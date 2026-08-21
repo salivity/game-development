@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Securing Auth Tokens in Mobile Game Development - game-development</title>
+    <meta name="description" content="Mobile game authentication tokens are high-value targets for interception, credential theft, and unauthorized access, threatening both player accounts and game economies. This article outlines the critical security best practices for protecting user auth">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/securing-auth-tokens-in-mobile-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Securing Auth Tokens in Mobile Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/securing-auth-tokens-in-mobile-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Mobile game authentication tokens are high-value targets for interception, credential theft, and unauthorized access, threatening both player accounts and game economies. This article outlines the critical security best practices for protecting user auth" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="securing-auth-tokens-in-mobile-game-development">Securing Auth
+Tokens in Mobile Game Development</h1>
+<p>Mobile game authentication tokens are high-value targets for
+interception, credential theft, and unauthorized access, threatening
+both player accounts and game economies. This article outlines the
+critical security best practices for protecting user authentication
+tokens against network- and device-level interception, covering
+transport-layer hardening, secure local storage mechanisms, robust token
+architecture, and runtime application defenses.</p>
+<h3
+id="enforce-strict-transport-layer-security-and-certificate-pinning">Enforce
+Strict Transport Layer Security and Certificate Pinning</h3>
+<p>All network communication carrying authentication payloads must use
+modern TLS protocols (TLS 1.3 preferred). To prevent Man-in-the-Middle
+(MitM) attacks orchestrated through proxy tools like Charles or Burp
+Suite, implement SSL/TLS certificate or public key pinning within your
+game client. Pinning ensures the mobile application only trusts explicit
+server certificates or public keys rather than the full operating system
+trust store, blocking attackers from intercepting tokens via
+custom-installed root certificates.</p>
+<h3 id="utilize-os-level-secure-storage">Utilize OS-Level Secure
+Storage</h3>
+<p>Never store authentication tokens in plaintext environments, such as
+Unity's <code>PlayerPrefs</code>, plain SQLite databases, or standard
+platform shared preferences (<code>SharedPreferences</code> on Android
+or <code>NSUserDefaults</code> on iOS). Instead, leverage
+hardware-backed platform security:</p>
+<ul>
+<li><strong>iOS:</strong> Store tokens in the <strong>iOS Keychain
+Services</strong>, utilizing access control flags like
+<code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>.</li>
+<li><strong>Android:</strong> Use the <strong>Android Keystore
+system</strong> combined with <code>EncryptedSharedPreferences</code> to
+ensure tokens are encrypted using hardware-backed cryptographic
+keys.</li>
+</ul>
+<h3
+id="implement-short-lived-access-tokens-and-refresh-token-rotation">Implement
+Short-Lived Access Tokens and Refresh Token Rotation</h3>
+<p>Adopt an OAuth 2.0 or modern token architecture utilizing short-lived
+access tokens paired with secure refresh tokens.</p>
+<ul>
+<li><strong>Access Tokens:</strong> Configure access tokens to expire
+quickly (e.g., within 5 to 15 minutes) to minimize the window of
+opportunity if a token is intercepted.</li>
+<li><strong>Refresh Tokens:</strong> Enforce <strong>Refresh Token
+Rotation (RTR)</strong>. Every time a refresh token is used to generate
+a new access token, the auth server invalidates the old refresh token
+and issues a new one. If an invalidated refresh token is ever submitted,
+the server should immediately revoke all active sessions associated with
+that user family.</li>
+</ul>
+<h3
+id="cryptographic-token-binding-and-context-verification">Cryptographic
+Token Binding and Context Verification</h3>
+<p>Mitigate the impact of stolen tokens by binding them to specific
+client parameters. Include cryptographic device signatures or integrity
+claims (such as Google Play Integrity API or Apple DeviceCheck / App
+Attest) in server validation routines. When the backend verifies an
+incoming token, it should confirm that the request originates from the
+genuine, uncompromised game binary and matches expected device
+attributes, preventing off-device replay attacks.</p>
+<h3
+id="deploy-runtime-application-self-protection-rasp-and-obfuscation">Deploy
+Runtime Application Self-Protection (RASP) and Obfuscation</h3>
+<p>Attackers frequently use reverse engineering and dynamic memory
+inspection tools (such as Frida or GameGuardian) to intercept tokens
+directly from device memory during runtime.</p>
+<ul>
+<li><strong>Binary Hardening:</strong> Use native compilation (such as
+Unity's IL2CPP) and apply code obfuscation (e.g., DexGuard or
+specialized native code protectors) to obscure authentication
+logic.</li>
+<li><strong>Runtime Defenses:</strong> Implement detection mechanisms
+for root/jailbreak status, debuggers, memory injection, and hooking
+frameworks. If tampering is detected, terminate token-handling routines
+or revoke the active session immediately.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

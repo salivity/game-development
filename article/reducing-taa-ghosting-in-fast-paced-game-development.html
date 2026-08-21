@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reducing TAA Ghosting in Fast-Paced Game Development - game-development</title>
+    <meta name="description" content="Temporal Anti-Aliasing (TAA) smooths jagged edges by accumulating pixel samples across multiple frames, but high-speed motion often creates distracting trails known as ghosting. Developers mitigate this artifact in fast-paced games by combining high-prec">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/reducing-taa-ghosting-in-fast-paced-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Reducing TAA Ghosting in Fast-Paced Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/reducing-taa-ghosting-in-fast-paced-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Temporal Anti-Aliasing (TAA) smooths jagged edges by accumulating pixel samples across multiple frames, but high-speed motion often creates distracting trails known as ghosting. Developers mitigate this artifact in fast-paced games by combining high-prec" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="reducing-taa-ghosting-in-fast-paced-game-development">Reducing
+TAA Ghosting in Fast-Paced Game Development</h1>
+<p>Temporal Anti-Aliasing (TAA) smooths jagged edges by accumulating
+pixel samples across multiple frames, but high-speed motion often
+creates distracting trails known as ghosting. Developers mitigate this
+artifact in fast-paced games by combining high-precision motion vectors,
+color neighborhood clamping, dynamic blend weighting based on velocity,
+and custom reactive masks. By accurately detecting disocclusions and
+aggressively discarding invalid historical data, game engines maintain
+edge stability without sacrificing visual clarity during rapid
+movement.</p>
+<h3 id="1-generating-precise-velocity-buffers">1. Generating Precise
+Velocity Buffers</h3>
+<p>The foundation of effective TAA is an accurate 2D screen-space
+velocity buffer (motion vectors). Ghosting occurs when the engine
+samples the wrong historical pixel location.</p>
+<ul>
+<li><strong>Include All Motion Sources:</strong> Motion vectors must
+account for camera translation and rotation, rigid object transforms,
+skeletal mesh animations, and vertex-shader deformations (e.g., wind
+sway on vegetation).</li>
+<li><strong>Subtract Sub-Pixel Camera Jitter:</strong> Because TAA
+shifts the projection matrix every frame with sub-pixel offsets
+(jittering), developers must explicitly subtract the current and
+previous frames' jitter offsets from the calculated velocity vector.
+Failure to do so misaligns the historical sample.</li>
+<li><strong>Dilate Motion Vectors:</strong> Foreground objects moving
+across static backgrounds often cause background pixels near silhouettes
+to pick up zero velocity, leading to trailing streaks. Applying a 3x3
+"closest depth" cross-search around the pixel ensures the moving
+silhouette's velocity takes precedence over the background.</li>
+</ul>
+<h3 id="2-color-neighborhood-clamping-and-clipping">2. Color
+Neighborhood Clamping and Clipping</h3>
+<p>When an object moves, it reveals background pixels that did not exist
+in the previous frame (disocclusion). Blending this stale history causes
+ghosting.</p>
+<ul>
+<li><strong>AABB Clamping in Color Space:</strong> Sample the 3x3 pixel
+neighborhood of the current frame and construct an Axis-Aligned Bounding
+Box (AABB) using the minimum and maximum color values. The historical
+color is then clamped or clipped to stay within this bounding box.</li>
+<li><strong>Transform to Perceptual Color Spaces:</strong> Performing
+AABB clipping in RGB space often introduces color fringing. Developers
+convert colors to luminance-chrominance spaces such as YCoCg or <span
+class="math inline">\(\text{IC}_t\text{C}_p\)</span>. Clamping tightly
+along the luma axis eliminates brightness ghosting while preserving
+anti-aliasing on subtle color transitions.</li>
+<li><strong>Variance Clipping:</strong> Instead of absolute min/max
+limits—which can be overly broad—calculate the mean and standard
+deviation (<span class="math inline">\(\sigma\)</span>) of the 3x3 color
+neighborhood. Constraining the historical color to <span
+class="math inline">\(\mu \pm \gamma\sigma\)</span> (where <span
+class="math inline">\(\gamma\)</span> typically ranges from 0.75 to 1.5)
+provides tighter boundaries around dynamic edges.</li>
+</ul>
+<h3 id="3-dynamic-and-velocity-dependent-blend-factors">3. Dynamic and
+Velocity-Dependent Blend Factors</h3>
+<p>Standard TAA uses an exponential moving average to blend the current
+frame (<span class="math inline">\(C\)</span>) and the reprojected
+history (<span class="math inline">\(H\)</span>):</p>
+<p><span class="math display">\[\text{Output} = \alpha C + (1 - \alpha)
+H\]</span></p>
+<p>In static scenes, a low <span class="math inline">\(\alpha\)</span>
+(e.g., <span class="math inline">\(0.05\)</span> to <span
+class="math inline">\(0.1\)</span>) provides maximum temporal stability.
+In high-speed scenes, developers dynamically modify <span
+class="math inline">\(\alpha\)</span>:</p>
+<ul>
+<li><strong>Velocity-Scaled Blending:</strong> Increase <span
+class="math inline">\(\alpha\)</span> proportionally to pixel velocity.
+Faster-moving objects lean more heavily on the current frame, resolving
+motion instantly rather than trailing behind.</li>
+<li><strong>Luminance Difference Scaling:</strong> If the contrast
+between the clamped history sample and the current sample is large,
+temporarily increase <span class="math inline">\(\alpha\)</span> to
+force a rapid update.</li>
+</ul>
+<h3 id="4-depth-and-geometric-disocclusion-testing">4. Depth and
+Geometric Disocclusion Testing</h3>
+<p>Relying solely on color clamping can fail on uniform backgrounds.
+Geometric validation confirms whether the reprojected sample represents
+the same surface:</p>
+<ul>
+<li><strong>Depth Comparison:</strong> Compare the current pixel's
+linear depth with the reprojected historical depth. If the difference
+exceeds a small adaptive threshold, the historical pixel is marked as an
+occluded surface and discarded (<span class="math inline">\(\alpha =
+1.0\)</span>).</li>
+<li><strong>Normal Buffer Checks:</strong> Comparing surface normal
+vectors between frames further detects when a thin object has rapidly
+rotated or moved out of alignment.</li>
+</ul>
+<h3 id="5-reactive-and-transparency-masks">5. Reactive and Transparency
+Masks</h3>
+<p>High-frequency visual elements such as particle effects,
+semi-transparent glass, fire, and post-process motion blur do not
+produce reliable motion vectors.</p>
+<ul>
+<li><strong>Reactive Masks:</strong> Developers render a single-channel
+mask where transparent materials and fast particle effects write a bias
+factor. TAA reads this mask to increase <span
+class="math inline">\(\alpha\)</span> directly for those pixels.</li>
+<li><strong>Separate Overlay Passes:</strong> Non-diegetic UI elements,
+crosshairs, and screen-space overlays are rendered after the TAA pass to
+prevent fast player rotations from smearing UI graphics.</li>
+</ul>
+<h3 id="6-post-taa-sharpening">6. Post-TAA Sharpening</h3>
+<p>Because discarding historical samples to prevent ghosting can
+reintroduce slight temporal aliasing or softness, modern pipelines apply
+an edge-aware contrast pass, such as Contrast-Adaptive Sharpening (CAS),
+immediately after temporal accumulation. This restores high-frequency
+detail across fast-moving silhouettes without exacerbating edge
+artifacts.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

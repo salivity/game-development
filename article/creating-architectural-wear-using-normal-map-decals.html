@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creating Architectural Wear Using Normal Map Decals - game-development</title>
+    <meta name="description" content="In modern video game development, environment artists achieve believable architectural decay—such as cracked concrete, chipped stone, and eroding plaster—without inflating polygon budgets by utilizing decal systems paired with normal maps. By project">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/creating-architectural-wear-using-normal-map-decals">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Creating Architectural Wear Using Normal Map Decals - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/creating-architectural-wear-using-normal-map-decals" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In modern video game development, environment artists achieve believable architectural decay—such as cracked concrete, chipped stone, and eroding plaster—without inflating polygon budgets by utilizing decal systems paired with normal maps. By project" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="creating-architectural-wear-using-normal-map-decals">Creating
+Architectural Wear Using Normal Map Decals</h1>
+<p>In modern video game development, environment artists achieve
+believable architectural decay—such as cracked concrete, chipped stone,
+and eroding plaster—without inflating polygon budgets by utilizing decal
+systems paired with normal maps. By projecting localized surface details
+onto base geometry, artists can simulate micro-surface depth, edge wear,
+and weathering effects dynamically or statically. This approach
+preserves rendering performance, maintains high visual fidelity across
+large environments, and allows for rapid, modular iteration without the
+need for bespoke, high-poly geometry for every damaged asset.</p>
+<h3 id="the-role-of-normal-maps-in-decal-systems">The Role of Normal
+Maps in Decal Systems</h3>
+<p>Normal maps modify the way light interacts with a 3D surface by
+encoding directional vectors into the red, green, and blue channels of a
+2D texture. When integrated into a decal, a normal map can simulate
+recessed cracks, raised plaster layers, or structural chips without
+adding a single vertex to the underlying architectural mesh.</p>
+<p>During rendering, the game engine calculates the lighting across the
+decal’s normal map and blends it seamlessly with the base mesh’s
+underlying surface normals. This creates the visual illusion of real
+physical depth and shadow, tricking the eye into perceiving complex
+structural damage on flat or low-poly surfaces.</p>
+<h3 id="types-of-decal-implementations">Types of Decal
+Implementations</h3>
+<p>Artists typically rely on two primary decaling workflows to detail
+architectural assets:</p>
+<ol type="1">
+<li><p><strong>Deferred Projected Decals:</strong> These are bounding
+boxes placed in the game engine that project texture information onto
+any geometry within their volume. Artists use deferred decals to add
+isolated, non-repetitive damage like water stains, bullet impacts, or
+large foundation fractures across multiple intersecting meshes at
+runtime.</p></li>
+<li><p><strong>Mesh Decals and Trim Strips:</strong> These are low-poly
+geometry strips floating slightly above the base asset, mapped to a
+transparent decal material containing normal and roughness maps. Mesh
+decals are especially effective for edge damage along architectural
+pillars, walls, and steps, softening hard 90-degree polygon edges with
+the appearance of realistic chipping and erosion.</p></li>
+</ol>
+<h3 id="blending-and-channel-control">Blending and Channel Control</h3>
+<p>Believable wear requires more than just shape manipulation; it relies
+on accurate material transitions. Artists configure decal shaders to
+project specific channels selectively:</p>
+<ul>
+<li><strong>Normal Only:</strong> Applies physical cracks or dents while
+inheriting the color and roughness of the base material beneath it,
+perfect for subtle structural fractures.</li>
+<li><strong>Normal + Roughness/Ambient Occlusion:</strong> Simulates
+deep crevices where dust collects (Ambient Occlusion) or worn patches
+where foot traffic has smoothed a rough surface (Roughness).</li>
+<li><strong>Normal + Albedo + Roughness:</strong> Delivers full material
+breakages, such as stucco breaking away to reveal the brickwork
+underneath, where both the texture color and the 3D relief must change
+completely.</li>
+</ul>
+<h3 id="performance-and-production-advantages">Performance and
+Production Advantages</h3>
+<p>Using decal systems with normal maps offers critical technical
+benefits over traditional unique asset modeling:</p>
+<ul>
+<li><strong>Geometry Optimization:</strong> Complex architectural damage
+can be rendered on simple, optimized collision meshes, keeping scene
+polygon counts low and framerates stable.</li>
+<li><strong>Texture Memory Efficiency:</strong> Instead of baking unique
+high-resolution 4K texture maps for every damaged wall, artists can use
+low-cost tiling materials across the architecture and scatter a small
+atlas of reusable normal decals across the entire level.</li>
+<li><strong>Non-Destructive Workflows:</strong> Level designers and
+environment artists can move, rotate, scale, and adjust the intensity of
+architectural damage directly within the game engine without having to
+modify the original 3D models in external digital content creation
+software.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

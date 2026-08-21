@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Cloud Collision Detection for 3D Procedural Shapes - game-development</title>
+    <meta name="description" content="Implementing efficient point cloud collision detection for procedural organic shapes requires balancing computational precision with strict frame-rate constraints. This article explores the core techniques game developers use to handle dynamic, non-unifo">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/point-cloud-collision-detection-for-3d-procedural-shapes">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Point Cloud Collision Detection for 3D Procedural Shapes - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/point-cloud-collision-detection-for-3d-procedural-shapes" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Implementing efficient point cloud collision detection for procedural organic shapes requires balancing computational precision with strict frame-rate constraints. This article explores the core techniques game developers use to handle dynamic, non-unifo" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="point-cloud-collision-detection-for-3d-procedural-shapes">Point
+Cloud Collision Detection for 3D Procedural Shapes</h1>
+<p>Implementing efficient point cloud collision detection for procedural
+organic shapes requires balancing computational precision with strict
+frame-rate constraints. This article explores the core techniques game
+developers use to handle dynamic, non-uniform geometries in real time,
+including hierarchical spatial partitioning, GPU-accelerated computing,
+Signed Distance Field (SDF) conversions, and optimized broad-to-narrow
+phase pipelines.</p>
+<h3 id="1-dynamic-spatial-partitioning">1. Dynamic Spatial
+Partitioning</h3>
+<p>Procedural organic shapes frequently change topology or deform,
+making static collision meshes impractical. Developers rely on dynamic
+spatial partitioning structures to drastically reduce the number of
+collision checks from <span class="math inline">\(O(N^2)\)</span> to
+<span class="math inline">\(O(\log N)\)</span> or near <span
+class="math inline">\(O(1)\)</span>:</p>
+<ul>
+<li><strong>Bounding Volume Hierarchies (BVH):</strong> Tree structures
+using axis-aligned bounding boxes (AABBs) or oriented bounding boxes
+(OBBs). When an organic mesh shifts, only the affected branches of the
+BVH are refitted rather than rebuilt from scratch.</li>
+<li><strong>Sparse Voxel Octrees (SVO):</strong> Ideal for highly
+detailed organic forms, SVOs store point data hierarchically, allocating
+memory only where geometry exists.</li>
+<li><strong>Spatial Hash Grids:</strong> A 3D uniform grid mapped to a
+1D hash table. Points are binned by their world coordinates, allowing
+constant-time neighbor lookups for localized collision queries.</li>
+</ul>
+<h3 id="2-signed-distance-fields-sdfs">2. Signed Distance Fields
+(SDFs)</h3>
+<p>Point clouds lack inherent surface normal and connectivity data,
+which can cause tunneling where fast-moving objects pass through gaps
+between points. To solve this, developers often convert point clouds
+into implicit surfaces using Signed Distance Fields (SDFs).</p>
+<p>An SDF stores the distance from any point in space to the closest
+surface boundary, with the sign indicating whether the point is inside
+or outside the shape. During collision checks, a single texture or
+buffer sample returns both the penetration depth and the contact normal
+(via the field's gradient), enabling continuous, robust collision
+response for soft or irregular bodies.</p>
+<h3 id="3-gpu-accelerated-compute-pipelines">3. GPU-Accelerated Compute
+Pipelines</h3>
+<p>Modern game engines offload point cloud calculations to compute
+shaders, processing tens of thousands of points simultaneously:</p>
+<ul>
+<li><strong>Parallel Broad-Phase Filtering:</strong> The GPU tests large
+clusters of points against bounding volumes, discarding non-colliding
+regions before passing remaining candidates to the narrow phase.</li>
+<li><strong>Bitonic Sorting and Radix Trees:</strong> For real-time k-d
+tree or BVH construction on the GPU, parallel sorting algorithms build
+acceleration structures directly in VRAM every frame.</li>
+<li><strong>Direct Physics Integration:</strong> By keeping collision
+evaluation on the GPU, developers avoid expensive data transfers between
+system RAM and video memory (VRAM).</li>
+</ul>
+<h3 id="4-multi-stage-broad-and-narrow-phase-pipelines">4. Multi-Stage
+Broad and Narrow Phase Pipelines</h3>
+<p>To maximize performance, collision systems use a multi-tiered
+pipeline:</p>
+<ol type="1">
+<li><strong>Coarse Broad Phase:</strong> Evaluates low-cost bounding
+spheres or coarse AABBs representing procedural regions.</li>
+<li><strong>Intermediate Phase:</strong> Traverses spatial partition
+trees to locate the specific sub-clusters of the point cloud
+intersecting the collider.</li>
+<li><strong>Narrow Phase:</strong> Executes precise point-to-primitive
+or point-to-implicit surface tests. Penetration vectors and contact
+manifolds are generated only for the specific points touching the target
+collider.</li>
+</ol>
+<h3 id="5-temporal-coherence-and-level-of-detail-lod">5. Temporal
+Coherence and Level of Detail (LOD)</h3>
+<p>Because organic deformations are typically continuous, developers
+leverage temporal coherence by caching contact points from the previous
+frame and testing those first. Additionally, collision level-of-detail
+(LOD) systems subsample the point cloud density based on the distance
+from the player or camera, ensuring computational resources are focused
+on active gameplay interactions.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

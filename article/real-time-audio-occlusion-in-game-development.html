@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Audio Occlusion in Game Development - game-development</title>
+    <meta name="description" content="Real-time dynamic audio occlusion simulates how sound waves interact with physical obstacles, attenuating and filtering audio when objects move between a sound source and the listener. In modern game development, implementing this for complex, dynamic ge">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/real-time-audio-occlusion-in-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Real-Time Audio Occlusion in Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/real-time-audio-occlusion-in-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Real-time dynamic audio occlusion simulates how sound waves interact with physical obstacles, attenuating and filtering audio when objects move between a sound source and the listener. In modern game development, implementing this for complex, dynamic ge" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="real-time-audio-occlusion-in-game-development">Real-Time Audio
+Occlusion in Game Development</h1>
+<p>Real-time dynamic audio occlusion simulates how sound waves interact
+with physical obstacles, attenuating and filtering audio when objects
+move between a sound source and the listener. In modern game
+development, implementing this for complex, dynamic geometry requires
+combining physics engine raycasting, acoustic portal systems, runtime
+voxelization, and digital signal processing (DSP) through audio
+middleware. This article breaks down the primary methods and
+architectural patterns developers use to achieve responsive, performant
+audio occlusion in non-static game environments.</p>
+<h3 id="raycasting-and-multi-point-tracing">Raycasting and Multi-Point
+Tracing</h3>
+<p>The foundational method for dynamic audio occlusion relies on physics
+engine queries. Instead of calculating full wave propagation, developers
+cast rays from the listener’s position (often the player's camera or
+character head) to the sound emitter.</p>
+<ul>
+<li><strong>Single-Ray Checks:</strong> A single line trace between the
+source and listener detects direct line-of-sight obstruction. If a
+dynamic collider (such as a moving blast door or falling pillar)
+intersects the ray, the audio engine flags the source as occluded.</li>
+<li><strong>Multi-Point/Sphere Tracing:</strong> Single rays produce
+abrupt binary states (fully occluded or unoccluded). To model soft
+occlusion, developers cast multiple rays to the bounding box or
+perimeter of the sound source. The ratio of blocked to unblocked rays
+determines the occlusion percentage.</li>
+<li><strong>Asynchronous Physics Queries:</strong> Because casting
+dozens of rays per sound source is computationally expensive, developers
+batch raycasts across multiple frames and offload them to worker threads
+via the physics engine (e.g., PhysX, Chaos).</li>
+</ul>
+<h3 id="dynamic-rooms-and-acoustic-portals">Dynamic Rooms and Acoustic
+Portals</h3>
+<p>For interior environments with moving elements—such as opening doors,
+moving elevators, or destructible walls—developers use dynamic
+room-and-portal systems.</p>
+<ol type="1">
+<li><strong>Acoustic Volumes:</strong> Spaces are divided into distinct
+acoustic zones (rooms).</li>
+<li><strong>Dynamic Portals:</strong> Openings between rooms (windows,
+doorways) act as sound emitters when the direct path is blocked. When a
+dynamic barrier moves, its physical transform updates the aperture size
+of the acoustic portal in real time.</li>
+<li><strong>Diffraction Calculation:</strong> Audio engines calculate
+the angle between the listener, the portal, and the sound source,
+applying edge diffraction so sounds naturally bend around corners rather
+than disappearing entirely.</li>
+</ol>
+<h3 id="runtime-voxelization-and-acoustic-probes">Runtime Voxelization
+and Acoustic Probes</h3>
+<p>For highly complex, organic, or fully destructible geometry where
+manual portal placement and basic raycasting fail, developers use
+dynamic acoustic voxelization and wave-based spatial audio plugins (such
+as Steam Audio, Microsoft Project Acoustics, or Meta XR Audio).</p>
+<ul>
+<li><strong>Runtime Voxel Grids:</strong> Dynamic meshes are mapped into
+coarse, lightweight 3D voxel grids updated at runtime.</li>
+<li><strong>Probe Interpolation:</strong> Pre-baked or dynamically
+updated acoustic probes sample the geometry to calculate pathing,
+reflection, and transmission loss. When dynamic geometry alters the
+grid, local probes re-evaluate their visibility metrics to update
+occlusion coefficients.</li>
+</ul>
+<h3 id="dsp-filtering-and-middleware-integration">DSP Filtering and
+Middleware Integration</h3>
+<p>Once the occlusion value (a normalized value from 0.0 to 1.0) is
+determined, it is sent to audio middleware such as Audiokinetic Wwise,
+FMOD Studio, or native engine audio systems to alter the sound
+stream.</p>
+<ul>
+<li><strong>Low-Pass Filtering (LPF):</strong> High frequencies are
+absorbed more rapidly by physical matter than low frequencies. The audio
+engine maps the occlusion value to a dynamic low-pass filter cutoff
+frequency, muffling the sound as obstruction increases.</li>
+<li><strong>Transmission Loss and Volume Attenuation:</strong> Sound
+passing through walls suffers a reduction in gain. Developers assign
+dynamic physical materials (e.g., concrete, wood, glass) with specific
+transmission loss coefficients to determine how much volume and
+frequency content penetrates the obstacle.</li>
+<li><strong>Wet/Dry Signal Balancing:</strong> Occlusion alters direct
+sound (dry path) while allowing reverberant sound (wet path) to travel
+through indirect openings, maintaining spatial awareness and
+immersion.</li>
+</ul>
+<h3 id="performance-optimization-strategies">Performance Optimization
+Strategies</h3>
+<p>To maintain stable framerates with hundreds of dynamic audio sources,
+developers implement several optimization layers:</p>
+<ul>
+<li><strong>Audio Level of Detail (LOD):</strong> Distant or
+low-priority sounds bypass multi-ray tracing and use simplified
+single-ray checks or distance-based falloffs.</li>
+<li><strong>Tick Throttling:</strong> Non-critical audio occlusion
+states are updated at lower tick rates (e.g., 5 to 10 Hz) rather than
+every rendered frame, with smooth interpolation applied between state
+changes.</li>
+<li><strong>Acoustic Material Tagging:</strong> Physical materials are
+cached on mesh components, allowing physics sweeps to return density and
+absorption values directly from the hit result without extra
+lookups.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithms for Procedural Terrain Heightmaps - game-development</title>
+    <meta name="description" content="Procedural terrain generation in video games relies on mathematical algorithms to create expansive, realistic landscapes without manual modeling. By calculating elevations across two-dimensional grids, developers produce heightmaps representing mountains">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/algorithms-for-procedural-terrain-heightmaps">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Algorithms for Procedural Terrain Heightmaps - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/algorithms-for-procedural-terrain-heightmaps" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Procedural terrain generation in video games relies on mathematical algorithms to create expansive, realistic landscapes without manual modeling. By calculating elevations across two-dimensional grids, developers produce heightmaps representing mountains" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="algorithms-for-procedural-terrain-heightmaps">Algorithms for
+Procedural Terrain Heightmaps</h1>
+<p>Procedural terrain generation in video games relies on mathematical
+algorithms to create expansive, realistic landscapes without manual
+modeling. By calculating elevations across two-dimensional grids,
+developers produce heightmaps representing mountains, valleys, plains,
+and coastlines. This article covers the foundational mathematical
+algorithms used in procedural heightmap generation, including gradient
+noise functions, fractal subdivision, Voronoi partitioning, and physical
+erosion simulations.</p>
+<h3 id="gradient-noise-perlin-and-simplex-noise">Gradient Noise: Perlin
+and Simplex Noise</h3>
+<p>Gradient noise functions are the bedrock of procedural terrain.
+Developed by Ken Perlin, Perlin noise assigns pseudo-random gradient
+vectors to grid points and computes interpolations between them to yield
+smooth, continuous value transitions. Simplex noise improves on this by
+dividing space into simplexes (triangles in 2D) rather than hypercubes,
+reducing computational complexity from <span
+class="math inline">\(O(2^n)\)</span> to <span
+class="math inline">\(O(n^2)\)</span> and eliminating directional grid
+artifacts. These algorithms provide the base elevation layer for natural
+terrain.</p>
+<h3 id="fractal-brownian-motion-fbm">Fractal Brownian Motion (fBm)</h3>
+<p>Raw noise creates smooth, rolling hills rather than rugged mountains.
+To introduce natural roughness, developers use Fractal Brownian Motion
+(fBm), also known as octave summing. This technique layers multiple
+evaluations of a base noise function at increasing frequencies (detail)
+and decreasing amplitudes (influence). The mathematical formula combines
+these layers:</p>
+<p><span class="math display">\[\text{Elevation}(x, y) =
+\sum_{i=0}^{n-1} \text{gain}^i \cdot \text{Noise}(x \cdot
+\text{lacunarity}^i, y \cdot \text{lacunarity}^i)\]</span></p>
+<p>Here, <em>lacunarity</em> controls the frequency multiplier per step,
+while <em>gain</em> (or persistence) scales the amplitude, producing
+self-similar fractal details seen in real topography.</p>
+<h3 id="midpoint-displacement-and-the-diamond-square-algorithm">Midpoint
+Displacement and the Diamond-Square Algorithm</h3>
+<p>Midpoint displacement is a recursive fractal subdivision technique.
+The Diamond-Square algorithm applies this concept to a two-dimensional
+square grid:</p>
+<ol type="1">
+<li><strong>Initialization:</strong> Assign height values to the four
+corners of the grid.</li>
+<li><strong>Diamond Step:</strong> Find the center point of each square
+and set its height to the average of the four corner points plus a
+random offset.</li>
+<li><strong>Square Step:</strong> Find the midpoint of each diamond
+shape and set its height to the average of its corner points plus a
+random offset.</li>
+<li><strong>Iteration:</strong> Reduce the random offset range and
+repeat the process on smaller sub-squares until every grid cell is
+resolved.</li>
+</ol>
+<p>This method generates highly fractured, mountainous terrain
+efficiently, though it can exhibit subtle square-aligned artifacts.</p>
+<h3 id="voronoi-and-worley-noise">Voronoi and Worley Noise</h3>
+<p>Voronoi diagrams partition space based on the distance to a set of
+randomly distributed feature points. Worley noise uses the distance to
+the <span class="math inline">\(n\)</span>-th closest point to compute a
+height value. In heightmap design, Voronoi mathematics generate distinct
+structural formations such as volcanic calderas, cracked desert basins,
+mesas, and tectonic plate boundaries.</p>
+<h3 id="domain-warping">Domain Warping</h3>
+<p>Domain warping feeds the output of one noise function into the input
+coordinates of another:</p>
+<p><span class="math display">\[\text{Height}(p) = \text{Noise}(p +
+\vec{D}(p))\]</span></p>
+<p>Where <span class="math inline">\(\vec{D}(p)\)</span> is a vector
+generated by secondary noise functions. This distortion bends the rigid
+symmetry of standard noise, producing realistic geological patterns such
+as winding river valleys, twisted mountain ridges, and dynamic
+coastlines.</p>
+<h3 id="hydraulic-and-thermal-erosion">Hydraulic and Thermal
+Erosion</h3>
+<p>Purely mathematical noise lacks the directional wear caused by
+gravity and climate. Developers apply physical simulation algorithms as
+a post-processing pass:</p>
+<ul>
+<li><strong>Thermal Erosion:</strong> Simulates rockfall and weathering.
+When the slope between adjacent grid cells exceeds a threshold (the
+angle of repose), material shifts from the higher cell to the lower
+one.</li>
+<li><strong>Hydraulic Erosion:</strong> Simulates rainfall and water
+runoff using particle or grid-based fluid dynamics. Virtual raindrops
+land on the heightmap, flow downhill based on the height gradient,
+dissolve sediment, deposit it in lower depressions, and evaporate. This
+forms natural drainage basins, river tributaries, and alluvial
+fans.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

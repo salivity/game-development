@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Mipmapping Reduces Texture Aliasing in 3D Games - game-development</title>
+    <meta name="description" content="In 3D game development, rendering high-resolution textures on distant objects often leads to distracting visual glitches known as aliasing artifacts, such as shimmering or moiré patterns. Mipmapping solves this issue by creating and storing a sequence o">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-mipmapping-reduces-texture-aliasing-in-3d-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Mipmapping Reduces Texture Aliasing in 3D Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-mipmapping-reduces-texture-aliasing-in-3d-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In 3D game development, rendering high-resolution textures on distant objects often leads to distracting visual glitches known as aliasing artifacts, such as shimmering or moiré patterns. Mipmapping solves this issue by creating and storing a sequence o" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-mipmapping-reduces-texture-aliasing-in-3d-games">How
+Mipmapping Reduces Texture Aliasing in 3D Games</h1>
+<p>In 3D game development, rendering high-resolution textures on distant
+objects often leads to distracting visual glitches known as aliasing
+artifacts, such as shimmering or moiré patterns. Mipmapping solves this
+issue by creating and storing a sequence of pre-calculated,
+lower-resolution versions of a texture, allowing the graphics card to
+render the most appropriate size based on the object's distance from the
+camera. This article explains how mipmapping functions, why it
+eliminates aliasing, and its impact on game performance and visual
+fidelity.</p>
+<h2 id="the-problem-why-texture-aliasing-occurs">The Problem: Why
+Texture Aliasing Occurs</h2>
+<p>Texture aliasing happens when there is a mismatch between the
+resolution of a texture and the number of pixels it occupies on the
+screen.</p>
+<p>When a 3D object is close to the camera, a high-resolution texture
+(such as 1024x1024 pixels) maps perfectly to the screen. However, as the
+object moves further away, it occupies a much smaller screen
+area—perhaps only 10x10 pixels.</p>
+<p>Without mipmapping, the graphics processing unit (GPU) must map the
+entire 1024x1024 texture into that tiny 10x10 pixel space. To do this,
+the GPU sample rate drops, skipping large numbers of texels (texture
+pixels) and only rendering random samples. As the camera or the object
+moves, these sampled texels change rapidly, causing a flickering,
+sparkling effect called "shimmering," as well as geometric interference
+patterns called moiré patterns.</p>
+<h2 id="the-solution-what-is-a-mipmap">The Solution: What is a
+Mipmap?</h2>
+<p>A mipmap (the term "mip" comes from the Latin <em>multum in
+parvo</em>, meaning "much in a small space") is a collection of
+pre-calculated, optimized images that accompany a main texture.</p>
+<p>When a developer imports a texture, the game engine automatically
+generates a "mipmap chain." Each level in the chain is exactly half the
+resolution of the previous level. For example, a 1024x1024 texture will
+have mipmap levels at:</p>
+<ul>
+<li>512x512</li>
+<li>256x256</li>
+<li>128x128</li>
+<li>64x64</li>
+<li>32x32</li>
+<li>16x16</li>
+<li>8x8</li>
+<li>4x4</li>
+<li>2x2</li>
+<li>1x1</li>
+</ul>
+<p>Each smaller image is not just scaled down; it is pre-filtered and
+downsampled using averaging algorithms. This process smoothly blends the
+high-frequency details (sharp edges and fine lines) into a softer,
+lower-resolution representation.</p>
+<h2 id="how-mipmapping-reduces-aliasing">How Mipmapping Reduces
+Aliasing</h2>
+<p>When rendering a frame, the GPU calculates the distance of the 3D
+surface from the camera and determines its size in screen pixels.
+Instead of sampling the original, massive texture, the GPU selects the
+mipmap level that most closely matches the target screen size.</p>
+<p>By using the smaller, pre-filtered mipmap, the GPU avoids the need to
+skip texels. Because the high-frequency detail has already been
+mathematically blended during the downsampling process, the resulting
+image appears smooth and natural at a distance, completely eliminating
+the harsh shimmering and moiré artifacts.</p>
+<p>To prevent noticeable lines where one mipmap level switches to the
+next, graphics cards use mipmap filtering:</p>
+<ul>
+<li><strong>Bilinear Filtering:</strong> Samples pixels within a single
+mipmap level.</li>
+<li><strong>Trilinear Filtering:</strong> Samples and smoothly
+interpolates between the two closest mipmap levels, eliminating visible
+transition lines.</li>
+<li><strong>Anisotropic Filtering:</strong> Enhances mipmapping by
+scaling textures viewed at sharp angles, keeping textures crisp along
+the horizon without causing aliasing.</li>
+</ul>
+<h2 id="performance-benefits-of-mipmapping">Performance Benefits of
+Mipmapping</h2>
+<p>Beyond improving visual quality, mipmapping significantly boosts
+rendering performance.</p>
+<p>When a GPU renders a scene, it stores textures in its high-speed
+cache memory. Attempting to render a 1024x1024 texture for a distant,
+tiny object requires loading massive amounts of unnecessary data into
+the cache, causing cache misses and slowing down performance. Mipmapping
+ensures that only the small, relevant texture levels are loaded into the
+cache, drastically reducing VRAM bandwidth usage and increasing frame
+rates.</p>
+<p>While mipmaps do require approximately 33% more memory space (VRAM)
+to store the extra pre-rendered image levels, this minor storage cost is
+highly favored over the massive performance and anti-aliasing benefits
+it provides.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

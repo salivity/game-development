@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Calculate Video Game Break-Even Targets - game-development</title>
+    <meta name="description" content="Calculating a break-even target in game development requires determining the exact point where total game revenue equals total production and operating costs. Because gross sales are significantly diluted by platform cuts, engine royalties, taxes, publis">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-to-calculate-video-game-break-even-targets">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Calculate Video Game Break-Even Targets - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-to-calculate-video-game-break-even-targets" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Calculating a break-even target in game development requires determining the exact point where total game revenue equals total production and operating costs. Because gross sales are significantly diluted by platform cuts, engine royalties, taxes, publis" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-calculate-video-game-break-even-targets">How to Calculate
+Video Game Break-Even Targets</h1>
+<p>Calculating a break-even target in game development requires
+determining the exact point where total game revenue equals total
+production and operating costs. Because gross sales are significantly
+diluted by platform cuts, engine royalties, taxes, publisher splits, and
+regional pricing discounts, developers cannot simply divide their budget
+by the retail price. Accurately determining break-even points requires
+calculating the real "net revenue per unit" through a distribution
+revenue waterfall.</p>
+<h3 id="1-calculate-total-project-costs">1. Calculate Total Project
+Costs</h3>
+<p>Before determining how many units must be sold, establish the total
+capital required to bring the game to market. Total project costs
+include:</p>
+<ul>
+<li><strong>Direct Development Costs:</strong> Developer salaries,
+contractor fees, software licenses, dev kits, asset purchases, and
+localization.</li>
+<li><strong>Marketing and Publishing:</strong> Trailer production, PR
+agencies, paid advertising, convention booths, and community
+management.</li>
+<li><strong>Operational Overhead:</strong> Legal, accounting, QA
+testing, ratings board fees (ESRB, PEGI), and post-launch maintenance
+buffers.</li>
+</ul>
+<h3 id="2-map-the-revenue-deduction-waterfall">2. Map the Revenue
+Deduction Waterfall</h3>
+<p>A retail price tag does not equal developer income. Gross revenue is
+reduced sequentially through standard industry deductions:</p>
+<ul>
+<li><strong>Taxes and Refunds:</strong> Value-Added Tax (VAT) and sales
+taxes are deducted first (averaging 5% to 15% globally), followed by
+player refund reserves (typically 5% to 10% on platforms like
+Steam).</li>
+<li><strong>Platform Distribution Fees:</strong> Storefronts take a
+standard commission on the remaining revenue:
+<ul>
+<li><strong>Steam, PlayStation, Xbox, Nintendo eShop, Apple App Store,
+Google Play:</strong> 30% standard fee (with select reductions for
+smaller developers, such as Apple's 15% Small Business Program).</li>
+<li><strong>Epic Games Store:</strong> 12% flat fee.</li>
+</ul></li>
+<li><strong>Engine Royalties:</strong> If applicable, proprietary engine
+cuts apply after specific thresholds (for example, Unreal Engine takes
+5% after the first $1 million in gross lifetime revenue).</li>
+<li><strong>Publisher Revenue Shares:</strong> If working with a
+publisher, they typically take 100% of net revenue until development
+funds are fully recouped, after which revenue is split according to the
+contract (e.g., 70/30 in favor of the developer or publisher).</li>
+</ul>
+<h3 id="3-factor-in-regional-pricing-and-discounts">3. Factor in
+Regional Pricing and Discounts</h3>
+<p>A game priced at $20 in the United States will not generate an
+average of $20 globally due to storefront regional pricing (Purchasing
+Power Parity). Global sales typically reduce the average base selling
+price by 20% to 35%. Furthermore, launch discounts (usually 10% to 15%)
+and seasonal sales events reduce the effective price over the game's
+lifecycle.</p>
+<h3 id="4-the-real-net-revenue-calculation">4. The Real Net Revenue
+Calculation</h3>
+<p>To find your net yield per sale, calculate the real income per unit
+sold at full retail price:</p>
+<p><span class="math display">\[\text{Effective Base Price} =
+\text{Sticker Price} \times (1 - \text{Regional Pricing
+Adjustment})\]</span></p>
+<p><span class="math display">\[\text{Net Revenue Per Unit} =
+(\text{Effective Base Price} - \text{Taxes/Refunds}) \times (1 -
+\text{Platform Fee}) \times (1 - \text{Engine Royalty}) \times (1 -
+\text{Publisher Cut})\]</span></p>
+<p><em>Example:</em> A <span class="math inline">\(20 game on Steam
+often yields a developer take-home of approximately **\)</span>8 to $11
+per unit** once average regional pricing, refunds, and platform fees are
+deducted (excluding publisher splits).</p>
+<h3 id="5-calculate-the-break-even-target">5. Calculate the Break-Even
+Target</h3>
+<p>Once net revenue per unit is determined, calculate the required unit
+sales and gross revenue needed to break even:</p>
+<p><span class="math display">\[\text{Break-Even Units} =
+\frac{\text{Total Project Costs}}{\text{Net Revenue Per
+Unit}}\]</span></p>
+<p><span class="math display">\[\text{Break-Even Gross Revenue Target} =
+\text{Break-Even Units} \times \text{Base Sticker Price}\]</span></p>
+<p>If a project costs $200,000 to develop and market, and yields an
+effective net revenue of $10 per unit on a <span
+class="math inline">\(20 game, the developer must sell **20,000
+units**—equivalent to **\)</span>400,000 in gross platform sales**—to
+fully break even.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

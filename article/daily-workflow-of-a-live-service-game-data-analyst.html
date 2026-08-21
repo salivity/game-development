@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Workflow of a Live-Service Game Data Analyst - game-development</title>
+    <meta name="description" content="In the fast-paced world of live-service game development, a game data analyst plays a crucial role in maintaining player engagement and game health. This article explores the daily workflow of these professionals as they monitor telemetry dashboards, inv">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/daily-workflow-of-a-live-service-game-data-analyst">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Daily Workflow of a Live-Service Game Data Analyst - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/daily-workflow-of-a-live-service-game-data-analyst" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In the fast-paced world of live-service game development, a game data analyst plays a crucial role in maintaining player engagement and game health. This article explores the daily workflow of these professionals as they monitor telemetry dashboards, inv" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="daily-workflow-of-a-live-service-game-data-analyst">Daily
+Workflow of a Live-Service Game Data Analyst</h1>
+<p>In the fast-paced world of live-service game development, a game data
+analyst plays a crucial role in maintaining player engagement and game
+health. This article explores the daily workflow of these professionals
+as they monitor telemetry dashboards, investigate performance anomalies,
+collaborate with development teams, and translate raw player data into
+actionable insights to continuously improve the gaming experience.</p>
+<h3 id="morning-dashboard-monitoring-and-health-checks">Morning
+Dashboard Monitoring and Health Checks</h3>
+<p>Every morning begins with a thorough review of the telemetry
+dashboards. Analysts check key performance indicators (KPIs) such as
+Daily Active Users (DAU), concurrent players (CCU), retention rates, and
+monetization metrics like Average Revenue Per User (ARPU). They look for
+immediate red flags, such as sudden drops in player logins, spike in
+crash reports, or matchmaking failures. Identifying these anomalies
+early allows the analyst to alert the engineering and live-operations
+teams before the issues impact a larger portion of the player base.</p>
+<h3 id="anomaly-investigation-and-deep-dive-analysis">Anomaly
+Investigation and Deep-Dive Analysis</h3>
+<p>When a metric deviates from the baseline, the analyst transitions
+into investigation mode. For example, if telemetry shows a sudden
+decline in completion rates for a new seasonal event, the analyst writes
+SQL or Python queries to segment the data. They isolate variables—such
+as player level, gear score, or platform—to pinpoint the root cause.
+This helps determine whether the drop is due to an unbalanced difficulty
+spike, a progression bug, or a confusing user interface.</p>
+<h3 id="cross-functional-collaboration-and-reporting">Cross-Functional
+Collaboration and Reporting</h3>
+<p>Data holds little value if it is not communicated effectively.
+Throughout the day, game data analysts meet with product managers, level
+designers, and economy designers. During these meetings, analysts
+present their findings using clear data visualizations. If an A/B test
+for a new in-game store layout or matchmaking algorithm is active, the
+analyst presents the statistical outcomes to help the team decide
+whether to roll out the change to the entire player base or revert
+it.</p>
+<h3 id="defining-telemetry-and-preparing-for-future-updates">Defining
+Telemetry and Preparing for Future Updates</h3>
+<p>To ensure continuous data collection, analysts spend a portion of
+their day planning telemetry hooks for upcoming game patches. They
+collaborate with software engineers to define exactly what player
+actions need to be tracked—such as weapon choices, quest progression
+milestones, or store clicks. This proactive planning ensures that when
+the new content goes live, the dashboards are immediately populated with
+the data needed to measure success and player satisfaction.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

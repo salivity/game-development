@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Frustum Culling in Game Development? - game-development</title>
+    <meta name="description" content="In game development, rendering highly detailed 3D environments in real-time can severely strain system resources. Frustum culling is a crucial optimization technique that solves this problem by identifying which objects fall outside the camera's field of">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/what-is-frustum-culling-in-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What is Frustum Culling in Game Development? - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/what-is-frustum-culling-in-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In game development, rendering highly detailed 3D environments in real-time can severely strain system resources. Frustum culling is a crucial optimization technique that solves this problem by identifying which objects fall outside the camera's field of" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-frustum-culling-in-game-development">What is Frustum
+Culling in Game Development?</h1>
+<p>In game development, rendering highly detailed 3D environments in
+real-time can severely strain system resources. Frustum culling is a
+crucial optimization technique that solves this problem by identifying
+which objects fall outside the camera's field of view—known as the
+viewing frustum—and preventing the graphics hardware from processing
+them. This article explains how frustum culling works, why it is
+essential for camera view optimization, and how it directly enhances
+game performance.</p>
+<h2 id="understanding-the-viewing-frustum">Understanding the Viewing
+Frustum</h2>
+<p>To understand frustum culling, you must first understand the "viewing
+frustum." In 3D graphics, a camera's field of view is shaped like a
+rectangular pyramid with its top cut off. This geometric shape is the
+frustum. It is defined by six clipping planes:</p>
+<ul>
+<li><strong>Near clipping plane:</strong> The closest boundary the
+camera can see.</li>
+<li><strong>Far clipping plane:</strong> The furthest boundary the
+camera can see.</li>
+<li><strong>Left, right, top, and bottom planes:</strong> The lateral
+boundaries of the camera's lens.</li>
+</ul>
+<p>Only the objects located within this three-dimensional space are
+visible to the player.</p>
+<h2 id="how-frustum-culling-works">How Frustum Culling Works</h2>
+<p>Before the graphics processing unit (GPU) spends power rendering a
+frame, the game engine's central processing unit (CPU) performs frustum
+culling. The process follows these steps:</p>
+<ol type="1">
+<li><strong>Bounding Volumes:</strong> The engine assigns simplified
+mathematical shapes, such as bounding boxes or bounding spheres, around
+complex 3D models in the game world.</li>
+<li><strong>Intersection Testing:</strong> The engine tests whether
+these bounding volumes intersect with the six planes of the camera’s
+viewing frustum.</li>
+<li><strong>The Culling Decision:</strong>
+<ul>
+<li>If an object's bounding volume is completely outside the frustum, it
+is <strong>culled</strong> (discarded).</li>
+<li>If it is completely inside or intersects the boundary, it is sent to
+the GPU to be rendered.</li>
+</ul></li>
+</ol>
+<p>By using simplified bounding shapes instead of complex mesh geometry
+for this test, the CPU can perform these calculations incredibly
+fast.</p>
+<h2 id="the-function-and-benefits-in-game-optimization">The Function and
+Benefits in Game Optimization</h2>
+<p>Frustum culling is fundamental to maintaining stable frame rates,
+especially in large-scale or open-world games. Its primary functions
+include:</p>
+<h3 id="1-reducing-draw-calls">1. Reducing Draw Calls</h3>
+<p>Every object sent to the GPU requires a "draw call" from the CPU. A
+high number of draw calls can bottleneck the CPU and cause lag. Frustum
+culling discards hundreds or thousands of off-screen objects before they
+can trigger draw calls, drastically reducing CPU overhead.</p>
+<h3 id="2-saving-gpu-processing-power">2. Saving GPU Processing
+Power</h3>
+<p>Without frustum culling, the GPU would waste precious clock cycles
+processing vertices and calculating pixels for objects behind the
+player's back or far to the sides. Culling ensures that the GPU only
+allocates its resources to what is actively visible on the screen.</p>
+<h3 id="3-enabling-highly-detailed-environments">3. Enabling Highly
+Detailed Environments</h3>
+<p>Because only a fraction of the game world is rendered at any single
+moment, developers can pack much more detail, higher-resolution
+textures, and complex geometry into the active viewport without
+degrading game performance.</p>
+<h2 id="frustum-culling-vs-occlusion-culling">Frustum Culling vs.
+Occlusion Culling</h2>
+<p>While frustum culling is highly efficient, it has limitations. It
+only checks if an object is within the camera's field of view; it does
+not check if an object is hidden behind another object (such as a
+character standing behind a large wall).</p>
+<p>To optimize camera views completely, game developers often pair
+frustum culling with <strong>occlusion culling</strong>. While frustum
+culling removes everything outside the camera's sight cone, occlusion
+culling removes objects that are inside the cone but blocked from view
+by closer, solid objects. Together, these techniques ensure that the
+engine only renders what the player can actually see.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Platform Deterministic Lockstep Architecture - game-development</title>
+    <meta name="description" content="Building a cross-platform deterministic lockstep engine requires all connected clients to execute identical game simulations purely by sharing player inputs rather than synchronizing world states. This article explores the primary architectural considera">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/cross-platform-deterministic-lockstep-architecture">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Cross-Platform Deterministic Lockstep Architecture - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/cross-platform-deterministic-lockstep-architecture" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Building a cross-platform deterministic lockstep engine requires all connected clients to execute identical game simulations purely by sharing player inputs rather than synchronizing world states. This article explores the primary architectural considera" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1
+id="cross-platform-deterministic-lockstep-architecture">Cross-Platform
+Deterministic Lockstep Architecture</h1>
+<p>Building a cross-platform deterministic lockstep engine requires all
+connected clients to execute identical game simulations purely by
+sharing player inputs rather than synchronizing world states. This
+article explores the primary architectural considerations necessary to
+achieve robust determinism across disparate platforms, focusing on
+arithmetic consistency, simulation decoupling, memory ordering, rollback
+networking, and desynchronization detection.</p>
+<h3 id="1-arithmetic-consistency-and-floating-point-hazards">1.
+Arithmetic Consistency and Floating-Point Hazards</h3>
+<p>The greatest obstacle in cross-platform determinism is the divergence
+of floating-point calculations across different CPU architectures (such
+as x86_64 and ARM), operating systems, and compiler optimization levels.
+Although IEEE 754 establishes floating-point standards, differences in
+hardware fused multiply-add (FMA) instructions, register precision
+(e.g., x87 vs. SSE/NEON), and transcendentals (<code>sin</code>,
+<code>cos</code>, <code>sqrt</code>) create micro-divergences that
+compound quickly.</p>
+<ul>
+<li><strong>Fixed-Point Mathematics:</strong> The industry standard
+solution is replacing native floats with fixed-point integers (e.g.,
+Q32.32 or Q16.16 formats) for all physics, collision, and gameplay
+calculations.</li>
+<li><strong>Software Floating-Point Libraries:</strong> If
+floating-point representations are mandatory, a software-emulated,
+strictly compliant floating-point library must be used, disabling
+compiler fast-math flags globally.</li>
+</ul>
+<h3 id="2-decoupled-fixed-tick-simulation-loop">2. Decoupled Fixed-Tick
+Simulation Loop</h3>
+<p>A deterministic engine must run on a discrete, fixed-timestep loop
+independent of the rendering refresh rate.</p>
+<ul>
+<li><strong>Logic Accumulator:</strong> Incoming frame delta times are
+accumulated to step the simulation at a fixed frequency (e.g., exactly
+60 Hz).</li>
+<li><strong>State Interpolation:</strong> Because the render rate may
+exceed or jitter relative to the fixed tick rate, visual transforms must
+interpolate between the current and previous simulation states rather
+than reading mutable physics states directly.</li>
+<li><strong>Cosmetics Isolation:</strong> Audio, visual effects, and
+particle systems must be strictly decoupled from the core simulation to
+prevent cosmetic logic from contaminating deterministic game state.</li>
+</ul>
+<h3 id="3-deterministic-data-structures-and-memory-layout">3.
+Deterministic Data Structures and Memory Layout</h3>
+<p>Data structures that rely on memory addresses or non-deterministic
+hashing will cause desynchronization across platforms.</p>
+<ul>
+<li><strong>Hash Maps and Sets:</strong> Standard unordered collections
+order elements based on memory addresses or implementation-specific hash
+functions. Engines must use deterministic hash functions and enforce
+explicit, order-independent iteration (e.g., insertion-ordered maps or
+sorted arrays).</li>
+<li><strong>Pointer-Free Logic:</strong> Gameplay logic must never sort,
+branch, or make decisions based on raw memory pointers. Identifiers must
+be numeric entity IDs or handles.</li>
+<li><strong>Deterministic ECS:</strong> Entity Component Systems must
+process systems in a guaranteed, static execution order and iterate
+through contiguous, deterministically ordered components.</li>
+</ul>
+<h3 id="4-seeded-random-number-generation">4. Seeded Random Number
+Generation</h3>
+<p>Standard platform-level random libraries (<code>rand()</code>,
+<code>std::mt19937</code> with non-fixed implementations) vary across
+runtime environments and must not be used for game logic.</p>
+<ul>
+<li><strong>State-Bound PRNGs:</strong> All simulation logic must query
+dedicated, platform-agnostic Pseudo-Random Number Generators (such as
+PCG or Xoroshiro) initialized with a synchronized seed.</li>
+<li><strong>RNG Stream Separation:</strong> Separate PRNG streams must
+be maintained for gameplay-critical events versus purely visual or audio
+effects to prevent a cosmetic trigger on one client from altering the
+gameplay sequence.</li>
+</ul>
+<h3 id="5-input-transport-delay-based-vs-rollback-lockstep">5. Input
+Transport: Delay-Based vs. Rollback Lockstep</h3>
+<p>Architectures must select an input distribution strategy tailored to
+network latency tolerance.</p>
+<ul>
+<li><strong>Lockstep (Delay-Based):</strong> The engine pauses execution
+for tick <span class="math inline">\(N\)</span> until inputs for tick
+<span class="math inline">\(N\)</span> are received from every client.
+While simple to implement, latency matches the slowest client's
+ping.</li>
+<li><strong>Rollback (Predictive):</strong> Clients advance the
+simulation locally using input prediction. When remote inputs arrive
+late or conflict with predictions, the engine rolls back its state to
+the divergent frame, applies the verified inputs, and resimulates
+forward to the current tick within a single frame. This requires
+lightweight state snapshotting and fast resimulation capabilities.</li>
+</ul>
+<h3 id="6-desynchronization-detection-and-state-verification">6.
+Desynchronization Detection and State Verification</h3>
+<p>Even minor implementation errors will break determinism; the engine
+architecture must actively detect and isolate divergence during
+development and live play.</p>
+<ul>
+<li><strong>Frame Checksumming:</strong> At every tick (or at defined
+intervals), the engine generates a lightweight hash (such as xxHash or
+CRC32) of the entire gameplay state. Checksums are transmitted alongside
+inputs and compared across peers.</li>
+<li><strong>Delta Logging:</strong> When a checksum mismatch occurs, the
+engine should dump categorized memory logs (e.g., positions, velocities,
+health, PRNG states) to immediately isolate which system caused the
+divergence.</li>
+<li><strong>Full State Serialization:</strong> Comprehensive
+serialization routines are required not only for rollback snapshots and
+mid-game reconnects, but also for capturing reproducible replay files
+driven solely by input streams.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

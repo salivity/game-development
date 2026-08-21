@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Locking for Large Assets in Game Source Control - game-development</title>
+    <meta name="description" content="Game development relies heavily on large, non-textual binary assets such as 3D models, textures, audio files, and compiled shaders. Unlike source code, which can be merged line-by-line during a conflict, binary files are monolithic; if two developers mod">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/file-locking-for-large-assets-in-game-source-control">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="File Locking for Large Assets in Game Source Control - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/file-locking-for-large-assets-in-game-source-control" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Game development relies heavily on large, non-textual binary assets such as 3D models, textures, audio files, and compiled shaders. Unlike source code, which can be merged line-by-line during a conflict, binary files are monolithic; if two developers mod" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="file-locking-for-large-assets-in-game-source-control">File
+Locking for Large Assets in Game Source Control</h1>
+<p>Game development relies heavily on large, non-textual binary assets
+such as 3D models, textures, audio files, and compiled shaders. Unlike
+source code, which can be merged line-by-line during a conflict, binary
+files are monolithic; if two developers modify the same binary asset
+simultaneously, their changes cannot be merged automatically, resulting
+in lost work. To solve this, version control systems employ file locking
+mechanisms that grant exclusive write access to a single user,
+preventing concurrent edits and preserving asset integrity.</p>
+<h2 id="why-binary-files-require-exclusive-locking">Why Binary Files
+Require Exclusive Locking</h2>
+<p>When developers edit code, Git or other version control tools can
+easily merge changes from different branches because the files are plain
+text. However, binary formats are proprietary, compressed, or structured
+in ways that automated merge tools cannot parse. If Artist A and Artist
+B both edit the same 3D character model at the same time, the system
+cannot combine their changes. The only resolution is to overwrite one
+artist's work with the other's. File locking prevents this scenario by
+ensuring only one person has write access to a specific binary file at
+any given time.</p>
+<h2 id="how-perforce-helix-core-handles-file-locking">How Perforce
+(Helix Core) Handles File Locking</h2>
+<p>Perforce Helix Core is the industry standard for major game
+development studios, largely due to its native, highly efficient
+handling of binary assets and file locking.</p>
+<p>Perforce operates on a centralized architecture, which makes locking
+straightforward. It uses an "exclusive checkout" mechanism, often
+designated by the <code>+l</code> file type modifier. When a developer
+wants to edit a binary asset, they must "check out" the file from the
+central server. If the file is marked with the exclusive checkout
+attribute, Perforce locks the file on the server. Other developers are
+immediately blocked from checking out or editing that file until the
+original holder submits their changes or reverts the checkout.</p>
+<h2 id="how-git-lfs-large-file-storage-handles-file-locking">How Git LFS
+(Large File Storage) Handles File Locking</h2>
+<p>Git is a distributed version control system, meaning every developer
+has a full copy of the repository. Historically, this made file locking
+nearly impossible. Git LFS (Large File Storage) was developed to handle
+large binary files by replacing them with text pointers in the main
+repository and storing the actual binaries on a separate server.</p>
+<p>To prevent conflicts, Git LFS introduced a File Locking API. The
+workflow operates as follows:</p>
+<ol type="1">
+<li><strong>Locking:</strong> A developer runs the command
+<code>git lfs lock &lt;path/to/file&gt;</code>. The Git LFS server
+registers that this user has exclusive rights to the file.</li>
+<li><strong>Local Enforcement:</strong> When other developers run
+<code>git pull</code> or <code>git lfs checkout</code>, Git LFS marks
+locked files as read-only on their local machines.</li>
+<li><strong>Verification:</strong> Before pushing changes, Git LFS
+verifies that the pushing user holds the lock for any modified binary
+files. If they do not, the server rejects the push.</li>
+<li><strong>Unlocking:</strong> Once the changes are pushed and merged,
+the developer releases the lock using
+<code>git lfs unlock &lt;path/to/file&gt;</code>.</li>
+</ol>
+<h2 id="how-subversion-svn-handles-file-locking">How Subversion (SVN)
+Handles File Locking</h2>
+<p>Apache Subversion (SVN) is another centralized version control system
+widely used in smaller studios or legacy projects. Like Perforce, its
+centralized nature makes locking intuitive.</p>
+<p>SVN uses the <code>svn lock</code> command. When a user locks a file,
+the central repository records the lock. Other users can still update
+their local working copies, but they cannot commit changes to the locked
+file. SVN also supports the <code>svn:needs-lock</code> property. When
+this property is set on a binary file, SVN automatically makes the file
+read-only on everyone's local machine. The file only becomes writeable
+once a developer explicitly requests a lock from the server, preventing
+accidental local edits.</p>
+<h2 id="integration-with-game-engines">Integration with Game
+Engines</h2>
+<p>To make these locking systems seamless for artists and designers,
+game engines like Unreal Engine and Unity integrate directly with
+Perforce, Git LFS, and SVN APIs.</p>
+<p>Inside the engine editor, when a developer attempts to modify a
+source asset (such as a level file or a blueprint), the engine
+automatically communicates with the source control server in the
+background. If the file is available, the engine checks it out and locks
+it automatically. If another developer already locks the asset, the
+engine displays a visual warning (such as a red icon) and prevents the
+user from making changes, ensuring smooth collaboration without leaving
+the creative environment.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

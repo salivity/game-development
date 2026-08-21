@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Procedural Climbing Systems in Game Development - game-development</title>
+    <meta name="description" content="Dynamic climbing systems allow player characters to scale arbitrary 3D geometry without relying on pre-authored ledge markers or strict spline paths. Technical designers achieve this by combining environment trace queries, surface normal analysis, dynami">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/dynamic-procedural-climbing-systems-in-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dynamic Procedural Climbing Systems in Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/dynamic-procedural-climbing-systems-in-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Dynamic climbing systems allow player characters to scale arbitrary 3D geometry without relying on pre-authored ledge markers or strict spline paths. Technical designers achieve this by combining environment trace queries, surface normal analysis, dynami" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="dynamic-procedural-climbing-systems-in-game-development">Dynamic
+Procedural Climbing Systems in Game Development</h1>
+<p>Dynamic climbing systems allow player characters to scale arbitrary
+3D geometry without relying on pre-authored ledge markers or strict
+spline paths. Technical designers achieve this by combining environment
+trace queries, surface normal analysis, dynamic root positioning, and
+Inverse Kinematics (IK) for precise limb placement. This article breaks
+down the core architecture required to build a fully procedural climbing
+mechanic capable of adapting to complex, unstructured game
+environments.</p>
+<h3 id="environment-querying-and-surface-detection">Environment Querying
+and Surface Detection</h3>
+<p>The foundation of any arbitrary climbing system is continuous spatial
+awareness. Instead of querying pre-tagged climbing volumes, the system
+uses dynamic shape casting—such as sphere casts, capsule traces, or box
+sweeps—fired from the character’s local coordinate space toward the
+climbing surface.</p>
+<ol type="1">
+<li><strong>Forward Wall Detection:</strong> Sweeps are projected
+forward from the character's chest, waist, and head to determine if a
+surface is within reach and whether its angle falls within a climbable
+slope threshold (typically checked by calculating the dot product of the
+surface normal against the global up vector).</li>
+<li><strong>Ledge and Edge Finding:</strong> Downward and inward traces
+originate slightly above the character to locate the apex or top lip of
+the geometry, identifying valid hold points for hand placement.</li>
+<li><strong>Collision Normal Extraction:</strong> Hit results provide
+the exact impact location and surface normal, which are used to orient
+the character's body and limbs tangentially to the geometry.</li>
+</ol>
+<h3
+id="procedural-hand-and-foot-placement-via-inverse-kinematics">Procedural
+Hand and Foot Placement via Inverse Kinematics</h3>
+<p>Once a surface is confirmed climbable, the system replaces static
+grasping animations with procedural Inverse Kinematics (IK).</p>
+<ul>
+<li><strong>Target Searching:</strong> The character's animation
+blueprint projects localized sphere traces outward from projected rest
+points (where hands and feet naturally hang during a climb pose) toward
+the surface mesh.</li>
+<li><strong>Hit Normal Alignment:</strong> When a trace hits valid
+collision geometry, the impact point becomes the IK target location. The
+surface normal determines the IK target's rotation, ensuring palms and
+soles align flush with uneven, curved, or jagged faces.</li>
+<li><strong>IK Solvers:</strong> Systems like Two-Bone IK or Full-Body
+IK (FBIK) calculate the required shoulder, elbow, hip, and knee joint
+rotations to reach these targets while respecting joint limits and
+preventing unnatural hyperextension.</li>
+</ul>
+<h3 id="root-motion-and-body-offset-management">Root Motion and Body
+Offset Management</h3>
+<p>To prevent the character model from clipping into convex surfaces or
+floating away from concave overhangs, the character's root transform
+must dynamically adapt to the surface topology.</p>
+<ul>
+<li><strong>Distance Maintenance:</strong> The distance between the
+character's pelvis (root) and the wall is maintained using the average
+depth of all active hand and foot contact points.</li>
+<li><strong>Surface Normal Averaging:</strong> The character's yaw and
+pitch are aligned to the averaged normal vector of the current handholds
+and the main body trace.</li>
+<li><strong>Smoothing and Damping:</strong> Rotations and translations
+are processed through interpolation functions (such as
+<code>VInterpTo</code> and <code>RInterpTo</code>) to prevent erratic
+jittering when traversing highly irregular or low-poly meshes.</li>
+</ul>
+<h3 id="locomotion-state-and-traversal-logic">Locomotion State and
+Traversal Logic</h3>
+<p>Moving along the surface requires dynamic re-evaluation of holds as
+the player supplies directional input:</p>
+<ol type="1">
+<li><strong>Grip Projection:</strong> As directional input is received,
+the system casts predictive traces in the direction of movement to find
+the next set of viable handholds.</li>
+<li><strong>Step Cycles:</strong> Limbs are unpinned and moved
+sequentially rather than simultaneously. A procedural gait system
+alternates lifting, translating, and planting hands and feet toward the
+new target coordinates.</li>
+<li><strong>Obstacle and Gap Handling:</strong> If a forward trace fails
+to find geometry, or if a trace hits geometry marked with invalid
+collision channels, the system constrains movement in that direction,
+triggering reaching or idle animations at the boundary edge.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

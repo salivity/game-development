@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Day-Night Cycles and Baked Shadows in Games - game-development</title>
+    <meta name="description" content="Integrating dynamic day-and-night cycles into open-world games presents a technical challenge when static baked lighting and shadow maps are involved. Because standard baked shadows contain fixed directional and intensity data, altering the sun's positio">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/dynamic-day-night-cycles-and-baked-shadows-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dynamic Day-Night Cycles and Baked Shadows in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/dynamic-day-night-cycles-and-baked-shadows-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Integrating dynamic day-and-night cycles into open-world games presents a technical challenge when static baked lighting and shadow maps are involved. Because standard baked shadows contain fixed directional and intensity data, altering the sun's positio" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="dynamic-day-night-cycles-and-baked-shadows-in-games">Dynamic
+Day-Night Cycles and Baked Shadows in Games</h1>
+<p>Integrating dynamic day-and-night cycles into open-world games
+presents a technical challenge when static baked lighting and shadow
+maps are involved. Because standard baked shadows contain fixed
+directional and intensity data, altering the sun's position can cause
+visual artifacts, conflicting shadows, or static light pools at
+midnight. Game developers overcome this limitation by using hybrid
+rendering strategies, such as shadowmask lightmapping, lightmap runtime
+modulation, time-of-day lightmap blending, and separating indirect
+global illumination from dynamic directional shadows.</p>
+<h3 id="1-shadowmask-and-occlusion-baking">1. Shadowmask and Occlusion
+Baking</h3>
+<p>Instead of baking full direct illumination and hard directional
+shadows, engines bake a "shadowmask." A shadowmask is a low-overhead
+texture that stores only occlusion data (which static objects occlude
+direct light) rather than hardcoded light color and direction. At
+runtime, the dynamic directional sun or moon uses this mask to determine
+where static objects cast shadows, seamlessly blending real-time shadows
+from dynamic characters with baked static geometry without casting
+conflicting light.</p>
+<h3 id="2-separating-indirect-gi-from-direct-shadows">2. Separating
+Indirect GI from Direct Shadows</h3>
+<p>A widely adopted technique is to bake only indirect light (diffuse
+bounces and ambient occlusion) into lightmaps or volumetric light
+probes, leaving direct shadows completely dynamic. Because ambient
+occlusion and bounce light from skylight are less sensitive to rapid
+angle shifts than sharp directional shadows, they can be tinted or
+scaled at runtime without breaking visual immersion. The sun and moon
+then cast dynamic Cascaded Shadow Maps (CSM) across the environment.</p>
+<h3 id="3-lightmap-tinting-and-runtime-modulation">3. Lightmap Tinting
+and Runtime Modulation</h3>
+<p>For performance-constrained platforms, developers modify baked
+lightmap data directly in the pixel shader based on the current
+time-of-day parameters. By multiplying the baked luminance by real-time
+ambient color gradients, skylight intensities, and sun angles, baked
+shadows can darken realistically during night or shift to warm tones
+during golden hour. While this does not alter the physical direction of
+baked shadows, it prevents them from appearing unnaturally bright at
+night.</p>
+<h3 id="4-multi-state-lightmap-blending">4. Multi-State Lightmap
+Blending</h3>
+<p>For games requiring high visual fidelity with baked global
+illumination across distinct times of day, studios bake multiple sets of
+lightmaps—typically representing noon, sunset, and midnight. Shaders
+then interpolate between these textures based on the game's internal
+clock. While memory-intensive, texture compression and sparse virtual
+texturing allow engines to smoothly crossfade baked lighting and shadow
+intensities across varying sun elevations.</p>
+<h3 id="5-distance-based-dynamic-shadow-cascades">5. Distance-Based
+Dynamic Shadow Cascades</h3>
+<p>In open-world architectures, dynamic Cascaded Shadow Maps are
+prioritized for the near-to-mid field, completely overriding baked
+direct lighting around the player. At far distances, where real-time
+shadow rendering becomes expensive, the engine smoothly transitions to
+screen-space ambient occlusion (SSAO), directional distance field
+shadows, or neutralized ambient maps. This prevents jarring transitions
+where baked directional data would otherwise conflict with dynamic
+geometry.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

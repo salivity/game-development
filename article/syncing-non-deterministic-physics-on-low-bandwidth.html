@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syncing Non-Deterministic Physics on Low Bandwidth - game-development</title>
+    <meta name="description" content="Synchronizing non-deterministic physics simulations across a network is one of the most complex challenges in multiplayer game development. Because non-deterministic engines produce divergent physical outcomes from identical initial inputs, developers mu">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/syncing-non-deterministic-physics-on-low-bandwidth">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Syncing Non-Deterministic Physics on Low Bandwidth - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/syncing-non-deterministic-physics-on-low-bandwidth" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Synchronizing non-deterministic physics simulations across a network is one of the most complex challenges in multiplayer game development. Because non-deterministic engines produce divergent physical outcomes from identical initial inputs, developers mu" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="syncing-non-deterministic-physics-on-low-bandwidth">Syncing
+Non-Deterministic Physics on Low Bandwidth</h1>
+<p>Synchronizing non-deterministic physics simulations across a network
+is one of the most complex challenges in multiplayer game development.
+Because non-deterministic engines produce divergent physical outcomes
+from identical initial inputs, developers must constantly transmit
+authoritative state updates to keep clients aligned. Over low-bandwidth
+connections, this necessity clashes directly with strict data limits,
+resulting in state divergence, visual artifacts, latency amplification,
+and complex reconciliation issues.</p>
+<h3 id="compounding-state-divergence">Compounding State Divergence</h3>
+<p>Non-deterministic physics engines introduce minute variations due to
+differences in CPU architectures, floating-point math implementations,
+threading models, and execution order. In a localized simulation, these
+tiny variances compound rapidly—a phenomenon known as the butterfly
+effect. A rigid body colliding with a corner might deflect slightly left
+on the server and slightly right on the client. Over several simulation
+ticks, this small deviation transforms into completely different world
+states, requiring frequent corrections from the authoritative host.</p>
+<h3 id="bandwidth-saturation-from-state-snapshots">Bandwidth Saturation
+from State Snapshots</h3>
+<p>Because clients cannot reliably predict future physics states on
+their own, the server must continuously send full state updates. A
+complete rigid-body snapshot typically includes:</p>
+<ul>
+<li>3D position vectors (X, Y, Z)</li>
+<li>Orientations (Quaternions: X, Y, Z, W)</li>
+<li>Linear velocity vectors</li>
+<li>Angular velocity vectors</li>
+</ul>
+<p>Multiplying these parameters across dozens or hundreds of active
+dynamic objects quickly exceeds the data throughput limits of
+low-bandwidth connections. Without sufficient bandwidth to broadcast
+updates at tick rate, the server must lower update frequencies, widening
+the divergence window between updates.</p>
+<h3 id="packet-loss-and-latency-amplification">Packet Loss and Latency
+Amplification</h3>
+<p>Low-bandwidth environments often suffer from packet loss, high
+latency, and jitter. When client-side prediction is applied to
+non-deterministic systems, lost state packets force the client to
+extrapolate physical motion blind. By the time a corrective packet
+finally arrives, the client's local object may be far removed from the
+server's authoritative position, rendering standard dead-reckoning
+algorithms ineffective and inaccurate.</p>
+<h3 id="visual-snapping-and-rubber-banding">Visual Snapping and
+Rubber-Banding</h3>
+<p>When authoritative corrections arrive over a constrained link, the
+discrepancy between the client's local simulation and the server's true
+state is often substantial. Correcting this difference instantly causes
+visible "teleporting" or snapping. While interpolation and smoothing
+algorithms can blend these corrections over time, severe divergence
+under low update rates leads to noticeable rubber-banding, unnatural
+floatiness, or objects phasing through static geometry during
+interpolation.</p>
+<h3 id="complex-multi-body-and-constraint-failures">Complex Multi-Body
+and Constraint Failures</h3>
+<p>Interacting systems—such as ragdolls, vehicle suspensions, rope
+physics, and stacked crates—rely on constraint solvers. Under low
+bandwidth, updating every individual joint or constraint solver state is
+impossible. If clients only receive partial updates or delayed
+constraint resolutions, joint limits break, stacks collapse prematurely,
+and ragdolls exhibit violent stretching or physics explosions due to
+conflicting local constraints and server corrections.</p>
+<h3 id="common-engineering-solutions-and-trade-offs">Common Engineering
+Solutions and Trade-Offs</h3>
+<p>To manage non-deterministic synchronization under tight bandwidth
+constraints, developers rely on several architectural compromises:</p>
+<ul>
+<li><strong>Quantization and Delta Compression:</strong> Truncating
+floating-point precision and only sending changes (deltas) relative to
+previous confirmed states.</li>
+<li><strong>Interest Management:</strong> Limiting physics
+synchronization strictly to objects within the player's immediate
+interaction radius or line of sight.</li>
+<li><strong>Cosmetic vs. Gameplay Separation:</strong> Restricting
+server-synchronized physics strictly to gameplay-critical objects, while
+running purely cosmetic physics (debris, secondary foliage, minor props)
+entirely client-side without any network sync.</li>
+<li><strong>Adaptive Send Rates:</strong> Dynamically scaling the update
+rate and precision of physics bodies based on an object's velocity,
+proximity to players, and current network congestion.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
