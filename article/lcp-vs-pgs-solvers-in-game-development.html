@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCP vs PGS Solvers in Game Development - game-development</title>
+    <meta name="description" content="In real-time game physics, rigid body contact and constraint resolution are commonly formulated as a Linear Complementarity Problem (LCP). While Projected Gauss-Seidel (PGS) is technically an iterative algorithm used to solve an LCP, the game development">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/lcp-vs-pgs-solvers-in-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="LCP vs PGS Solvers in Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/lcp-vs-pgs-solvers-in-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In real-time game physics, rigid body contact and constraint resolution are commonly formulated as a Linear Complementarity Problem (LCP). While Projected Gauss-Seidel (PGS) is technically an iterative algorithm used to solve an LCP, the game development" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="lcp-vs-pgs-solvers-in-game-development">LCP vs PGS Solvers in
+Game Development</h1>
+<p>In real-time game physics, rigid body contact and constraint
+resolution are commonly formulated as a Linear Complementarity Problem
+(LCP). While Projected Gauss-Seidel (PGS) is technically an iterative
+algorithm used to solve an LCP, the game development industry typically
+distinguishes "LCP solvers" as direct, active-set pivoting methods (such
+as Lemke’s or Dantzig’s algorithms) and "PGS solvers" as iterative,
+matrix-splitting methods. This article examines the core structural
+differences between these two approaches, focusing on matrix assembly,
+memory management, execution predictability, and handling of frictional
+constraints.</p>
+<h2 id="mathematical-formulation-and-solution-strategy">Mathematical
+Formulation and Solution Strategy</h2>
+<p>Both approaches resolve the velocity-level constraint equations
+subject to complementarity conditions:</p>
+<p><span class="math display">\[w = A\lambda + b \ge 0, \quad \lambda
+\ge 0, \quad \lambda^T w = 0\]</span></p>
+<p>Where <span class="math inline">\(A = J M^{-1} J^T\)</span> is the
+Delassus operator, <span class="math inline">\(J\)</span> is the
+constraint Jacobian, <span class="math inline">\(M\)</span> is the
+system mass matrix, <span class="math inline">\(b\)</span> is the
+constraint violation/bias term, and <span
+class="math inline">\(\lambda\)</span> represents the constraint
+impulses.</p>
+<ul>
+<li><strong>Direct LCP Solvers (Pivoting Methods):</strong> Use
+combinatorial search methods such as Lemke’s algorithm or Dantzig’s
+principal pivoting method. Structurally, they partition constraints into
+active and inactive sets, iteratively swapping indices between sets and
+solving linear sub-systems until the complementarity conditions are
+satisfied exactly.</li>
+<li><strong>PGS Solvers (Iterative Splitting):</strong> Decompose the
+system matrix <span class="math inline">\(A\)</span> into lower,
+diagonal, and upper components (<span class="math inline">\(A = L + D +
+U\)</span>). The solver updates each constraint impulse <span
+class="math inline">\(\lambda_i\)</span> sequentially while immediately
+clamping (projecting) the result onto the admissible set <span
+class="math inline">\([0, \infty)\)</span> or friction limits:</li>
+</ul>
+<p><span class="math display">\[\lambda_i^{k+1} = \max\left(0,
+\lambda_i^k - \frac{1}{A_{ii}} \left( b_i + \sum_{j &lt; i}
+A_{ij}\lambda_j^{k+1} + \sum_{j &gt; i} A_{ij}\lambda_j^k
+\right)\right)\]</span></p>
+<h2 id="matrix-assembly-vs-matrix-free-architectures">Matrix Assembly
+vs. Matrix-Free Architectures</h2>
+<p>A fundamental structural difference lies in how data is stored and
+accessed during execution.</p>
+<p>Direct LCP solvers require explicit construction of the Delassus
+matrix <span class="math inline">\(A\)</span>. Assembling <span
+class="math inline">\(A = J M^{-1} J^T\)</span> requires sparse
+matrix-matrix multiplications and dynamic memory allocation to manage
+pivoting steps and matrix factorizations (such as Cholesky or LU
+updates). This introduces significant cache thrashing and memory
+overhead when handling large constraint islands.</p>
+<p>PGS solvers are almost universally implemented as
+<strong>matrix-free</strong> algorithms, often referred to in game
+engines as Sequential Impulses (SI). Because PGS updates constraints one
+row at a time, the engine does not need to build <span
+class="math inline">\(A\)</span> globally. Instead, it computes the
+scalar diagonal <span class="math inline">\(J_i M^{-1} J_i^T\)</span>
+once per constraint, reads body velocities directly from memory,
+calculates the impulse, and applies the delta directly back to body
+velocities. This keeps data localized in CPU L1/L2 caches and makes
+vectorization (SIMD) straightforward.</p>
+<h2 id="time-complexity-and-frame-budget-predictability">Time Complexity
+and Frame-Budget Predictability</h2>
+<p>Game engines operate under strict per-frame time budgets (typically
+16.6ms or 8.3ms).</p>
+<ul>
+<li><strong>Direct LCP Solvers:</strong> Have a worst-case computational
+complexity of <span class="math inline">\(O(2^n)\)</span> or <span
+class="math inline">\(O(n^3)\)</span> operations, where <span
+class="math inline">\(n\)</span> is the number of constraint rows. If
+the pivot search hits degenerate conditions, computation time spikes
+drastically, leading to visible frame drops. Furthermore, direct methods
+cannot be terminated halfway; stopping early yields an incomplete pivot
+state with invalid velocities.</li>
+<li><strong>PGS Solvers:</strong> Exhibit <span
+class="math inline">\(O(k \cdot n)\)</span> complexity, where <span
+class="math inline">\(k\)</span> is a fixed number of iterations
+(typically 4 to 10 in modern titles). PGS is an "anytime" algorithm: it
+can be terminated unconditionally when the frame budget expires. While
+early termination results in softer constraints or slight penetration,
+it avoids simulation crashes and maintains frame-rate stability.</li>
+</ul>
+<h2 id="warm-starting-and-temporal-coherence">Warm Starting and Temporal
+Coherence</h2>
+<p>Physics engines exploit temporal coherence across consecutive
+frames:</p>
+<ul>
+<li><strong>In PGS Solvers:</strong> Warm starting is trivial. The
+impulse <span class="math inline">\(\lambda\)</span> calculated in frame
+<span class="math inline">\(t\)</span> is cached and applied as the
+initial guess <span class="math inline">\(\lambda^0\)</span> in frame
+<span class="math inline">\(t+1\)</span>. This dramatically reduces the
+number of iterations required to reach visual stability for resting
+stacks of bodies.</li>
+<li><strong>In Direct LCP Solvers:</strong> Caching the active set from
+the previous frame can accelerate initial pivoting, but changes in
+contact topology require rebuilding factorizations and updating pivot
+bases, reducing the performance advantage gained from temporal
+coherence.</li>
+</ul>
+<h2 id="friction-and-non-linear-limits">Friction and Non-Linear
+Limits</h2>
+<p>Under Coulomb friction, the friction limits depend dynamically on the
+normal contact force: <span class="math inline">\(|\lambda_t| \le \mu
+\lambda_n\)</span>.</p>
+<p>Direct LCP solvers struggle with this coupling because it turns the
+system into an NP-hard non-monotone or non-linear complementarity
+problem. Engines using direct LCPs typically linearize the friction cone
+into a polyhedral pyramid, adding multiple constraint rows per contact
+and further bloating matrix dimensions.</p>
+<p>PGS naturally handles coupled friction limits through sequential
+projection. The normal impulse <span
+class="math inline">\(\lambda_n\)</span> is computed and clamped first;
+immediately following, the tangential impulses <span
+class="math inline">\(\lambda_t\)</span> are evaluated and clamped
+against the newly calculated <span class="math inline">\([-\mu
+\lambda_n, \mu \lambda_n]\)</span> bound within the same iteration loop.
+While this Gauss-Seidel-style decoupling is an approximation that can
+cause minor shear inaccuracies, it is computationally robust and
+visually indistinguishable in real-time applications.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

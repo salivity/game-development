@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulating Non-Newtonian Fluids in Video Games - game-development</title>
+    <meta name="description" content="Simulating non-Newtonian fluids such as cornstarch slurry (oobleck) in real-time game development requires balancing physical accuracy with rigid frame-rate constraints. Unlike standard fluids, these shear-thickening materials transition from liquid to s">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/simulating-non-newtonian-fluids-in-video-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Simulating Non-Newtonian Fluids in Video Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/simulating-non-newtonian-fluids-in-video-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Simulating non-Newtonian fluids such as cornstarch slurry (oobleck) in real-time game development requires balancing physical accuracy with rigid frame-rate constraints. Unlike standard fluids, these shear-thickening materials transition from liquid to s" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="simulating-non-newtonian-fluids-in-video-games">Simulating
+Non-Newtonian Fluids in Video Games</h1>
+<p>Simulating non-Newtonian fluids such as cornstarch slurry (oobleck)
+in real-time game development requires balancing physical accuracy with
+rigid frame-rate constraints. Unlike standard fluids, these
+shear-thickening materials transition from liquid to solid states under
+stress, forcing developers to look beyond traditional Navier-Stokes
+implementations. Game engineers achieve this interactive behavior
+through specialized physics models like modified Smoothed Particle
+Hydrodynamics (SPH), Material Point Methods (MPM), and Position Based
+Dynamics (PBD), combined with dynamic viscosity functions executed
+entirely on GPU compute shaders.</p>
+<h3 id="understanding-the-target-physics">Understanding the Target
+Physics</h3>
+<p>In traditional Newtonian fluids (like water), viscosity remains
+constant regardless of the shear stress applied. Cornstarch slurry is a
+dilatant, or shear-thickening fluid:</p>
+<ul>
+<li>At low shear rates, particles suspended in the liquid remain
+separated by thin layers of fluid, allowing them to slide past one
+another smoothly.</li>
+<li>Under rapid impact or high shear stress, the liquid layer is
+squeezed out, causing frictional particle-particle contact and temporary
+inter-particle jamming that acts like a solid.</li>
+</ul>
+<p>Engineers must calculate local strain rates dynamically per frame to
+determine whether the fluid particles should flow, deform elastically,
+or resist displacement entirely.</p>
+<h3 id="primary-simulation-frameworks">Primary Simulation
+Frameworks</h3>
+<h4 id="1-smoothed-particle-hydrodynamics-sph">1. Smoothed Particle
+Hydrodynamics (SPH)</h4>
+<p>SPH is a Lagrangian (particle-based) method commonly used for fluid
+simulations in games. To handle shear-thickening behavior:</p>
+<ul>
+<li><strong>Constitutive Viscosity Models:</strong> Engineers apply
+non-Newtonian formulas like the Ostwald-de Waele power-law model or the
+Cross model. The kinematic viscosity (<span
+class="math inline">\(\nu\)</span>) becomes a function of the local
+strain rate tensor (<span
+class="math inline">\(\dot{\gamma}\)</span>).</li>
+<li><strong>Stress Tensors:</strong> High strain rates scale up
+artificial viscosity and bulk stiffness forces between neighboring
+particles, temporarily restricting relative velocity.</li>
+</ul>
+<h4 id="2-material-point-method-mpm">2. Material Point Method (MPM)</h4>
+<p>MPM has become the industry standard for complex phase-changing
+matter due to its ability to seamlessly handle elastoplasticity,
+fracture, and fluid flow:</p>
+<ul>
+<li><strong>Hybrid Approach:</strong> Particles store physical
+properties (mass, velocity, deformation gradient), while a background
+Eulerian grid computes gradients and solves momentum equations.</li>
+<li><strong>Yield Criteria:</strong> Engineers implement custom
+Drucker-Prager or friction-based yield surfaces. When the shear stress
+exceeds a threshold, the material transitions from a Navier-Stokes fluid
+solve to an elastoplastic solid solve.</li>
+</ul>
+<h4 id="3-position-based-dynamics-pbd-and-xpbd">3. Position Based
+Dynamics (PBD) and XPBD</h4>
+<p>For games where performance and unconditional numerical stability
+outweigh absolute physical accuracy, Position Based Dynamics is
+preferred:</p>
+<ul>
+<li>Instead of integrating forces and velocities, PBD directly projects
+geometric position constraints.</li>
+<li>Shear-thickening is simulated by modulating distance and
+shape-matching constraints based on collision velocity. Fast impacts
+trigger rigid shape-matching constraints to prevent penetration, while
+slow interactions loosen constraints to permit standard fluid
+relaxation.</li>
+</ul>
+<h3 id="real-time-optimization-techniques">Real-Time Optimization
+Techniques</h3>
+<p>Interactive games must maintain a minimum of 60 frames per second,
+leaving only a few milliseconds for physics updates. Engineers employ
+several optimization pipelines:</p>
+<ul>
+<li><strong>GPU Compute Shaders:</strong> Modern implementations offload
+neighbor searches and integration steps directly to the GPU. Spatial
+hashing algorithms partition particles into uniform grids, enabling
+parallel processing across thousands of GPU threads.</li>
+<li><strong>Decoupled Physics and Rendering:</strong> The simulation
+typically runs on a coarse resolution of tens of thousands of particles.
+For visual output, engineers use screen-space fluid rendering (SSFR) or
+marching cubes algorithms, applying blur filters and normal smoothing on
+the depth buffer to make the coarse particle simulation appear as a
+smooth, continuous surface.</li>
+<li><strong>Dynamic Substepping:</strong> When high-velocity impacts
+occur, the physics engine triggers adaptive substepping—running multiple
+micro-steps within a single frame for the affected region to prevent
+explosive instability without degrading global performance.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

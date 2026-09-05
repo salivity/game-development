@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How State Interpolation Reduces Rubber-Banding - game-development</title>
+    <meta name="description" content="In competitive multiplayer game development, network latency frequently causes high-ping clients to experience "rubber-banding"—the jarring effect where a character rapidly snaps or teleports back to an authoritative position. State interpolation mitig">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-state-interpolation-reduces-rubber-banding">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How State Interpolation Reduces Rubber-Banding - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-state-interpolation-reduces-rubber-banding" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In competitive multiplayer game development, network latency frequently causes high-ping clients to experience "rubber-banding"—the jarring effect where a character rapidly snaps or teleports back to an authoritative position. State interpolation mitig" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-state-interpolation-reduces-rubber-banding">How State
+Interpolation Reduces Rubber-Banding</h1>
+<p>In competitive multiplayer game development, network latency
+frequently causes high-ping clients to experience "rubber-banding"—the
+jarring effect where a character rapidly snaps or teleports back to an
+authoritative position. State interpolation mitigates this issue by
+rendering remote entities slightly in the past, allowing the client to
+smoothly blend between confirmed server snapshots rather than guessing
+where entities should be in real time. This article explores the
+mechanics of state interpolation, why high-ping players suffer from
+synchronization errors, and how buffering and smoothing techniques
+eliminate erratic position corrections.</p>
+<h3 id="the-mechanics-of-rubber-banding">The Mechanics of
+Rubber-Banding</h3>
+<p>In authoritative server architectures, the server remains the
+ultimate source of truth for all player positions, velocities, and game
+events. To ensure gameplay feels responsive locally, clients utilize
+<strong>Client-Side Prediction</strong>, immediately updating local
+movement before waiting for the server's acknowledgment.</p>
+<p>When a player has high latency or packet jitter, the client's
+predicted position may diverge significantly from the server's simulated
+position by the time the acknowledgment returns. If the discrepancy
+exceeds a defined error threshold, the client must reconcile its state
+by snapping the player back to the server-verified position. For remote
+entities (other players), missing or delayed packets leave the client
+without up-to-date trajectory data, causing sudden teleportation when a
+delayed packet finally arrives.</p>
+<h3 id="how-state-interpolation-works">How State Interpolation
+Works</h3>
+<p>State interpolation resolves discontinuous movement by delaying the
+rendering of other players by a fixed duration—often referred to as the
+<strong>interpolation buffer</strong> or
+<code>interpolation delay</code> (typically 50ms to 100ms, or 2–3 server
+ticks).</p>
+<p>Instead of attempting to extrapolate where a player <em>will</em> be
+(which easily leads to prediction errors), the client waits until it
+possesses at least two authoritative snapshots from the past:</p>
+<ol type="1">
+<li><strong>Snapshot A</strong> (Older position at time <span
+class="math inline">\(t_0\)</span>)</li>
+<li><strong>Snapshot B</strong> (Newer position at time <span
+class="math inline">\(t_1\)</span>)</li>
+</ol>
+<p>The client then calculates the entity’s visual position at render
+time <span class="math inline">\(t\)</span> (where <span
+class="math inline">\(t_0 \le t \le t_1\)</span>) using interpolation
+formulas such as linear interpolation (Lerp) or cubic splines
+(Hermite/Catmull-Rom) for smoother curves:</p>
+<p><span class="math display">\[\text{Position}(t) =
+\text{Lerp}(\text{Snapshot A}, \text{Snapshot B}, \alpha)\]</span></p>
+<p><span class="math display">\[\text{where } \alpha = \frac{t -
+t_0}{t_1 - t_0}\]</span></p>
+<h3 id="key-ways-interpolation-reduces-visual-artifacts">Key Ways
+Interpolation Reduces Visual Artifacts</h3>
+<ul>
+<li><strong>Buffers Against Packet Jitter:</strong> Network packets
+rarely arrive at uniform intervals. By maintaining a buffer of past
+states, state interpolation provides a cushion. If a packet arrives
+slightly late due to jitter, the client is still interpolating between
+older received states, preventing the entity from freezing and then
+snapping forward.</li>
+<li><strong>Transforms Discrete Ticks into Continuous Motion:</strong>
+Servers typically tick at 30Hz, 60Hz, or 128Hz, while client displays
+often refresh at 144Hz or higher. Interpolation calculates intermediate
+frames, providing fluid animation between coarse network updates.</li>
+<li><strong>Eliminates Extrapolation Over-Shooting:</strong> Without
+interpolation, a client must use dead reckoning (extrapolation) to guess
+an opponent's trajectory when packets lag. If an opponent changes
+direction during a lag spike, extrapolation sends them in the wrong
+direction, requiring a violent visual snap-back once the real data
+arrives. Interpolation looks backward, entirely bypassing trajectory
+mispredictions for remote players.</li>
+</ul>
+<h3 id="balancing-latency-and-competitive-integrity">Balancing Latency
+and Competitive Integrity</h3>
+<p>While state interpolation creates fluid visual movement, it
+introduces a necessary trade-off: players observe remote entities
+slightly in the past.</p>
+<p>To maintain competitive fairness, modern engines pair state
+interpolation with <strong>Server-Side Lag Compensation</strong>. When a
+player shoots at an interpolated target, the client sends the timestamp
+of the shot to the server. The server then rolls back its game state to
+that exact historical timestamp, verifying whether the crosshair was
+aligned with the target as it appeared on the shooter's screen. This
+ensures that the visual smoothness gained from interpolation does not
+compromise hit registration accuracy in high-stakes competitive
+environments.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

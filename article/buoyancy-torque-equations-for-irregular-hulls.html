@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buoyancy Torque Equations for Irregular Hulls - game-development</title>
+    <meta name="description" content="This article outlines the mathematical equations and numerical formulations used to calculate buoyancy torque for partially submerged, irregular 3D hulls in real-time nautical game development. It details the classical continuous hydrostatics based on Ar">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/buoyancy-torque-equations-for-irregular-hulls">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Buoyancy Torque Equations for Irregular Hulls - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/buoyancy-torque-equations-for-irregular-hulls" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article outlines the mathematical equations and numerical formulations used to calculate buoyancy torque for partially submerged, irregular 3D hulls in real-time nautical game development. It details the classical continuous hydrostatics based on Ar" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="buoyancy-torque-equations-for-irregular-hulls">Buoyancy Torque
+Equations for Irregular Hulls</h1>
+<p>This article outlines the mathematical equations and numerical
+formulations used to calculate buoyancy torque for partially submerged,
+irregular 3D hulls in real-time nautical game development. It details
+the classical continuous hydrostatics based on Archimedes' principle,
+the transition to surface integral formulations via the divergence
+theorem, the classical metacentric height approximation, and the
+discretized numerical methods essential for game physics engines.</p>
+<hr />
+<h3 id="the-fundamental-buoyancy-torque-equation">The Fundamental
+Buoyancy Torque Equation</h3>
+<p>Buoyancy torque <span
+class="math inline">\(\boldsymbol{\tau}_B\)</span> represents the
+rotational moment exerted on a vessel by the displacement of fluid
+around its hull. In standard Newtonian mechanics, this torque is
+evaluated relative to the vessel's Center of Mass (<span
+class="math inline">\(\mathbf{r}_{\text{CoM}}\)</span>):</p>
+<p><span class="math display">\[\boldsymbol{\tau}_B = (\mathbf{r}_B -
+\mathbf{r}_{\text{CoM}}) \times \mathbf{F}_B\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\mathbf{F}_B\)</span> is the buoyant
+force vector.</li>
+<li><span class="math inline">\(\mathbf{r}_B\)</span> is the Center of
+Buoyancy (the geometric centroid of the submerged volume).</li>
+<li><span class="math inline">\(\mathbf{r}_{\text{CoM}}\)</span> is the
+center of mass of the rigid body.</li>
+<li><span class="math inline">\(\times\)</span> denotes the vector cross
+product.</li>
+</ul>
+<p>By Archimedes' principle, the buoyant force acts antiparallel to
+gravity:</p>
+<p><span class="math display">\[\mathbf{F}_B = \rho g V_{\text{sub}}
+\hat{\mathbf{k}}\]</span></p>
+<p>Where <span class="math inline">\(\rho\)</span> is the fluid density,
+<span class="math inline">\(g\)</span> is the acceleration due to
+gravity, <span class="math inline">\(V_{\text{sub}}\)</span> is the
+total submerged volume, and <span
+class="math inline">\(\hat{\mathbf{k}}\)</span> is the normalized upward
+unit vector perpendicular to the undisturbed water surface.</p>
+<hr />
+<h3 id="volumetric-integration-for-irregular-geometries">Volumetric
+Integration for Irregular Geometries</h3>
+<p>For irregular 3D hull shapes, <span
+class="math inline">\(V_{\text{sub}}\)</span> and <span
+class="math inline">\(\mathbf{r}_B\)</span> are dynamic quantities that
+change continuously as the ship translates and rotates. They are defined
+analytically by volume integrals over the submerged domain <span
+class="math inline">\(\Omega_{\text{sub}}\)</span>:</p>
+<p><span class="math display">\[V_{\text{sub}} =
+\iiint_{\Omega_{\text{sub}}} dV\]</span></p>
+<p><span class="math display">\[\mathbf{r}_B = \frac{1}{V_{\text{sub}}}
+\iiint_{\Omega_{\text{sub}}} \mathbf{r} \, dV\]</span></p>
+<p>Because evaluating 3D spatial grids dynamically is computationally
+prohibitive in game engines, these volume integrals are converted to
+surface integrals across the submerged boundary surface <span
+class="math inline">\(\partial \Omega_{\text{sub}}\)</span> using the
+Divergence Theorem (<span class="math inline">\(\iiint_\Omega \nabla
+\cdot \mathbf{F} \, dV = \iint_{\partial\Omega} \mathbf{F} \cdot
+\hat{\mathbf{n}} \, dA\)</span>):</p>
+<p><span class="math display">\[V_{\text{sub}} = \frac{1}{3}
+\iint_{\partial \Omega_{\text{sub}}} (\mathbf{r} \cdot \hat{\mathbf{n}})
+\, dA\]</span></p>
+<p><span class="math display">\[\mathbf{r}_B = \frac{1}{2
+V_{\text{sub}}} \iint_{\partial \Omega_{\text{sub}}} \mathbf{r}
+(\mathbf{r} \cdot \hat{\mathbf{n}}) \, dA\]</span></p>
+<p>Where <span class="math inline">\(\hat{\mathbf{n}}\)</span> is the
+outward-pointing unit normal of the submerged surface elements, and
+<span class="math inline">\(dA\)</span> is the differential surface
+area.</p>
+<hr />
+<h3 id="direct-hydrostatic-pressure-surface-integration">Direct
+Hydrostatic Pressure Surface Integration</h3>
+<p>An alternative formulation directly integrates hydrostatic pressure
+over the wetted hull mesh, bypassing the separate calculation of <span
+class="math inline">\(\mathbf{r}_B\)</span>. The hydrostatic pressure
+<span class="math inline">\(P\)</span> at depth <span
+class="math inline">\(d(\mathbf{r})\)</span> below the water surface
+is:</p>
+<p><span class="math display">\[P(\mathbf{r}) = \rho g \max(0,
+z_{\text{water}} - z)\]</span></p>
+<p>The differential force <span
+class="math inline">\(d\mathbf{F}\)</span> exerted on an infinitesimal
+surface patch with area <span class="math inline">\(dA\)</span> and
+inward normal <span class="math inline">\(-\hat{\mathbf{n}}\)</span>
+is:</p>
+<p><span class="math display">\[d\mathbf{F} = P(\mathbf{r})
+(-\hat{\mathbf{n}}) \, dA\]</span></p>
+<p>The net buoyancy torque relative to the center of mass becomes:</p>
+<p><span class="math display">\[\boldsymbol{\tau}_B =
+\iint_{S_{\text{wetted}}} (\mathbf{r} - \mathbf{r}_{\text{CoM}}) \times
+\big(-\rho g \max(0, z_{\text{water}} - z) \hat{\mathbf{n}}\big) \,
+dA\]</span></p>
+<p>This integral inherently accounts for the orientation and tilt of the
+hull without requiring explicit recalculation of a 3D centroid.</p>
+<hr />
+<h3 id="metacentric-restoration-for-small-tilt-angles">Metacentric
+Restoration for Small Tilt Angles</h3>
+<p>In simplified game physics where small angles of heel (roll) <span
+class="math inline">\(\theta\)</span> are assumed, the restoring torque
+around the longitudinal axis is governed by the metacentric
+equation:</p>
+<p><span class="math display">\[\tau_{\text{restore}} = -\Delta \cdot
+\overline{GM} \cdot \sin(\theta)\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\Delta = \rho g V_{\text{sub}}\)</span>
+is the displacement weight.</li>
+<li><span class="math inline">\(\overline{GM}\)</span> is the transverse
+metacentric height.</li>
+</ul>
+<p>The metacentric height is calculated using the vertical positions of
+the center of buoyancy (<span class="math inline">\(K B\)</span>), the
+center of gravity (<span class="math inline">\(K G\)</span>), and the
+metacentric radius (<span class="math inline">\(B M\)</span>):</p>
+<p><span class="math display">\[\overline{GM} = \overline{KB} +
+\overline{BM} - \overline{KG}\]</span></p>
+<p>The metacentric radius depends directly on the second moment of area
+(transverse moment of inertia) <span class="math inline">\(I_T\)</span>
+of the waterline plane cut by the hull:</p>
+<p><span class="math display">\[\overline{BM} =
+\frac{I_T}{V_{\text{sub}}} = \frac{\iint_{A_{wp}} y^2 \,
+dA}{V_{\text{sub}}}\]</span></p>
+<p>Where <span class="math inline">\(A_{wp}\)</span> is the waterplane
+surface area and <span class="math inline">\(y\)</span> is the
+transverse distance from the rotation axis. While computationally
+inexpensive, this linear formulation fails during steep waves, large
+capsizing angles, or for highly irregular geometries.</p>
+<hr />
+<h3 id="discretization-methods-in-game-engines">Discretization Methods
+in Game Engines</h3>
+<p>For arbitrary hull geometry subjected to dynamic waves, game engines
+solve these equations using two primary numerical approximations:</p>
+<h4 id="1-discrete-triangle-clipping">1. Discrete Triangle Clipping</h4>
+<p>The hull mesh is clipped against the water surface plane (or wave
+displacement field). For each submerged triangle <span
+class="math inline">\(i\)</span> with area <span
+class="math inline">\(A_i\)</span>, centroid <span
+class="math inline">\(\mathbf{c}_i\)</span>, and inward normal <span
+class="math inline">\(\mathbf{n}_i\)</span>:</p>
+<p><span class="math display">\[\mathbf{F}_i = \rho g \,
+\text{depth}(\mathbf{c}_i) A_i \mathbf{n}_i\]</span></p>
+<p><span class="math display">\[\boldsymbol{\tau}_B = \sum_{i}
+(\mathbf{c}_i - \mathbf{r}_{\text{CoM}}) \times
+\mathbf{F}_i\]</span></p>
+<h4 id="2-voxel-or-point-cloud-approximation">2. Voxel or Point-Cloud
+Approximation</h4>
+<p>The hull is approximated by an array of discrete volume samples <span
+class="math inline">\(j\)</span>, each representing a volume <span
+class="math inline">\(V_j\)</span> located at position <span
+class="math inline">\(\mathbf{r}_j\)</span>:</p>
+<p><span class="math display">\[\mathbf{F}_B = \sum_{j} \rho g V_j
+\hat{\mathbf{k}} \quad \text{for all } z_j &lt;
+z_{\text{water}}(\mathbf{r}_j)\]</span></p>
+<p><span class="math display">\[\boldsymbol{\tau}_B = \sum_{j}
+(\mathbf{r}_j - \mathbf{r}_{\text{CoM}}) \times (\rho g V_j
+\hat{\mathbf{k}})\]</span></p>
+<p>This discrete summation ensures stable real-time torque response on
+irregular, non-convex hulls across all tilt angles and wave
+configurations.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

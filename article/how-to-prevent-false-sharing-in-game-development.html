@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Prevent False Sharing in Game Development - game-development</title>
+    <meta name="description" content="False sharing occurs when multiple threads independently modify distinct variables that reside within the same or adjacent CPU cache lines, triggering unnecessary cache invalidations and memory bus stalls that degrade frame rates. In modern multithreaded">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-to-prevent-false-sharing-in-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Prevent False Sharing in Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-to-prevent-false-sharing-in-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="False sharing occurs when multiple threads independently modify distinct variables that reside within the same or adjacent CPU cache lines, triggering unnecessary cache invalidations and memory bus stalls that degrade frame rates. In modern multithreaded" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-prevent-false-sharing-in-game-development">How to Prevent
+False Sharing in Game Development</h1>
+<p>False sharing occurs when multiple threads independently modify
+distinct variables that reside within the same or adjacent CPU cache
+lines, triggering unnecessary cache invalidations and memory bus stalls
+that degrade frame rates. In modern multithreaded game engines,
+mitigating this hidden bottleneck requires a combination of
+hardware-aware data layout, explicit memory alignment, thread-local
+accumulation, and algorithmic partitioning. The following techniques
+demonstrate how to eliminate false sharing across CPU cache lines in
+latency-critical game systems.</p>
+<h3 id="explicit-alignment-and-cache-padding">Explicit Alignment and
+Cache Padding</h3>
+<p>Modern x86 and ARM CPUs typically use 64-byte or 128-byte cache
+lines. When thread-specific state must live inside shared memory
+structures, you can use explicit language-level alignment to guarantee
+that adjacent data does not straddle the same cache line.</p>
+<ul>
+<li><strong>Using <code>alignas</code>:</strong> In C++11 and newer, use
+<code>alignas(hardware_destructive_interference_size)</code> to enforce
+cache-line boundaries. If this standard constant is unsupported by your
+compiler, explicitly use <code>alignas(64)</code> or
+<code>alignas(128)</code>.</li>
+<li><strong>Manual Padding:</strong> Insert explicit padding arrays
+(e.g., <code>uint8_t pad[64]</code>) between independently mutated
+variables within a struct or array to separate fields that are updated
+concurrently by different worker threads.</li>
+</ul>
+<h3 id="thread-local-storage-and-reduction-buffers">Thread-Local Storage
+and Reduction Buffers</h3>
+<p>Instead of writing fine-grained updates directly to shared game
+state, assign private accumulators to individual worker threads:</p>
+<ul>
+<li><strong>Thread-Local Storage (TLS):</strong> Allocate counters,
+statistics, and temporary allocations using <code>thread_local</code>
+storage. Threads write to thread-private memory spaces that are
+completely isolated in different memory pages or widely separated
+addresses.</li>
+<li><strong>Split Aggregation:</strong> For game-wide metrics (such as
+active entity counts or audio channel usage), allow each thread to write
+to its own dedicated index in a padded array. At the end of the frame or
+dispatch stage, a single thread accumulates the values into the global
+state.</li>
+</ul>
+<h3
+id="structure-of-arrays-soa-and-data-layout-transformation">Structure-of-Arrays
+(SoA) and Data Layout Transformation</h3>
+<p>Traditional game development often uses Array of Structures (AoS),
+which clusters multiple fields of an entity together. In parallel
+systems, this increases the probability that adjacent entities being
+processed by different threads inhabit the same cache line.</p>
+<ul>
+<li><strong>Structure of Arrays (SoA):</strong> Group homogeneous data
+members together. If multiple threads update only the
+<code>Velocity</code> components while reading <code>Position</code>, an
+SoA layout ensures that read-only memory remains in the shared cache
+while write-invalidations are restricted strictly to the modified memory
+streams.</li>
+<li><strong>Separating Hot and Cold Data:</strong> Isolate mutable
+variables that update per-frame from static or infrequently read
+variables. If a thread repeatedly writes to a "hot" health counter,
+keeping that variable apart from immutable rendering handles prevents
+unnecessary evictions of shared read-only data.</li>
+</ul>
+<h3 id="accounting-for-hardware-spatial-prefetchers">Accounting for
+Hardware Spatial Prefetchers</h3>
+<p>Many contemporary processors feature adjacent-line prefetchers that
+fetch pairs of cache lines (128-byte chunks) rather than single 64-byte
+lines.</p>
+<ul>
+<li>Aligning to a standard 64-byte boundary can still provoke false
+sharing if the prefetcher pairs lines <code>N</code> and
+<code>N+1</code>.</li>
+<li>In high-throughput loops, align performance-critical structures to
+128 bytes to completely insulate cache pairs from hardware prefetch
+invalidations.</li>
+</ul>
+<h3 id="coarse-grained-task-batching-chunking">Coarse-Grained Task
+Batching (Chunking)</h3>
+<p>Fine-grained work distribution, such as distributing single entity
+updates across a thread pool, creates high cache contention. Instead,
+partition data into contiguous chunks sized to exceed typical cache
+lines:</p>
+<ul>
+<li><strong>Job System Chunking:</strong> Instead of scheduling
+individual entities, assign batches (e.g., 64, 128, or 256 contiguous
+items) to each worker thread.</li>
+<li><strong>Interior vs. Boundary Updates:</strong> Within a large
+continuous array, the internal elements processed by a thread are
+completely safe from false sharing; only the elements at the extreme
+boundaries between worker threads can share a cache line. Batching
+maximizes the ratio of safe interior elements to potentially shared
+boundary elements.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

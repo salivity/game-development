@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Realistic Stealth Detection Cones in Games - game-development</title>
+    <meta name="description" content="Realistic stealth gameplay relies on believable enemy artificial intelligence (AI) that reacts dynamically to visual and auditory cues in the game world. This article explores the core technical and design approaches developers use to construct realistic">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/building-realistic-stealth-detection-cones-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Building Realistic Stealth Detection Cones in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/building-realistic-stealth-detection-cones-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Realistic stealth gameplay relies on believable enemy artificial intelligence (AI) that reacts dynamically to visual and auditory cues in the game world. This article explores the core technical and design approaches developers use to construct realistic" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="building-realistic-stealth-detection-cones-in-games">Building
+Realistic Stealth Detection Cones in Games</h1>
+<p>Realistic stealth gameplay relies on believable enemy artificial
+intelligence (AI) that reacts dynamically to visual and auditory cues in
+the game world. This article explores the core technical and design
+approaches developers use to construct realistic stealth detection
+cones, focusing on how visual fields of view, dynamic lighting
+conditions, and acoustic propagation systems intersect to create fair
+and immersive stealth mechanics.</p>
+<h2 id="geometric-vision-cones-and-raycasting">Geometric Vision Cones
+and Raycasting</h2>
+<p>The foundation of a visual stealth system is the Field of View (FOV)
+cone. Game designers implement this using a combination of mathematical
+volume checks and line-of-sight raycasting.</p>
+<ul>
+<li><strong>Angular and Distance Thresholds:</strong> The AI calculates
+the dot product between its forward facing vector and the vector toward
+the player to determine if the target falls within a defined angle
+(typically between 60 and 120 degrees) and maximum view distance.</li>
+<li><strong>Line-of-Sight Occlusion:</strong> If the player is within
+the cone volume, the engine casts physics rays from the AI's eye
+position to critical bones on the player model (head, torso, feet). If
+an obstacle blocks all rays, detection does not occur, preventing
+detection through walls or solid cover.</li>
+<li><strong>Multi-Tiered Vision Zones:</strong> Realistic systems divide
+the vision cone into distinct zones:
+<ul>
+<li><strong>Peripheral Zone:</strong> Wide angle, shorter range, slow
+detection rate.</li>
+<li><strong>Central/Focused Zone:</strong> Narrow angle, long range,
+rapid detection rate.</li>
+<li><strong>Immediate Proximity Sphere:</strong> A small radius around
+the AI where presence is felt regardless of angle.</li>
+</ul></li>
+</ul>
+<h2 id="light-level-integration">Light Level Integration</h2>
+<p>Static vision cones often feel artificial because real human vision
+adapts to environmental illumination. Modern stealth mechanics
+dynamically modify detection parameters based on the amount of light
+cast upon the player.</p>
+<ul>
+<li><strong>Light Probe and Render Target Sampling:</strong> Designers
+sample the light intensity at the player's world position using light
+probes or a small secondary camera rendering the player's silhouette
+against a black background. The calculated luminosity scalar directly
+scales the AI's detection parameters.</li>
+<li><strong>Dynamic Cone Scaling:</strong> In dark environments, the
+AI's visual cone distance and angle shrink, or the time-to-detect meter
+fills significantly slower. In bright light, the cone expands to its
+maximum limits, making detection nearly instantaneous at standard
+ranges.</li>
+<li><strong>Shadow Buffers and Volume Tracing:</strong> Advanced engines
+evaluate whether the player intersects with dynamic shadow maps,
+allowing the player to hide within moving shadows cast by geometry or
+dynamic searchlights.</li>
+</ul>
+<h2 id="auditory-propagation-and-acoustic-cones">Auditory Propagation
+and Acoustic Cones</h2>
+<p>Noise functions as an omnidirectional or directional trigger that
+complements the vision system. Unlike sight, sound does not rely solely
+on direct line-of-sight.</p>
+<ul>
+<li><strong>Radial Noise Spheres:</strong> Basic actions (walking,
+sprinting, crouch-moving, firing weapons) emit sound spheres with
+specific radii. If an AI is within this radius, it registers the noise
+event.</li>
+<li><strong>Acoustic Raycasting and Pathfinding:</strong> To simulate
+realistic sound travel, advanced systems route sound along the shortest
+path on the navigation mesh (NavMesh) or use audio raycasts to account
+for wall dampening and open doorways.</li>
+<li><strong>Directional Audio Awareness:</strong> When a sound is heard,
+the AI does not instantly spot the player; instead, it interpolates its
+head or body toward the sound origin. This swings the visual detection
+cone directly toward the disturbance, bridging the auditory and visual
+systems.</li>
+</ul>
+<h2 id="awareness-meters-and-alert-states">Awareness Meters and Alert
+States</h2>
+<p>To prevent frustrating "binary" detection where players are instantly
+spotted or ignored, systems combine light and noise data into an
+incremental awareness value.</p>
+<ul>
+<li><strong>Accumulative Detection Rate:</strong> Detection is
+represented as a floating-point value from 0 to 100%. The speed at which
+this fills is governed by the formula:<br />
+<code>Detection Rate = Base Rate * Distance Factor * Light Level * Stance Modifier</code></li>
+<li><strong>AI State Transitions:</strong> As the awareness meter rises,
+the AI transitions smoothly through states:
+<ul>
+<li><strong>Unaware (0%):</strong> Standard patrol routine.</li>
+<li><strong>Suspicious (1%–99%):</strong> Pauses, investigates
+anomalies, turns vision cone toward stimuli.</li>
+<li><strong>Alert/Combat (100%):</strong> Engages the player, sounds
+alarms, and calls reinforcements.</li>
+</ul></li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

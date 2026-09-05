@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garbage Collection Budgets for 60 FPS Games - game-development</title>
+    <meta name="description" content="Achieving a consistent 60 frames per second (FPS) requires rendering each frame in under 16.67 milliseconds, leaving virtually no margin for unexpected pauses caused by automatic memory management. Game engineers eliminate Garbage Collection (GC) spikes">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/garbage-collection-budgets-for-60-fps-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Garbage Collection Budgets for 60 FPS Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/garbage-collection-budgets-for-60-fps-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Achieving a consistent 60 frames per second (FPS) requires rendering each frame in under 16.67 milliseconds, leaving virtually no margin for unexpected pauses caused by automatic memory management. Game engineers eliminate Garbage Collection (GC) spikes" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="garbage-collection-budgets-for-60-fps-games">Garbage Collection
+Budgets for 60 FPS Games</h1>
+<p>Achieving a consistent 60 frames per second (FPS) requires rendering
+each frame in under 16.67 milliseconds, leaving virtually no margin for
+unexpected pauses caused by automatic memory management. Game engineers
+eliminate Garbage Collection (GC) spikes by treating heap allocation as
+a strictly regulated resource. This article explores how development
+teams establish zero-allocation runtime policies, use memory pooling,
+leverage value types, and integrate continuous profiling to prevent
+GC-induced frame drops.</p>
+<h3 id="the-1667ms-frame-budget-and-gc-spikes">The 16.67ms Frame Budget
+and GC Spikes</h3>
+<p>In a 60 FPS rendering loop, all game logic, physics updates,
+animation, rendering commands, and engine overhead must execute within
+16.67 milliseconds. Traditional garbage collectors, such as those found
+in C# (Unity, Godot) or custom runtime environments, manage memory
+automatically by periodically freezing execution to identify and free
+unused objects (stop-the-world phases).</p>
+<p>Even a minor GC pause of 5 to 10 milliseconds can push the total
+frame time past the 16.67ms threshold, resulting in a dropped frame,
+visual stutter, and unresponsive input. Because GC triggers are
+typically based on accumulated allocations rather than fixed timers,
+unmanaged allocations introduce non-deterministic performance drops.</p>
+<h3 id="the-zero-allocation-per-frame-rule">The Zero-Allocation
+Per-Frame Rule</h3>
+<p>To guarantee smooth performance, most engineering teams enforce a
+"zero-allocation per frame" budget during active gameplay. While memory
+allocation is permitted during loading screens, level transitions, and
+initialization phases, the per-frame allocation limit for core systems
+(physics, AI, rendering, UI, audio) is set strictly to 0 bytes.</p>
+<p>Engineers achieve this by:</p>
+<ul>
+<li><strong>Pre-allocating Collections:</strong> Pre-sizing lists,
+dictionaries, and arrays during startup to prevent dynamic resizing at
+runtime.</li>
+<li><strong>Avoiding Temporary Allocations:</strong> Eliminating string
+concatenations, closures, lambda expressions, and LINQ queries inside
+update loops, which implicitly generate short-lived heap objects.</li>
+<li><strong>Preventing Boxing and Unboxing:</strong> Ensuring value
+types are not implicitly converted to reference types when passed into
+generic or object-based APIs.</li>
+</ul>
+<h3 id="object-pooling-architecture">Object Pooling Architecture</h3>
+<p>When dynamic game entities—such as projectiles, enemies, visual
+effects, and audio sources—must spawn and despawn continuously,
+engineers use object pools instead of allocating and destroying
+instances at runtime.</p>
+<p>An object pool pre-instantiates a fixed number of objects into an
+inactive state at level load. When an object is needed, the system
+activates it from the pool, resets its state, and returns it to the pool
+upon deactivation. This shifts all allocation overhead to non-critical
+loading phases and keeps the runtime heap entirely static.</p>
+<h3 id="favoring-value-types-and-cache-friendly-structures">Favoring
+Value Types and Cache-Friendly Structures</h3>
+<p>Engineers reduce GC pressure by shifting memory from the managed heap
+to the execution stack or unmanaged memory regions.</p>
+<ul>
+<li><strong>Structs over Classes:</strong> Using value types
+(<code>struct</code> in C# or C++) ensures that data is stored directly
+on the stack or inline within containing arrays, bypassing the garbage
+collector entirely.</li>
+<li><strong>Native and Unmanaged Memory:</strong> Modern engines allow
+developers to bypass managed runtimes using native memory buffers,
+unmanaged arrays, or data-oriented design frameworks (such as Unity's
+DOTS/Burst Compiler). This provides direct control over memory layout
+and deallocation without GC overhead.</li>
+</ul>
+<h3 id="strategic-gc-invocation-and-incremental-collection">Strategic GC
+Invocation and Incremental Collection</h3>
+<p>When allocations cannot be completely avoided, engineers manage how
+and when the garbage collector runs rather than leaving it to the
+runtime's default heuristic.</p>
+<ol type="1">
+<li><strong>Explicit Invocations at Safe Times:</strong> Triggering a
+full garbage collection manually during scenes where frame drops are
+imperceptible, such as loading screens, pause menus, or cutscene
+transitions.</li>
+<li><strong>Incremental and Generational GC:</strong> Configuring the
+collector to split its workload across multiple frames. Instead of
+performing a long, single-frame cleanup, an incremental collector
+performs a few microseconds of work per frame, staying well inside the
+16.67ms budget.</li>
+</ol>
+<h3 id="automated-profiling-and-ci-budget-gates">Automated Profiling and
+CI Budget Gates</h3>
+<p>Maintaining an allocation budget across large development teams
+requires strict automated validation. Engineers use memory profilers to
+track heap allocations on a per-frame, per-subsystem basis.</p>
+<p>Many studios integrate automated performance tests into their
+Continuous Integration (CI) pipelines. These tests run automated
+gameplay scenarios in headless builds; if any recurring update loop
+generates heap allocations above the configured budget (typically zero),
+the build fails automatically, preventing GC regressions from reaching
+the main codebase.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Smart Pointers to Prevent C++ Memory Cycles - game-development</title>
+    <meta name="description" content="This article explores how game developers design and implement custom intrusive reference-counting smart pointers to eliminate circular memory dependencies and avoid memory leaks. While standard solutions like std::sharedptr and std::weakptr manage lifet">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/custom-smart-pointers-to-prevent-c-memory-cycles">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Custom Smart Pointers to Prevent C++ Memory Cycles - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/custom-smart-pointers-to-prevent-c-memory-cycles" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores how game developers design and implement custom intrusive reference-counting smart pointers to eliminate circular memory dependencies and avoid memory leaks. While standard solutions like std::sharedptr and std::weakptr manage lifet" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="custom-smart-pointers-to-prevent-c-memory-cycles">Custom Smart
+Pointers to Prevent C++ Memory Cycles</h1>
+<p>This article explores how game developers design and implement custom
+intrusive reference-counting smart pointers to eliminate circular memory
+dependencies and avoid memory leaks. While standard solutions like
+<code>std::shared_ptr</code> and <code>std::weak_ptr</code> manage
+lifetimes dynamically, their decoupled control blocks and atomic
+overhead often degrade game performance. By building an intrusive
+dual-counter system embedded directly into engine objects, developers
+maintain strict ownership semantics, eliminate circular references
+between interconnected engine systems, and retain high cache locality
+across frame updates.</p>
+<h3 id="the-problem-circular-dependencies-in-game-architectures">The
+Problem: Circular Dependencies in Game Architectures</h3>
+<p>Game engines heavily rely on bidirectional relationships. Common
+examples include:</p>
+<ul>
+<li><strong>Scene Graphs:</strong> A parent node owns its child nodes,
+while child nodes need references back to their parent to compute
+world-space transformations.</li>
+<li><strong>Entity-Component Systems (ECS) and UI:</strong> An entity or
+window container owns its components or child widgets, but components
+frequently need to query their owning entity.</li>
+</ul>
+<p>If both directions use strong reference-counting pointers, neither
+object's reference count will ever drop to zero, creating a circular
+reference and causing permanent memory leaks.</p>
+<h3 id="limitations-of-standard-smart-pointers-in-games">Limitations of
+Standard Smart Pointers in Games</h3>
+<p>Standard library pointers (<code>std::shared_ptr</code> and
+<code>std::weak_ptr</code>) pose specific challenges in game
+development:</p>
+<ol type="1">
+<li><strong>Cache Inefficiency:</strong> Non-intrusive control blocks
+are allocated separately from the object payload, causing an extra
+pointer indirection and cache misses.</li>
+<li><strong>Thread Overhead:</strong> <code>std::shared_ptr</code>
+enforces atomic operations on reference counters by default, introducing
+synchronization costs even in single-threaded systems like rendering or
+gameplay logic.</li>
+<li><strong>Fat Pointers:</strong> A <code>std::weak_ptr</code> stores
+two pointers (one to the object, one to the control block), doubling the
+memory footprint compared to a raw pointer.</li>
+</ol>
+<h3
+id="architectural-solution-intrusive-dual-counter-system">Architectural
+Solution: Intrusive Dual-Counter System</h3>
+<p>To eliminate circular dependencies without standard pointer overhead,
+developers implement custom intrusive smart pointers using two counters:
+a <strong>Strong Reference Count</strong> and a <strong>Weak Reference
+Count</strong>.</p>
+<ul>
+<li><strong>Strong Pointer (<code>TStrongPtr&lt;T&gt;</code>):</strong>
+Represents shared ownership. Increments the strong counter. When the
+strong count hits zero, the managed object is destroyed via its
+destructor.</li>
+<li><strong>Weak Pointer (<code>TWeakPtr&lt;T&gt;</code>):</strong>
+Represents non-owning observation. Increments the weak counter. A weak
+pointer does not prevent the object from being destroyed, breaking
+circular reference loops.</li>
+<li><strong>Control Block Integration:</strong> Counters can be embedded
+directly within the base object class (<code>RefCountedBase</code>), or
+managed through a lightweight internal proxy so that memory for the
+counters outlives the underlying game object until all weak pointers are
+released.</li>
+</ul>
+<h3 id="core-implementation">Core Implementation</h3>
+<h4 id="1-the-reference-control-block">1. The Reference Control
+Block</h4>
+<p>When handling weak references, the counters must remain valid even
+after the game object is destroyed. A common pattern separates the
+counter state into a lightweight counter block that the object owns
+intrusively.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> ReferenceController <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">int</span> strong_count<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">int</span> weak_count<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> add_strong_ref<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">++</span>strong_count<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> release_strong_ref<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">--</span>strong_count <span class="op">==</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> add_weak_ref<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">++</span>weak_count<span class="op">;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> release_weak_ref<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">--</span>weak_count <span class="op">==</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<h4 id="2-the-intrusive-base-class">2. The Intrusive Base Class</h4>
+<p>Game entities inherit from a base class that manages the controller
+lifecycle:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RefCounted <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    RefCounted<span class="op">()</span> <span class="op">:</span> controller<span class="op">(</span><span class="kw">new</span> ReferenceController<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        controller<span class="op">-&gt;</span>add_strong_ref<span class="op">();</span> <span class="co">// Initial creation ref</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">virtual</span> <span class="op">~</span>RefCounted<span class="op">()</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ReferenceController<span class="op">*</span> get_controller<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> controller<span class="op">;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> add_ref<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        controller<span class="op">-&gt;</span>add_strong_ref<span class="op">();</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> release<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>controller<span class="op">-&gt;</span>release_strong_ref<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            destroy<span class="op">();</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="kw">protected</span><span class="op">:</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">virtual</span> <span class="dt">void</span> destroy<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        ReferenceController<span class="op">*</span> ctrl <span class="op">=</span> controller<span class="op">;</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="kw">delete</span> <span class="kw">this</span><span class="op">;</span> <span class="co">// Invokes destructor</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>ctrl<span class="op">-&gt;</span>release_weak_ref<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>            <span class="kw">delete</span> ctrl<span class="op">;</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    ReferenceController<span class="op">*</span> controller<span class="op">;</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<h4 id="3-the-weak-pointer-implementation">3. The Weak Pointer
+Implementation</h4>
+<p>The weak pointer references the controller directly without
+incrementing <code>strong_count</code>, eliminating circular
+retention.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T<span class="op">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TWeakPtr <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    TWeakPtr<span class="op">()</span> <span class="op">:</span> instance<span class="op">(</span><span class="kw">nullptr</span><span class="op">),</span> controller<span class="op">(</span><span class="kw">nullptr</span><span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    TWeakPtr<span class="op">(</span>T<span class="op">*</span> ptr<span class="op">)</span> <span class="op">:</span> instance<span class="op">(</span>ptr<span class="op">),</span> controller<span class="op">(</span>ptr <span class="op">?</span> ptr<span class="op">-&gt;</span>get_controller<span class="op">()</span> <span class="op">:</span> <span class="kw">nullptr</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>controller<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            controller<span class="op">-&gt;</span>add_weak_ref<span class="op">();</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>TWeakPtr<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        reset<span class="op">();</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    TWeakPtr<span class="op">(</span><span class="at">const</span> TWeakPtr<span class="op">&amp;</span> other<span class="op">)</span> <span class="op">:</span> instance<span class="op">(</span>other<span class="op">.</span>instance<span class="op">),</span> controller<span class="op">(</span>other<span class="op">.</span>controller<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>controller<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            controller<span class="op">-&gt;</span>add_weak_ref<span class="op">();</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> reset<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>controller<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>controller<span class="op">-&gt;</span>release_weak_ref<span class="op">()</span> <span class="op">&amp;&amp;</span> controller<span class="op">-&gt;</span>strong_count <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                <span class="kw">delete</span> controller<span class="op">;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>            controller <span class="op">=</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            instance <span class="op">=</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> is_valid<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> controller <span class="op">&amp;&amp;</span> controller<span class="op">-&gt;</span>strong_count <span class="op">&gt;</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    T<span class="op">*</span> get<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> is_valid<span class="op">()</span> <span class="op">?</span> instance <span class="op">:</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    T<span class="op">*</span> instance<span class="op">;</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    ReferenceController<span class="op">*</span> controller<span class="op">;</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<h3 id="breaking-cycles-in-practice">Breaking Cycles in Practice</h3>
+<p>By pairing strong pointers with weak pointers, engine systems enforce
+clean ownership hierarchies:</p>
+<ul>
+<li><strong>Parent to Child:</strong> The parent node retains ownership
+using a strong pointer (<code>TStrongPtr&lt;Node&gt;</code>), keeping
+the child alive as long as the parent exists.</li>
+<li><strong>Child to Parent:</strong> The child stores a
+<code>TWeakPtr&lt;Node&gt;</code> pointing back up the tree. Because the
+weak pointer does not increment the parent's strong count, removing the
+parent permits its reference count to reach zero.</li>
+<li><strong>Destruction:</strong> When the parent destructs, it releases
+its strong references to its children. With their strong counts now at
+zero, the children destruct cleanly. Any dangling weak pointers safely
+report <code>is_valid() == false</code> because the controller tracks
+that the active instance was destroyed.</li>
+</ul>
+<h3 id="performance-optimizations-for-game-engines">Performance
+Optimizations for Game Engines</h3>
+<p>To achieve maximum performance with custom reference counting,
+developers apply the following engine-level strategies:</p>
+<ul>
+<li><strong>Policy-Based Threading:</strong> Game developers template
+smart pointers with threading policies (e.g.,
+<code>SingleThreadedPolicy</code> vs. <code>MultiThreadedPolicy</code>).
+Gameplay code running entirely on the main thread uses non-atomic
+arithmetic, avoiding CPU bus-locking penalties.</li>
+<li><strong>Arena Allocators for Controllers:</strong> Instead of
+invoking global <code>malloc</code> or <code>delete</code> for
+<code>ReferenceController</code> instances, engines use pooled or slab
+allocators to keep counter blocks clustered together in cache
+memory.</li>
+<li><strong>Generational Indices as an Alternative:</strong> In
+high-churn systems like particle management or ECS, developers often
+replace weak pointers entirely with lightweight entity IDs combined with
+generational counters, sidestepping pointer-tracking overhead
+altogether.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

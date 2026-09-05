@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Resolution Scaling in Docked and Battery Modes - game-development</title>
+    <meta name="description" content="Dynamic resolution scaling (DRS) allows modern video games to maintain consistent frame rates across varying hardware states by adjusting rendering resolution on the fly. In hybrid systems such as the Nintendo Switch, the Steam Deck, and Windows-based ha">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/dynamic-resolution-scaling-in-docked-and-battery-modes">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dynamic Resolution Scaling in Docked and Battery Modes - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/dynamic-resolution-scaling-in-docked-and-battery-modes" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Dynamic resolution scaling (DRS) allows modern video games to maintain consistent frame rates across varying hardware states by adjusting rendering resolution on the fly. In hybrid systems such as the Nintendo Switch, the Steam Deck, and Windows-based ha" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="dynamic-resolution-scaling-in-docked-and-battery-modes">Dynamic
+Resolution Scaling in Docked and Battery Modes</h1>
+<p>Dynamic resolution scaling (DRS) allows modern video games to
+maintain consistent frame rates across varying hardware states by
+adjusting rendering resolution on the fly. In hybrid systems such as the
+Nintendo Switch, the Steam Deck, and Windows-based handhelds, power
+constraints shift dramatically between docked (AC power) and handheld
+(battery) modes. Implementing DRS that seamlessly adapts to these shifts
+requires game developers to integrate power-state event hooks, split
+resolution bounds, custom GPU frame-time budgets, and battery-aware
+scaling algorithms.</p>
+<h3 id="power-state-detection-and-hardware-profiling">Power-State
+Detection and Hardware Profiling</h3>
+<p>Game engines utilize platform-specific APIs to query whether a device
+is running on external power or internal battery. On systems like the
+Nintendo Switch, this is handled via platform SDK callbacks, whereas on
+PC handhelds, engines listen for system power events through Windows
+APIs or Linux sysfs interfaces.</p>
+<p>When a transition occurs, the engine updates its internal hardware
+profile. This profile accounts for changes in GPU core clocks, memory
+bandwidth, and thermal envelopes, prompting the DRS controller to reload
+its operating parameters rather than treating the hardware as a static
+performance target.</p>
+<h3 id="dual-resolution-and-frame-time-targets">Dual Resolution and
+Frame-Time Targets</h3>
+<p>Instead of using a single range, developers implement split bounds
+for docked and battery modes:</p>
+<ul>
+<li><strong>Resolution Bounds:</strong> Docked mode might scale
+dynamically between 1080p and 1440p (or 900p to 1080p), targeting an
+external display. Handheld mode drops to a range such as 540p to 720p,
+matching the smaller built-in screen where lower internal resolutions
+are less visually perceptible.</li>
+<li><strong>Frame-Time Budgets:</strong> On battery, hardware often
+reduces clock speeds to minimize heat and extend battery life. A docked
+mode target of 16.6ms (60 FPS) may be shifted to 33.3ms (30 FPS) or 25ms
+(40 FPS) on battery. The DRS algorithm recalculates its target budget
+immediately upon state change, adjusting resolution before frame pacing
+stutters occur.</li>
+</ul>
+<h3 id="adaptive-scaling-heuristics-and-thermal-offsets">Adaptive
+Scaling Heuristics and Thermal Offsets</h3>
+<p>DRS engines typically monitor the duration of the previous frame's
+GPU work. If the work exceeds the target threshold (e.g., 85% of the
+frame budget), the resolution scales downward; if headroom exists, it
+scales upward.</p>
+<p>In battery mode, this heuristic is often tuned more aggressively.
+Because handheld hardware is prone to thermal throttling over extended
+sessions, developers introduce thermal headroom offsets into the scaling
+formula. If internal temperatures approach safety thresholds, the DRS
+algorithm lowers resolution even if the current frame rate target is
+technically being met, reducing power draw and stabilizing clock
+speeds.</p>
+<h3 id="temporal-upscaling-integration">Temporal Upscaling
+Integration</h3>
+<p>Modern DRS implementations integrate directly with temporal upscalers
+such as AMD FidelityFX Super Resolution (FSR), Intel XeSS, or
+proprietary temporal anti-aliasing upsampling (TAAU) solutions. In
+docked mode, DRS determines the input resolution that feeds into an
+upscaler targeting 1080p or 4K. In battery mode, the DRS output feeds
+into an upscaler configured with lower input baselines and reduced
+sample counts, allowing the reconstruction phase itself to consume fewer
+compute cycles.</p>
+<h3 id="hysteresis-and-shift-dampening">Hysteresis and Shift
+Dampening</h3>
+<p>Abrupt resolution changes create distracting visual artifacts,
+especially on lower-resolution handheld panels where pixel crawling is
+obvious. To manage the lower performance headroom typical of battery
+operation, developers implement asymmetrical hysteresis.</p>
+<p>The DRS controller drops resolution rapidly within one to two frames
+when GPU load spikes to prevent dropped frames, but scales back up
+gradually using an exponential moving average over dozens of frames.
+When transitioning from docked to battery power while gameplay is
+active, the engine briefly dampens the scaling rate over a few seconds
+to smoothly step the resolution down to the new handheld target
+baseline.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

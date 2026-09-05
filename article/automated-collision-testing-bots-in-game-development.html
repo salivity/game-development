@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Collision Testing Bots in Game Development - game-development</title>
+    <meta name="description" content="Automated collision verification bots eliminate invisible level holes and collision leaks by programmatically traversing game geometry, stress-testing boundaries, and reporting geometry failures. Rather than relying entirely on manual quality assurance,">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/automated-collision-testing-bots-in-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Automated Collision Testing Bots in Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/automated-collision-testing-bots-in-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Automated collision verification bots eliminate invisible level holes and collision leaks by programmatically traversing game geometry, stress-testing boundaries, and reporting geometry failures. Rather than relying entirely on manual quality assurance," />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="automated-collision-testing-bots-in-game-development">Automated
+Collision Testing Bots in Game Development</h1>
+<p>Automated collision verification bots eliminate invisible level holes
+and collision leaks by programmatically traversing game geometry,
+stress-testing boundaries, and reporting geometry failures. Rather than
+relying entirely on manual quality assurance, developers deploy
+headless, autonomous agents powered by custom navigation graphs, physics
+raycasting, and boundary-probing algorithms. This guide breaks down the
+core architecture, traversal logic, failure-detection rules, and
+telemetry pipelines required to build a systematic collision-testing
+bot.</p>
+<h3 id="1-spatial-partitioning-and-map-representation">1. Spatial
+Partitioning and Map Representation</h3>
+<p>To systematically cover every surface, a bot cannot rely solely on
+the standard gameplay Navigation Mesh (NavMesh), as standard NavMeshes
+deliberately exclude non-walkable geometry, steep slopes, and boundary
+walls where collision leaks typically occur.</p>
+<p>Developers typically use two alternative approaches:</p>
+<ul>
+<li><strong>Dense Voxel Grids:</strong> The engine voxelizes the static
+geometry at a high resolution (e.g., 5–10 cm voxels). The bot uses this
+grid to discover all continuous surfaces, including ledges, props, and
+transition seams.</li>
+<li><strong>Surface Flood-Fill Algorithms:</strong> The bot starts at a
+known valid spawn coordinate and expands outward along polygon edges
+using a breadth-first search (BFS). Every unique static mesh polygon
+face is treated as a node, ensuring every walkable and semi-walkable
+surface is queued for verification.</li>
+</ul>
+<h3 id="2-traversal-and-surface-hugging-mechanics">2. Traversal and
+Surface-Hugging Mechanics</h3>
+<p>Once the traversal path is established, the bot must simulate
+realistic character controller movement to reproduce standard collision
+behaviors.</p>
+<ul>
+<li><strong>Wall-Scraping Logic:</strong> The bot walks parallel to
+every perimeter wall and barrier, continuously applying an inward
+directional force (bias) toward the wall. This forces the character
+capsule against seams between modular assets, which are the most common
+sources of collision gaps.</li>
+<li><strong>Movement Permutations:</strong> The agent does not simply
+walk; it loops through player movement states at regular intervals. This
+includes sprinting, crouching, jumping, sliding, and mantle attempts
+against corners and intersecting geometry.</li>
+<li><strong>Probe Raycasting:</strong> In addition to the physics
+capsule of the character controller, the bot casts a dense cone of
+raycasts or spherecasts outward in its direction of travel, directly
+downward, and orthogonally toward adjacent surfaces to detect micro-gaps
+before the physics engine resolves them.</li>
+</ul>
+<h3 id="3-hole-detection-criteria-and-trigger-conditions">3. Hole
+Detection Criteria and Trigger Conditions</h3>
+<p>Bots detect collision failures using explicit heuristic triggers:</p>
+<ul>
+<li><strong>Unbounded Negative Velocity / Kill-Z Triggers:</strong> If
+the bot's vertical position (<span class="math inline">\(Z\)</span> or
+<span class="math inline">\(Y\)</span> axis depending on the engine)
+drops below an expected threshold or accelerates downward unexpectedly
+without a jump command, a "fall through world" event is flagged.</li>
+<li><strong>Raycast Discrepancies:</strong> If a downward raycast hits a
+surface, but the character capsule’s bottom contact point fails to
+register a collision, the bot has likely slipped into an unclosed seam
+between two collision primitives.</li>
+<li><strong>Camera and Volume Clipping:</strong> Secondary collision
+spheres represent the game's camera or hitboxes. If these secondary
+volumes penetrate geometry while the primary controller is grounded, an
+occlusion or collision leak is registered.</li>
+<li><strong>Stuck States (Zero Displacement under Continuous
+Input):</strong> If the bot inputs forward velocity but experiences zero
+displacement over multiple frames while grounded, it flags an
+unintentional geometry trap or snagging collision.</li>
+</ul>
+<h3 id="4-headless-execution-and-performance-scaling">4. Headless
+Execution and Performance Scaling</h3>
+<p>Running collision bots in real-time within the full game engine is
+too slow for large-scale environments. Studios optimize this workflow
+through headless simulation:</p>
+<ul>
+<li><strong>Headless Server Instances:</strong> Bots run in dedicated
+client/server builds stripped of rendering, audio, post-processing, and
+dynamic animation updates, freeing system memory and compute power.</li>
+<li><strong>Decoupled Physics Ticks:</strong> The physics engine is run
+in non-real-time mode, allowing simulations to run at 5x to 20x actual
+game speed, bound only by CPU performance.</li>
+<li><strong>Distributed Cloud Testing:</strong> Entire levels are
+divided into sub-zones or grid cells. Multiple automated instances are
+launched across continuous integration (CI) pipelines, allowing full
+level scans to complete within minutes rather than days.</li>
+</ul>
+<h3 id="5-automated-telemetry-and-bug-reporting">5. Automated Telemetry
+and Bug Reporting</h3>
+<p>When a bot encounters a hole or collision defect, it automatically
+packages the event into a debug artifact:</p>
+<ol type="1">
+<li><strong>Transform Coordinates:</strong> The exact 3D world-space
+coordinates, surface normal vectors, and character orientation.</li>
+<li><strong>Deterministic Input Replay:</strong> A 5-second recorded
+buffer of deterministic inputs and state transitions that allow
+developers to immediately reproduce the fall-through.</li>
+<li><strong>Automated Ticketing Integration:</strong> The bot engine
+triggers an API call to project management tools (such as Jira),
+automatically attaching the level name, coordinates, screenshot from a
+virtual capture camera, and the assigned environmental artist
+responsible for that map section.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

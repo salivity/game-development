@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculating Mobile Game UA ROI Across Channels - game-development</title>
+    <meta name="description" content="Calculating user acquisition (UA) return on investment (ROI) in mobile game development requires tracking acquisition costs against player revenue across multiple paid and organic channels. This article outlines the essential formulas, metrics, and attri">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/calculating-mobile-game-ua-roi-across-channels">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Calculating Mobile Game UA ROI Across Channels - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/calculating-mobile-game-ua-roi-across-channels" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Calculating user acquisition (UA) return on investment (ROI) in mobile game development requires tracking acquisition costs against player revenue across multiple paid and organic channels. This article outlines the essential formulas, metrics, and attri" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="calculating-mobile-game-ua-roi-across-channels">Calculating
+Mobile Game UA ROI Across Channels</h1>
+<p>Calculating user acquisition (UA) return on investment (ROI) in
+mobile game development requires tracking acquisition costs against
+player revenue across multiple paid and organic channels. This article
+outlines the essential formulas, metrics, and attribution frameworks
+game publishers use to measure channel performance, analyze cohort
+lifetime value (LTV), and allocate marketing budgets effectively.</p>
+<h3 id="the-fundamental-roi-and-roas-formulas">The Fundamental ROI and
+ROAS Formulas</h3>
+<p>Mobile publishers evaluate UA success primarily through Return on Ad
+Spend (ROAS) and Return on Investment (ROI):</p>
+<ul>
+<li><strong>ROAS (%):</strong>
+<code>(Total Revenue Generated by Cohort / Total Ad Spend on Cohort) * 100</code></li>
+<li><strong>ROI (%):</strong>
+<code>((Total Revenue - Total Ad Spend) / Total Ad Spend) * 100</code></li>
+</ul>
+<p>A campaign breaks even when ROAS reaches 100%. If a publisher spends
+$10,000 on a channel and the acquired users generate $14,000 in revenue
+over a given period, the ROAS is 140% and the ROI is 40%.</p>
+<h3 id="step-1-measuring-total-acquisition-costs">Step 1: Measuring
+Total Acquisition Costs</h3>
+<p>To determine spend per channel, publishers calculate the effective
+Cost Per Install (eCPI) and Customer Acquisition Cost (CAC):</p>
+<ul>
+<li><strong>eCPI:</strong>
+<code>Total Spend on Channel / Total Attributed Installs</code></li>
+<li><strong>Costs Included:</strong> Ad spend, creative production
+costs, agency fees, and platform distribution fees.</li>
+</ul>
+<p>Publishers track spend across individual channels such as ad networks
+(AppLovin, Unity Ads), social media platforms (Meta, TikTok), search
+networks (Google App Campaigns), and influencer campaigns.</p>
+<h3 id="step-2-measuring-monetization-and-cohort-ltv">Step 2: Measuring
+Monetization and Cohort LTV</h3>
+<p>Mobile game monetization generally comes from three streams: In-App
+Purchases (IAP), In-App Advertising (IAA), and Subscriptions. Publishers
+track these revenue streams using cohort analysis, grouping users by
+their install date and acquisition channel.</p>
+<p>Because players generate revenue over months or years, publishers
+project and track LTV milestones over standardized time windows:</p>
+<ul>
+<li><strong>Day 0 (D0) ROAS:</strong> Measures immediate revenue to
+evaluate initial campaign quality.</li>
+<li><strong>Day 7 (D7) / Day 30 (D30) ROAS:</strong> Benchmark metrics
+to determine early payback velocity.</li>
+<li><strong>Day 180 / Day 360 ROAS:</strong> Long-term maturity points
+where games reach full profitability.</li>
+</ul>
+<h3 id="step-3-implementing-attribution-and-cross-channel-tracking">Step
+3: Implementing Attribution and Cross-Channel Tracking</h3>
+<p>Accurately mapping revenue back to the originating channel relies on
+specialized attribution tools:</p>
+<ul>
+<li><strong>Mobile Measurement Partners (MMPs):</strong> Tools like
+AppsFlyer, Adjust, or Singular aggregate cost data from ad networks and
+match it with downstream in-game purchase and ad revenue events via SDK
+integration.</li>
+<li><strong>Privacy Frameworks:</strong> Publishers use Apple’s
+SKAdNetwork (SKAN) for iOS and Google's Privacy Sandbox for Android.
+These frameworks require conversion value schemas to model early user
+behavior and predict long-term revenue under privacy limitations.</li>
+<li><strong>Media Mix Modeling (MMM):</strong> Macro-level statistical
+modeling used alongside deterministic attribution to quantify the
+efficiency of channels with limited tracking visibility.</li>
+</ul>
+<h3 id="step-4-comparing-cross-channel-performance">Step 4: Comparing
+Cross-Channel Performance</h3>
+<p>Channels deliver different player types and monetization profiles.
+Publishers compare performance using normalized metrics:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Channel Type</th>
+<th style="text-align: left;">Typical Strength</th>
+<th style="text-align: left;">Primary Metric Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Social (Meta,
+TikTok)</strong></td>
+<td style="text-align: left;">High targeting precision, scale</td>
+<td style="text-align: left;">D7/D30 IAP ROAS</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Search (Google App
+Campaigns)</strong></td>
+<td style="text-align: left;">High user intent</td>
+<td style="text-align: left;">Retention and high LTV</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ad Networks (Unity,
+AppLovin)</strong></td>
+<td style="text-align: left;">High volume of active gamers</td>
+<td style="text-align: left;">Fast IAA monetization</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Influencers /
+Programmatic</strong></td>
+<td style="text-align: left;">Brand awareness and viral reach</td>
+<td style="text-align: left;">Blended organic uplift</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-5-accounting-for-organic-lift-and-k-factor">Step 5:
+Accounting for Organic Lift and K-Factor</h3>
+<p>Paid UA often boosts organic visibility by improving store ranking.
+Publishers calculate the organic multiplier (K-Factor) to determine the
+blended impact of their marketing spend:</p>
+<ul>
+<li><strong>Blended eCPI:</strong>
+<code>Total Marketing Spend / (Paid Installs + Organic Installs)</code></li>
+</ul>
+<p>When a paid campaign drives incremental organic downloads, the
+blended eCPI decreases, shortening the payback period and increasing
+total channel ROI.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

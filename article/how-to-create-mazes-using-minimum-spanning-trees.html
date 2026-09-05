@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Create Mazes Using Minimum Spanning Trees - game-development</title>
+    <meta name="description" content="Procedural maze generation is a fundamental technique in game development used to build dynamic, replayable levels without manual level design. By translating a grid into a mathematical graph, developers leverage minimum spanning tree (MST) algorithms to">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-to-create-mazes-using-minimum-spanning-trees">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Create Mazes Using Minimum Spanning Trees - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-to-create-mazes-using-minimum-spanning-trees" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Procedural maze generation is a fundamental technique in game development used to build dynamic, replayable levels without manual level design. By translating a grid into a mathematical graph, developers leverage minimum spanning tree (MST) algorithms to" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-create-mazes-using-minimum-spanning-trees">How to Create
+Mazes Using Minimum Spanning Trees</h1>
+<p>Procedural maze generation is a fundamental technique in game
+development used to build dynamic, replayable levels without manual
+level design. By translating a grid into a mathematical graph,
+developers leverage minimum spanning tree (MST) algorithms to carve out
+labyrinthine structures that guarantee full connectivity with zero
+isolated areas. This article details how developers represent game space
+as graphs, apply algorithms like Kruskal’s and Prim’s using randomized
+weights, and modify the resulting spanning trees to suit specific
+gameplay requirements.</p>
+<h3 id="1-representing-the-game-grid-as-a-graph">1. Representing the
+Game Grid as a Graph</h3>
+<p>To generate a maze using graph theory, developers first abstract the
+play area into an undirected graph composed of nodes (vertices) and
+connections (edges):</p>
+<ul>
+<li><strong>Nodes:</strong> Every individual cell or room in the grid
+represents a node.</li>
+<li><strong>Edges:</strong> The borders or walls separating adjacent
+cells represent potential pathways (edges).</li>
+<li><strong>Weights:</strong> Developers assign a randomized numerical
+weight to every edge. Randomizing edge weights ensures that every
+generated maze features a unique, unpredictable layout rather than a
+uniform geometric pattern.</li>
+</ul>
+<h3 id="2-choosing-and-applying-an-mst-algorithm">2. Choosing and
+Applying an MST Algorithm</h3>
+<p>A minimum spanning tree connects every node in a graph using the
+minimum possible total edge weight, inherently preventing closed loops
+(cycles). Two primary algorithms are used in game development:</p>
+<h4 id="randomized-kruskals-algorithm">Randomized Kruskal’s
+Algorithm</h4>
+<p>Kruskal’s algorithm processes edges globally:</p>
+<ol type="1">
+<li>All edges are added to a list and sorted in ascending order
+according to their randomized weights.</li>
+<li>Each cell begins in its own isolated set using a Disjoint Set Union
+(DSU) data structure.</li>
+<li>The algorithm iterates through the sorted edges. If the two cells
+connected by an edge belong to different sets, the edge is carved into a
+passage, and the sets are merged.</li>
+<li>If the cells are already in the same set, the edge is skipped to
+prevent creating a loop.</li>
+<li>This produces a maze with a uniform, branch-heavy structure where
+pathways expand evenly across the entire map.</li>
+</ol>
+<h4 id="randomized-prims-algorithm">Randomized Prim’s Algorithm</h4>
+<p>Prim’s algorithm grows a maze locally from a starting point:</p>
+<ol type="1">
+<li>A random starting cell is marked as visited, and its neighboring
+walls are added to an active list.</li>
+<li>The algorithm repeatedly selects the lowest-weight wall from the
+active list that connects to an unvisited cell.</li>
+<li>The wall is removed, the adjacent cell is marked as visited, and its
+neighboring walls are added to the list.</li>
+<li>This process repeats until no unvisited cells remain.</li>
+<li>Prim’s algorithm tends to produce mazes with shorter dead ends and a
+more pronounced radial branching pattern outward from the origin
+point.</li>
+</ol>
+<h3 id="3-translating-the-tree-into-gameplay-geometry">3. Translating
+the Tree into Gameplay Geometry</h3>
+<p>Once the MST calculation is complete, the resulting mathematical tree
+is mapped back into the game engine's coordinate system:</p>
+<ul>
+<li><strong>Retained Edges:</strong> Paths where edges were accepted by
+the algorithm are marked as walkable floor tiles or open corridors.</li>
+<li><strong>Discarded Edges:</strong> Paths where edges were rejected
+remain as solid, impassable collision geometry (walls).</li>
+</ul>
+<h3 id="4-gameplay-adjustments-and-braiding">4. Gameplay Adjustments and
+Braiding</h3>
+<p>A pure minimum spanning tree creates a "perfect maze," meaning there
+is exactly one viable path between any two points and numerous dead
+ends. While mathematically sound, this can lead to frustrating
+navigation in action or exploration games.</p>
+<p>Developers adjust the layout by "braiding" the maze—intentionally
+removing a small percentage of the remaining walls to introduce
+alternative routes and loops. Additionally, developers can manipulate
+weight distributions (such as artificially lowering weights along a
+horizontal axis) to create directional bias, longer straightaways, or
+cavernous open areas to accommodate combat encounters and dynamic camera
+angles.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

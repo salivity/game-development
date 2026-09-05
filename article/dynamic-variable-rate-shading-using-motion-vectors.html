@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Variable Rate Shading Using Motion Vectors - game-development</title>
+    <meta name="description" content="Dynamic Variable Rate Shading (VRS) based on motion vectors allows modern game engines to optimize GPU rendering performance by reducing shading frequency in areas with high motion where the human eye cannot perceive fine details. This article examines t">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/dynamic-variable-rate-shading-using-motion-vectors">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dynamic Variable Rate Shading Using Motion Vectors - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/dynamic-variable-rate-shading-using-motion-vectors" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Dynamic Variable Rate Shading (VRS) based on motion vectors allows modern game engines to optimize GPU rendering performance by reducing shading frequency in areas with high motion where the human eye cannot perceive fine details. This article examines t" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="dynamic-variable-rate-shading-using-motion-vectors">Dynamic
+Variable Rate Shading Using Motion Vectors</h1>
+<p>Dynamic Variable Rate Shading (VRS) based on motion vectors allows
+modern game engines to optimize GPU rendering performance by reducing
+shading frequency in areas with high motion where the human eye cannot
+perceive fine details. This article examines the practical techniques
+used to implement this pipeline, including tile-based velocity
+reduction, perceptual thresholding, directional shading rate mapping,
+edge-aware masking, and temporal smoothing.</p>
+<h3 id="velocity-buffer-generation-and-tile-based-downsampling">Velocity
+Buffer Generation and Tile-Based Downsampling</h3>
+<p>Hardware-accelerated VRS (such as Tier 2 VRS in DirectX 12 and
+Vulkan) operates on discrete pixel blocks—typically 8x8 or 16x16 tiles.
+To determine the appropriate rate for each tile, the engine first
+extracts motion data from the screen-space velocity buffer (motion
+vector buffer) produced during the G-buffer or depth pre-pass.</p>
+<p>Because modern velocity buffers store high-precision per-pixel
+vectors, a compute shader performs a reduction step over each tile.
+Rather than relying solely on the average velocity, implementations
+evaluate both the maximum velocity and the variance of motion within the
+tile. High variance often indicates rotational movement or silhouette
+edges, which require finer shading rates to avoid undersampling
+artifacts.</p>
+<h3 id="perceptual-motion-thresholding">Perceptual Motion
+Thresholding</h3>
+<p>Once tile velocities are calculated, they are mapped against
+thresholds derived from human visual perception. When an object moves
+rapidly across the screen, motion blur and temporal persistence in the
+human eye reduce sensitivity to high-frequency surface detail.</p>
+<p>Developers establish velocity boundaries that correspond to specific
+shading rates:</p>
+<ul>
+<li><strong>Low velocity (0 to <span
+class="math inline">\(V_{\text{min}}\)</span>):</strong> Shaded at full
+rate (<span class="math inline">\(1\times1\)</span>) to preserve sharp
+geometric and material detail on stationary or slow-moving
+surfaces.</li>
+<li><strong>Moderate velocity (<span
+class="math inline">\(V_{\text{min}}\)</span> to <span
+class="math inline">\(V_{\text{mid}}\)</span>):</strong> Scaled down to
+balanced rates such as <span class="math inline">\(2\times1\)</span>,
+<span class="math inline">\(1\times2\)</span>, or <span
+class="math inline">\(2\times2\)</span>.</li>
+<li><strong>High velocity (<span class="math inline">\(&gt;
+V_{\text{mid}}\)</span>):</strong> Coarsely shaded at <span
+class="math inline">\(2\times4\)</span>, <span
+class="math inline">\(4\times2\)</span>, or <span
+class="math inline">\(4\times4\)</span>, drastically cutting pixel
+shader invocations where motion dominates visual perception.</li>
+</ul>
+<h3 id="directional-shading-rate-mapping">Directional Shading Rate
+Mapping</h3>
+<p>Motion is rarely isotropic. When a surface moves primarily along a
+single axis (for example, horizontal camera panning or vertical falling
+objects), details blur along the motion vector while remaining sharp
+perpendicular to it.</p>
+<p>Advanced implementations analyze the dominant direction of the motion
+vector:</p>
+<ul>
+<li>If <span class="math inline">\(|V_x| \gg |V_y|\)</span>, the engine
+assigns a <span class="math inline">\(2\times1\)</span> or <span
+class="math inline">\(4\times1\)</span> rate. This reduces horizontal
+shading frequency along the direction of blur while preserving vertical
+edge detail at full resolution.</li>
+<li>If <span class="math inline">\(|V_y| \gg |V_x|\)</span>, the engine
+applies a <span class="math inline">\(1\times2\)</span> or <span
+class="math inline">\(1\times4\)</span> rate, preserving horizontal
+clarity.</li>
+<li>If the motion is diagonal or multidirectional, isotropic rates like
+<span class="math inline">\(2\times2\)</span> or <span
+class="math inline">\(4\times4\)</span> are selected.</li>
+</ul>
+<h3 id="edge-and-depth-discontinuity-masking">Edge and Depth
+Discontinuity Masking</h3>
+<p>Applying aggressive VRS purely based on velocity can cause severe
+aliasing or pixelation along geometry silhouettes, especially during
+disocclusions. To prevent this, motion-vector VRS is combined with depth
+and normal heuristics.</p>
+<p>During the compute pass that writes the Shading Rate Image (SRI):</p>
+<ol type="1">
+<li><strong>Depth Gradients:</strong> The shader samples neighbor depth
+values within the tile. Large depth deltas signal a silhouette
+edge.</li>
+<li><strong>Normal Variance:</strong> Significant differences in surface
+normals indicate geometric contours.</li>
+<li><strong>Clamping:</strong> If an edge is detected within a tile, the
+shading rate is clamped back to <span
+class="math inline">\(1\times1\)</span> (or <span
+class="math inline">\(2\times1\)</span>), overriding the velocity-based
+reduction to ensure geometry borders remain crisp.</li>
+</ol>
+<h3 id="temporal-hysteresis-and-anti-flicker-filtering">Temporal
+Hysteresis and Anti-Flicker Filtering</h3>
+<p>Shading rates that switch abruptly frame-to-frame cause noticeable
+flickering or "shading popping." To counteract this, engines employ
+temporal hysteresis.</p>
+<p>The compute pass reads the previous frame's shading rate image using
+reprojected motion vectors. If a tile's newly calculated shading rate
+differs drastically from its historical rate, the engine dampens the
+transition, forcing the rate to step incrementally (e.g., moving from
+<span class="math inline">\(1\times1\)</span> to <span
+class="math inline">\(2\times2\)</span> via an intermediate step, or
+delaying the transition for a frame). Additionally, bias is usually
+given to finer rates: the system will quickly promote a tile to <span
+class="math inline">\(1\times1\)</span> when motion decelerates, but
+slowly demote it to <span class="math inline">\(2\times2\)</span> or
+<span class="math inline">\(4\times4\)</span> as motion builds.</p>
+<h3 id="shading-rate-image-sri-dispatch">Shading Rate Image (SRI)
+Dispatch</h3>
+<p>The final result of these passes is written into an SRI—a
+low-resolution, single-channel image where each texel represents the
+discrete shading rate of a corresponding tile. The graphics pipeline
+then binds this texture prior to the main forward lighting or deferred
+shading passes, dynamically instructing the rasterizer how many pixels
+to group per pixel shader execution.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

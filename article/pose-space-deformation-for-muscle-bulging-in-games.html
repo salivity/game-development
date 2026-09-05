@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose Space Deformation for Muscle Bulging in Games - game-development</title>
+    <meta name="description" content="Pose Space Deformation (PSD) is an advanced character-rigging technique used in game development to fix standard linear skinning artifacts, such as volume collapse or unnatural muscle bulging at extreme joint angles. By driving sculpted corrective shapes">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/pose-space-deformation-for-muscle-bulging-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Pose Space Deformation for Muscle Bulging in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/pose-space-deformation-for-muscle-bulging-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Pose Space Deformation (PSD) is an advanced character-rigging technique used in game development to fix standard linear skinning artifacts, such as volume collapse or unnatural muscle bulging at extreme joint angles. By driving sculpted corrective shapes" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="pose-space-deformation-for-muscle-bulging-in-games">Pose Space
+Deformation for Muscle Bulging in Games</h1>
+<p>Pose Space Deformation (PSD) is an advanced character-rigging
+technique used in game development to fix standard linear skinning
+artifacts, such as volume collapse or unnatural muscle bulging at
+extreme joint angles. By driving sculpted corrective shapes or secondary
+bone offsets as a direct function of joint rotations, technical
+animators can achieve film-quality organic deformation in real-time.
+This article outlines the step-by-step pipeline technical animators
+follow to identify deformation issues, sculpt corrective deltas,
+configure mathematical pose drivers, and implement optimized PSD
+networks inside modern game engines.</p>
+<h3
+id="1-identifying-the-joint-range-and-sculpting-corrective-shapes">1.
+Identifying the Joint Range and Sculpting Corrective Shapes</h3>
+<p>Standard Linear Blend Skinning (LBS) calculates vertex transforms
+along linear vectors between bones, often causing severe "candy-wrapper"
+twisting at the wrists or volume loss and pinched geometry at extreme
+elbow and knee bends.</p>
+<p>To counteract this, technical animators:</p>
+<ul>
+<li>Rotate the joint to the problematic extreme angle (for example, an
+elbow flexed to 140 degrees).</li>
+<li>Extract the deformed mesh in this pose and duplicate it into a
+sculpting package (such as ZBrush or Maya's Sculpting Tools).</li>
+<li>Sculpt the mesh to restore realistic anatomy, such as the natural
+bulging of the bicep, the flattening of compressed soft tissue in the
+inner fold, and the sharp protrusion of the olecranon (elbow bone).</li>
+<li>Compute the delta: The sculpted geometry is subtracted from the
+skin-deformed geometry to isolate only the changes required for that
+specific pose, creating a corrective blend shape (morph target).</li>
+</ul>
+<h3 id="2-setting-up-pose-readers-and-invariant-coordinate-spaces">2.
+Setting Up Pose Readers and Invariant Coordinate Spaces</h3>
+<p>To trigger the corrective shape accurately, the character rig must
+measure the joint’s orientation reliably, independent of the character's
+movement in the world.</p>
+<ul>
+<li><strong>Swing-Twist Decomposition:</strong> Technical animators
+decompose rotational transforms into separate "swing"
+(flexion/extension, abduction/adduction) and "twist" (axial rotation)
+components using quaternions. This prevents gimbal lock and stops
+unwanted activations during pure axial twisting.</li>
+<li><strong>Local Space Evaluation:</strong> The driver orientation is
+evaluated relative to a parent reference transform (e.g., the upper arm
+measuring the forearm's rotation relative to the humerus), ensuring the
+system triggers regardless of overall character orientation.</li>
+</ul>
+<h3 id="3-radial-basis-function-rbf-interpolation">3. Radial Basis
+Function (RBF) Interpolation</h3>
+<p>Rather than relying on simple one-dimensional scalar drivers that map
+a single axis angle directly to a blend shape, production-ready PSD
+systems implement Radial Basis Function (RBF) networks.</p>
+<ul>
+<li><strong>Multi-Dimensional Pose Spaces:</strong> RBF solvers plot
+poses as points on a multi-dimensional sphere. Animators can define
+multiple targets across a range of motion (e.g., elbow bent 90 degrees
+with arm neutral, elbow bent 90 degrees with arm pronated, elbow bent
+140 degrees).</li>
+<li><strong>Smooth Falloff:</strong> When the joint moves, the RBF
+evaluates the distance between the current orientation and the
+configured target poses. It calculates smooth, normalized weights using
+Gaussian or multiquadric kernels, blending corrective shapes seamlessly
+as the joint transitions between poses without abrupt popping.</li>
+</ul>
+<h3 id="4-engine-implementation-and-optimization">4. Engine
+Implementation and Optimization</h3>
+<p>Once finalized in the digital content creation (DCC) tool, the PSD
+network must be optimized for real-time execution in the game engine
+(such as Unreal Engine or Unity).</p>
+<ul>
+<li><strong>Morph-Based PSDs:</strong> In engines like Unreal Engine,
+the built-in Pose Driver node accepts joint inputs, evaluates RBF
+algorithms inside the Animation Graph, and feeds resulting scalar curves
+directly into Morph Targets.</li>
+<li><strong>Bone-Driven PSDs (Joint-Based Correctives):</strong> For
+resource-constrained platforms (such as mobile or dense crowd systems)
+where vertex morph targets are too computationally expensive to
+calculate on the GPU, animators translate corrective shapes into
+auxiliary "helper bones." An RBF solver drives the transform, rotation,
+or scale of these helper joints, pushing the vertices to simulate the
+muscle bulge using standard GPU skinning instead of morph targets.</li>
+<li><strong>Delta Inversion:</strong> Modern game engines calculate
+inverted deltas on the fly, allowing the corrective shape to be applied
+prior to skinning, which prevents double-transformation bugs when
+characters inherit complex procedural secondary motion.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

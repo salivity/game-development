@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inheritance vs Composition Performance in Game Dev - game-development</title>
+    <meta name="description" content="Deep class inheritance and composition patterns represent two fundamentally different architectural paradigms in gameplay programming, each with starkly contrasting impacts on hardware performance. While deep inheritance relies on polymorphic object-orie">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/inheritance-vs-composition-performance-in-game-dev">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Inheritance vs Composition Performance in Game Dev - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/inheritance-vs-composition-performance-in-game-dev" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Deep class inheritance and composition patterns represent two fundamentally different architectural paradigms in gameplay programming, each with starkly contrasting impacts on hardware performance. While deep inheritance relies on polymorphic object-orie" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="inheritance-vs-composition-performance-in-game-dev">Inheritance
+vs Composition Performance in Game Dev</h1>
+<p>Deep class inheritance and composition patterns represent two
+fundamentally different architectural paradigms in gameplay programming,
+each with starkly contrasting impacts on hardware performance. While
+deep inheritance relies on polymorphic object-oriented hierarchies that
+introduce significant CPU cache misses, virtual function overhead, and
+memory bloat, composition patterns—particularly data-oriented and Entity
+Component System (ECS) architectures—prioritize contiguous memory
+layouts, high cache locality, and predictable instruction pipelines.
+This article analyzes the primary performance bottlenecks associated
+with deep inheritance hierarchies in game development and contrasts them
+with the computational and memory efficiencies offered by
+composition.</p>
+<h3 id="dynamic-dispatch-and-vtable-overhead">Dynamic Dispatch and
+Vtable Overhead</h3>
+<p>Deep inheritance hierarchies rely heavily on runtime polymorphism
+implemented via virtual method tables (vtables). When an engine calls an
+overridden function on an object situated deep within an inheritance
+tree (e.g.,
+<code>Entity -&gt; Actor -&gt; Pawn -&gt; Character -&gt; PlayerCharacter</code>),
+the CPU must execute an indirect call.</p>
+<ol type="1">
+<li><strong>Pointer Indirection:</strong> The CPU reads the object's
+instance to find its vtable pointer, dereferences the pointer to access
+the vtable, and then indexes into the table to retrieve the target
+function's address before executing the instruction.</li>
+<li><strong>Branch Misprediction:</strong> Because gameplay systems
+often iterate over mixed collections of base pointers (such as arrays of
+<code>Actor*</code>), the target function changes frequently between
+iterations. Modern CPU branch predictors struggle to anticipate these
+dynamic addresses, leading to pipeline flushes that cost anywhere from
+10 to 20 CPU cycles per mispredicted call.</li>
+<li><strong>Inlining Impediment:</strong> Compilers cannot inline
+virtual functions whose targets are determined at runtime. Inlining
+eliminates call overhead and opens doors for further compiler
+optimizations such as constant folding and loop vectorization. Deep
+inheritance structures severely limit the compiler’s ability to perform
+these optimizations.</li>
+</ol>
+<p>In contrast, composition patterns that utilize flat component arrays
+or static polymorphism (such as CRTP or templates) invoke non-virtual,
+direct function calls. This predictability allows compilers to
+aggressively inline critical gameplay logic and keeps the CPU
+instruction pipeline full.</p>
+<h3 id="cache-locality-and-memory-access-patterns">Cache Locality and
+Memory Access Patterns</h3>
+<p>Modern game performance is predominantly constrained by memory
+latency rather than raw compute cycles. Fetching data from main memory
+(RAM) can take up to 200–300 CPU cycles, while fetching from the L1
+cache takes approximately 4–5 cycles.</p>
+<p>Deep inheritance structures inherently lead to an Object-Oriented
+Design (OOD) pattern known as Array of Structures (AoS). These
+objects:</p>
+<ul>
+<li><strong>Scatter Across the Heap:</strong> Instances are typically
+allocated dynamically via <code>new</code> or <code>malloc</code>,
+leading to heap fragmentation. Iterating over an array of object
+pointers causes the memory controller to pull disparate, non-contiguous
+cache lines from RAM.</li>
+<li><strong>Pollute Cache Lines:</strong> A deep hierarchy causes
+individual objects to grow large because they inherit all fields defined
+by every ancestor in the chain. When a system iterates over entities to
+update a single property (such as position), it loads an entire 64-byte
+cache line containing irrelevant inherited variables (like health,
+faction IDs, and animation states), evicting potentially useful data
+from L1/L2 caches.</li>
+</ul>
+<p>Composition-based patterns, particularly data-oriented designs,
+decouple data from identity using contiguous memory arrays:</p>
+<ul>
+<li><strong>Structure of Arrays (SoA):</strong> Systems store like
+components contiguously in memory (e.g., all
+<code>TransformComponent</code> data in a single array).</li>
+<li><strong>High Spatial Locality:</strong> When a movement system
+processes updates, every byte pulled into a 64-byte CPU cache line is
+strictly transformation data used in that frame's calculation, achieving
+near 100% cache utilization.</li>
+<li><strong>Hardware Pre-fetching:</strong> Sequential memory reads
+allow the CPU hardware prefetcher to anticipate upcoming data,
+pre-loading it into the L1/L2 cache ahead of execution and effectively
+hiding memory access latency.</li>
+</ul>
+<h3 id="object-bloat-and-memory-footprint">Object Bloat and Memory
+Footprint</h3>
+<p>Deep inheritance imposes an "all-or-nothing" memory cost. If a base
+class <code>Actor</code> contains transform data, replication handles,
+input buffers, and collision flags, every derived class inherits that
+entire memory footprint, regardless of whether it requires those
+features.</p>
+<ul>
+<li>A static environmental object (like a breakable crate) derived from
+a heavy base class wastes dozens or hundreds of bytes of unused memory
+per instance.</li>
+<li>Over thousands of active gameplay entities, this accumulated dead
+data bloats the game’s overall memory footprint and degrades overall
+system throughput.</li>
+</ul>
+<p>Composition patterns allocate state modularly. Entities function
+merely as lightweight IDs (often 32-bit or 64-bit integers), and
+components are attached conditionally:</p>
+<ul>
+<li>An interactive static chest only receives a
+<code>TransformComponent</code>, <code>MeshComponent</code>, and
+<code>HealthComponent</code>.</li>
+<li>It pays zero memory or execution cost for pathfinding, AI states, or
+player inputs.</li>
+<li>This granular memory allocation minimizes waste and increases the
+total number of simultaneous entities an engine can simulate within
+tight frame budgets (e.g., 16.6ms for 60 FPS or 8.3ms for 120 FPS).</li>
+</ul>
+<h3 id="architectural-scalability-and-parallelism">Architectural
+Scalability and Parallelism</h3>
+<p>Deep inheritance creates tight temporal and spatial coupling. Methods
+deep in the tree frequently read and modify state scattered throughout
+their parent classes. This design pattern poses significant barriers to
+multi-threading:</p>
+<ul>
+<li>Detecting data dependencies between sibling or parent classes is
+difficult, making it risky to process object updates across multiple CPU
+cores without introducing race conditions.</li>
+<li>Synchronization primitives (such as mutexes or atomic locks)
+introduced to make deep classes thread-safe introduce immense latency
+and lock contention.</li>
+</ul>
+<p>Composition organizes data by domain. Because components represent
+discrete chunks of isolated data, dependencies are explicit:</p>
+<ul>
+<li>A <code>PhysicsSystem</code> only reads <code>RigidBody</code> and
+<code>Transform</code> components.</li>
+<li>A <code>RenderSystem</code> only reads <code>Mesh</code> and
+<code>Transform</code> components. This strict separation allows modern
+job-based schedulers to execute systems in parallel across worker
+threads with minimal data contention and without requiring complex lock
+mechanisms.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

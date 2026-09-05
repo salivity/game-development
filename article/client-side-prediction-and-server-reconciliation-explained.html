@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client-Side Prediction and Server Reconciliation Explained - game-development</title>
+    <meta name="description" content="In fast-paced multiplayer games, even a millisecond of network delay can disrupt the player experience, causing noticeable lag and unresponsive controls. To combat this, game developers rely on two critical network synchronization techniques: client-side">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/client-side-prediction-and-server-reconciliation-explained">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Client-Side Prediction and Server Reconciliation Explained - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/client-side-prediction-and-server-reconciliation-explained" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In fast-paced multiplayer games, even a millisecond of network delay can disrupt the player experience, causing noticeable lag and unresponsive controls. To combat this, game developers rely on two critical network synchronization techniques: client-side" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1
+id="client-side-prediction-and-server-reconciliation-explained">Client-Side
+Prediction and Server Reconciliation Explained</h1>
+<p>In fast-paced multiplayer games, even a millisecond of network delay
+can disrupt the player experience, causing noticeable lag and
+unresponsive controls. To combat this, game developers rely on two
+critical network synchronization techniques: client-side prediction and
+server reconciliation. Together, these methods hide network latency by
+allowing the local game client to anticipate movement immediately, while
+the authoritative server silently validates and corrects the game state
+in the background.</p>
+<h3 id="the-problem-of-network-latency">The Problem of Network
+Latency</h3>
+<p>In a standard multiplayer setup, the server is the ultimate authority
+on the game state. Without optimization, when a player presses a key to
+move forward, that input must travel to the server, be processed, and
+then travel back to the client before the player sees their character
+move. This round-trip time (RTT) creates a frustrating delay between
+input and visual feedback, making fast-paced actions like shooting or
+dodging feel sluggish and unresponsive.</p>
+<h3 id="client-side-prediction-instant-feedback">Client-Side Prediction:
+Instant Feedback</h3>
+<p>Client-side prediction solves the input delay by bypassing the wait
+for server confirmation. When a player presses a button to move, the
+local game client immediately executes the movement and updates the
+player's position on their screen.</p>
+<p>By assuming the server will approve the input, the game feels
+instantly responsive. The client sends the input to the server with a
+timestamp or frame number, continuing to simulate the game locally as if
+it is running in real-time.</p>
+<h3 id="server-reconciliation-correcting-the-course">Server
+Reconciliation: Correcting the Course</h3>
+<p>While client-side prediction makes the game feel smooth, it can lead
+to discrepancies. For example, another player might have blocked your
+path, or an explosion might have knocked you back—events your local
+client did not yet know about when predicting your movement.</p>
+<p>To maintain fair gameplay, the server remains the authoritative
+source of truth. It processes the player's inputs in the order they were
+generated and sends the official, correct game state back to the
+client.</p>
+<p>Server reconciliation is the process where the client corrects its
+local state to match the server's authoritative state. When the client
+receives the server's update, it performs the following steps:</p>
+<ol type="1">
+<li><strong>Compare States:</strong> The client compares its historical
+predicted position at a specific timestamp with the authoritative
+position sent by the server for that same timestamp.</li>
+<li><strong>Detect Mismatches:</strong> If the positions match, the
+client does nothing and continues predicting. If there is a discrepancy,
+a mismatch is detected.</li>
+<li><strong>Rewind and Replay:</strong> The client snaps its character
+back to the server’s authoritative position at that past timestamp. It
+then rapidly replays all inputs that occurred <em>after</em> that
+timestamp up to the current frame.</li>
+</ol>
+<p>This correction happens in a fraction of a second, often smoothed out
+using interpolation so the player does not experience a jarring
+"teleportation" or "rubber-banding" effect.</p>
+<h3 id="minimizing-perceived-latency">Minimizing Perceived Latency</h3>
+<p>By combining client-side prediction and server reconciliation, game
+developers create an illusion of zero latency. The player experiences
+immediate control responsiveness through prediction, while the integrity
+of the game world is preserved through server reconciliation. This
+synergy is fundamental to modern online gaming, enabling the tight,
+competitive physics found in first-person shooters, fighting games, and
+racing simulators.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

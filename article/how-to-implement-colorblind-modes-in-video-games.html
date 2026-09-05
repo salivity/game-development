@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Implement Colorblind Modes in Video Games - game-development</title>
+    <meta name="description" content="Implementing colorblind modes is a vital step in modern accessible game development, ensuring that the roughly 8% of men and 0.5% of women with color vision deficiency (CVD) can fully experience a game. This article outlines the practical steps developer">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-to-implement-colorblind-modes-in-video-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Implement Colorblind Modes in Video Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-to-implement-colorblind-modes-in-video-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Implementing colorblind modes is a vital step in modern accessible game development, ensuring that the roughly 8% of men and 0.5% of women with color vision deficiency (CVD) can fully experience a game. This article outlines the practical steps developer" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-implement-colorblind-modes-in-video-games">How to
+Implement Colorblind Modes in Video Games</h1>
+<p>Implementing colorblind modes is a vital step in modern accessible
+game development, ensuring that the roughly 8% of men and 0.5% of women
+with color vision deficiency (CVD) can fully experience a game. This
+article outlines the practical steps developers take to design for
+colorblindness, including utilizing redundant visual cues, applying
+post-processing screen filters, offering customizable user interface
+(UI) palettes, and testing games using simulated vision tools.</p>
+<h2 id="understand-the-types-of-color-blindness">Understand the Types of
+Color Blindness</h2>
+<p>To design an effective colorblind mode, developers must first
+understand the three primary types of color vision deficiencies they
+need to accommodate:</p>
+<ul>
+<li><strong>Protanopia:</strong> Red-weakness/insensitivity, making reds
+look duller and harder to distinguish from greens.</li>
+<li><strong>Deuteranopia:</strong> Green-weakness/insensitivity, which
+is the most common form and makes greens indistinguishable from
+reds.</li>
+<li><strong>Tritanopia:</strong> Blue-weakness/insensitivity, a rarer
+form that makes it difficult to distinguish between blue and yellow, or
+green and violet.</li>
+</ul>
+<p>By targeting these three specific categories, developers can create
+tailored accessibility profiles within their games' settings.</p>
+<h2 id="implement-redundant-design-dont-rely-only-on-color">Implement
+Redundant Design (Don't Rely Only on Color)</h2>
+<p>The most effective way to implement colorblind accessibility is to
+design the game so that color is never the sole source of information.
+This concept is known as redundant design.</p>
+<p>If a game uses red to indicate enemies and green to indicate allies,
+developers should also use distinct shapes, icons, or text. For example,
+in a first-person shooter, enemies might have a triangle icon above
+their heads, while allies have a circle. In puzzle games, matching
+mechanics should rely on both color and unique symbols or patterns on
+the game pieces.</p>
+<h2 id="offer-dedicated-ui-preset-profiles">Offer Dedicated UI Preset
+Profiles</h2>
+<p>Many developers include specific toggle options in the accessibility
+menu for Protanopia, Deuteranopia, and Tritanopia. When activated, these
+presets alter the colors of critical UI elements, HUDs, map icons, and
+reticles to combinations that are easily distinguishable for players
+with that specific type of color blindness.</p>
+<p>Modern games often avoid applying a blanket filter to the entire game
+world, as this can distort the art style. Instead, developers
+selectively target the user interface, player names, and objective
+markers, which are the most critical elements for gameplay.</p>
+<h2 id="allow-full-palette-customization">Allow Full Palette
+Customization</h2>
+<p>The gold standard of colorblind accessibility is allowing players to
+fully customize individual color channels. Instead of relying on
+presets, games like <em>Overwatch</em> and <em>Battlefield</em> allow
+players to choose the exact color of their crosshairs, enemy outlines,
+ally indicators, and squad markers from a wide color wheel. This level
+of customization accommodates players with varying degrees of severity
+in their color blindness, as well as those with general low vision.</p>
+<h2 id="use-post-processing-screen-filters">Use Post-Processing Screen
+Filters</h2>
+<p>For smaller development teams or retrofitting older games,
+post-processing shaders are a common solution. Developers can apply a
+full-screen color-shifting filter that remaps problematic color
+spectrums into visible ones. While this can sometimes make the game look
+unnatural to players with standard vision, it is a highly efficient way
+to make a game playable without redesigning individual assets or UI
+elements.</p>
+<h2 id="test-with-simulation-tools-and-playtesters">Test with Simulation
+Tools and Playtesters</h2>
+<p>Developers integrate colorblind simulators directly into their
+development pipelines. Game engines like Unity and Unreal Engine offer
+built-in viewport views that simulate different types of CVD in
+real-time. Additionally, developers use software plugins and image
+editors to verify that level designs, maps, and menus remain readable.
+Ultimately, the most reliable testing method is hiring colorblind QA
+testers to play the game and provide direct feedback on the readability
+of the visual design.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

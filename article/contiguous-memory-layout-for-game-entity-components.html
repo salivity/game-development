@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contiguous Memory Layout for Game Entity Components - game-development</title>
+    <meta name="description" content="In performance-critical game development, utilizing contiguous array buffers to store entity components shifts architecture from traditional Object-Oriented Design toward Data-Oriented Design (DOD) and Entity Component Systems (ECS). This approach arrang">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/contiguous-memory-layout-for-game-entity-components">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Contiguous Memory Layout for Game Entity Components - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/contiguous-memory-layout-for-game-entity-components" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In performance-critical game development, utilizing contiguous array buffers to store entity components shifts architecture from traditional Object-Oriented Design toward Data-Oriented Design (DOD) and Entity Component Systems (ECS). This approach arrang" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="contiguous-memory-layout-for-game-entity-components">Contiguous
+Memory Layout for Game Entity Components</h1>
+<p>In performance-critical game development, utilizing contiguous array
+buffers to store entity components shifts architecture from traditional
+Object-Oriented Design toward Data-Oriented Design (DOD) and Entity
+Component Systems (ECS). This approach arranges component data
+sequentially in memory rather than scattering individual object
+instances across the heap. By grouping data by type in flat, contiguous
+memory buffers, developers unlock significant performance gains through
+maximized CPU cache utilization, elimination of pointer chasing,
+enhanced SIMD vectorization, reduced memory fragmentation, and
+predictable hardware prefetching.</p>
+<h3 id="maximizing-cpu-cache-locality">Maximizing CPU Cache
+Locality</h3>
+<p>Modern CPUs are significantly faster than system RAM. When data is
+requested, the CPU loads a block of memory—typically 64 bytes, known as
+a cache line—into ultra-fast L1/L2/L3 caches.</p>
+<p>In traditional object-oriented architectures, an entity is an object
+containing references or pointers to various components scattered
+randomly in memory. Iterating over these entities causes frequent cache
+misses, stalling the CPU while it waits for RAM retrieval (a phenomenon
+known as "pointer chasing").</p>
+<p>Contiguous array buffers ensure <strong>spatial locality</strong>.
+When a system iterates through a specific component type (such as
+<code>TransformComponent</code>), reading the first element
+automatically pulls adjacent elements into the same cache line. As a
+result, subsequent iterations execute with near-zero latency because the
+required data already resides in the L1 or L2 cache.</p>
+<h3 id="enabling-structure-of-arrays-soa-layouts">Enabling Structure of
+Arrays (SoA) Layouts</h3>
+<p>Contiguous buffers allow systems to adopt a Structure of Arrays (SoA)
+approach instead of an Array of Structures (AoS).</p>
+<ul>
+<li><strong>Array of Structures (AoS):</strong> Storing complete entity
+objects sequentially means that updating a single property (like
+position) still forces the CPU to load unused data (like health,
+inventory, or render mesh IDs) into the cache line.</li>
+<li><strong>Structure of Arrays (SoA):</strong> Storing individual
+component fields or single component types in dedicated contiguous
+arrays ensures that 100% of the loaded cache line contains relevant
+data.</li>
+</ul>
+<p>Systems that process physics, transforms, or animations only read and
+write the exact streams of memory required, avoiding bandwidth waste and
+cache pollution.</p>
+<h3 id="simd-and-vectorization-capabilities">SIMD and Vectorization
+Capabilities</h3>
+<p>Contiguous memory alignment is a prerequisite for utilizing Single
+Instruction, Multiple Data (SIMD) instructions (such as SSE, AVX, or ARM
+NEON).</p>
+<p>When component attributes—such as positions, velocities, or bounding
+spheres—are stored sequentially and properly aligned, compilers can
+automatically vectorize mathematical operations, or developers can
+directly use SIMD intrinsics. This allows a CPU core to process 4, 8, or
+16 component updates simultaneously within a single clock cycle,
+drastically improving throughput for systems handling tens of thousands
+of dynamic entities.</p>
+<h3 id="hardware-prefetching-optimization">Hardware Prefetching
+Optimization</h3>
+<p>Modern processors feature hardware prefetchers that analyze memory
+access patterns. When a system iterates through a contiguous memory
+buffer with a constant stride (linear access), the hardware prefetcher
+predicts future reads and pulls the next cache lines from RAM into the
+cache before the CPU explicitly requests them. This virtually eliminates
+memory latency during large-scale updates.</p>
+<h3
+id="minimizing-memory-fragmentation-and-allocation-overhead">Minimizing
+Memory Fragmentation and Allocation Overhead</h3>
+<p>Allocating thousands of individual entity and component objects on
+the heap leads to memory fragmentation and runtime allocation overhead,
+which can trigger garbage collection pauses in managed languages or slow
+down heap managers in native environments.</p>
+<p>Contiguous array buffers are typically pre-allocated as large pools
+or flat buffers during initialization. Adding or removing a component
+operates in <span class="math inline">\(O(1)\)</span> time by swapping
+the target element with the last active element in the array
+(swap-and-pop), maintaining density without reallocating or fragmenting
+the system memory.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

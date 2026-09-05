@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrum vs Kanban in Game Pre-Production and Production - game-development</title>
+    <meta name="description" content="Game development shifts fundamentally as a project transitions from the exploratory chaos of pre-production to the disciplined execution of full production. Choosing between Scrum and Kanban across these two phases directly dictates how teams manage unpr">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/scrum-vs-kanban-in-game-pre-production-and-production">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Scrum vs Kanban in Game Pre-Production and Production - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/scrum-vs-kanban-in-game-pre-production-and-production" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Game development shifts fundamentally as a project transitions from the exploratory chaos of pre-production to the disciplined execution of full production. Choosing between Scrum and Kanban across these two phases directly dictates how teams manage unpr" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="scrum-vs-kanban-in-game-pre-production-and-production">Scrum vs
+Kanban in Game Pre-Production and Production</h1>
+<p>Game development shifts fundamentally as a project transitions from
+the exploratory chaos of pre-production to the disciplined execution of
+full production. Choosing between Scrum and Kanban across these two
+phases directly dictates how teams manage unpredictability, asset
+pipelines, and delivery schedules. This article explores the operational
+differences between Scrum and Kanban in both pre-production and
+production, detailing how cadence, scope management, estimation, and
+workflow tracking diverge in each framework.</p>
+<h3 id="cadence-and-planning-cycles">Cadence and Planning Cycles</h3>
+<p>In pre-production, the primary objective is finding "the fun" through
+rapid prototyping, concept art iteration, and technical de-risking.
+Operating Scrum during this phase requires fixed-length sprints
+(typically one to two weeks), sprint planning, and a defined sprint
+goal. Operationally, this structure often clashes with pre-production
+because prototypes frequently invalidate assumptions midweek, rendering
+committed sprint backlogs obsolete. Conversely, Kanban operates on a
+continuous flow model without fixed iterations. Pre-production teams
+using Kanban pull work on demand, allowing designers and engineers to
+discard failed experiments instantly and pull new tasks without waiting
+for the next sprint boundary.</p>
+<p>During full production, the cadence dynamic shifts. Production
+requires predictable output across engineering, art, animation, audio,
+and level design to hit publisher milestones or release dates. Scrum
+provides operational predictability through regular, synchronized sprint
+intervals. Teams commit to a clear package of deliverables every two to
+three weeks, establishing a dependable cadence for integration and
+internal playtests. Kanban in production abandons these fixed sync
+points, relying instead on continuous integration and just-in-time
+delivery. While efficient for modular asset delivery, Kanban without
+strict timeboxes can make cross-discipline alignment and synchronized
+milestone tracking more difficult across large teams.</p>
+<h3 id="scope-management-and-work-in-progress-wip">Scope Management and
+Work-in-Progress (WIP)</h3>
+<p>Scrum manages scope through sprint commitments. Once a sprint begins,
+the scope is ideally locked. In pre-production, locking scope is
+counterproductive, as immediate pivots are required based on prototype
+playtesting. Teams using Scrum in pre-production often suffer from
+persistent "spillover" and broken commitments. In production, however,
+locked sprint scope acts as a shield, preventing feature creep and
+shielding developers from ad-hoc managerial requests while they build
+core game systems.</p>
+<p>Kanban manages scope strictly through Work-in-Progress (WIP) limits
+per column or discipline rather than timeboxes. In pre-production, WIP
+limits prevent designers from starting five parallel mechanics before
+validating the first one. In production, WIP limits expose bottlenecks
+directly on the operational pipeline—such as 3D models piling up at the
+rigging or texturing stage. Operationally, Kanban forces the team to
+clear these pipeline chokepoints before pulling new assets into the
+board.</p>
+<h3 id="estimation-and-velocity-tracking">Estimation and Velocity
+Tracking</h3>
+<p>Estimation methods differ significantly between the two frameworks
+and their respective phases:</p>
+<ul>
+<li><strong>Scrum in Pre-production:</strong> Teams attempt to assign
+story points or hours to high-uncertainty research and development
+(R&amp;D) tasks. These estimates are routinely inaccurate because the
+technical or creative solution is not yet known, leading to volatile
+velocity metrics that offer little predictive value.</li>
+<li><strong>Kanban in Pre-production:</strong> Teams often forego
+granular estimation entirely. Instead, they track throughput and cycle
+time—measuring how long an experimental mechanic takes from concept to
+playable build—focusing on rapid feedback rather than velocity
+forecasts.</li>
+<li><strong>Scrum in Production:</strong> Estimation becomes highly
+reliable. Features are broken into well-understood user stories.
+Velocity stabilizes, allowing producers to construct burn-down and
+burn-up charts to accurately forecast whether milestones, beta phases,
+or submission deadlines will be met.</li>
+<li><strong>Kanban in Production:</strong> Teams measure lead time
+(request to completion) and cycle time (active development to
+completion). This operational metric is ideal for repetitive pipelines,
+such as producing 200 environment props or resolving thousands of QA bug
+tickets, but provides less structural data for long-term project-wide
+milestone forecasting.</li>
+</ul>
+<h3 id="discipline-alignment-and-handoffs">Discipline Alignment and
+Handoffs</h3>
+<p>Game development relies heavily on sequential dependencies: concept
+art informs 3D modeling, which informs rigging, animation, and engine
+implementation.</p>
+<p>Scrum handles these dependencies by building cross-functional
+"feature teams" containing all required disciplines. During production,
+a feature squad (e.g., combat or UI) plans and delivers a complete slice
+of functionality within the sprint. During pre-production,
+cross-functional Scrum teams work closely to build vertical slices,
+though individual specialists may face idle time if dependent technical
+foundations are not ready.</p>
+<p>Kanban treats dependencies as stages in a visual value stream. This
+makes Kanban operationally superior for functional, pipeline-based
+departments during production—such as dedicated art, QA, or localization
+teams. These teams operate as service desks, processing requests
+steadily regardless of feature sprint cycles. However, in
+pre-production, purely pipeline-based Kanban can cause siloed thinking
+if disciplines pass work over the wall instead of collaborating in real
+time to solve design challenges.</p>
+<h3 id="summary-of-operational-differences">Summary of Operational
+Differences</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Operational Factor</th>
+<th style="text-align: left;">Pre-Production: Scrum</th>
+<th style="text-align: left;">Pre-Production: Kanban</th>
+<th style="text-align: left;">Production: Scrum</th>
+<th style="text-align: left;">Production: Kanban</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Workflow Model</strong></td>
+<td style="text-align: left;">Iterative, fixed timeboxes (sprints)</td>
+<td style="text-align: left;">Continuous pull system</td>
+<td style="text-align: left;">Iterative, timeboxed delivery cycles</td>
+<td style="text-align: left;">Continuous flow with WIP limits</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Response to Change</strong></td>
+<td style="text-align: left;">High friction; pivots disrupt committed
+sprint goals</td>
+<td style="text-align: left;">Low friction; backlog can be reprioritized
+instantly</td>
+<td style="text-align: left;">Controlled; changes deferred to subsequent
+sprints</td>
+<td style="text-align: left;">Continuous; priorities shift as cards are
+pulled</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tracking Metric</strong></td>
+<td style="text-align: left;">Velocity (often unreliable due to
+R&amp;D)</td>
+<td style="text-align: left;">Cycle time and throughput</td>
+<td style="text-align: left;">Stabilized velocity, burn-down charts</td>
+<td style="text-align: left;">Lead time, cycle time, bottleneck
+detection</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Best Used For</strong></td>
+<td style="text-align: left;">Structured vertical slice validation</td>
+<td style="text-align: left;">Rapid prototyping and creative
+iteration</td>
+<td style="text-align: left;">Cross-functional gameplay and engine
+systems</td>
+<td style="text-align: left;">Asset pipelines (Art, Audio, Localization,
+QA)</td>
+</tr>
+</tbody>
+</table></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

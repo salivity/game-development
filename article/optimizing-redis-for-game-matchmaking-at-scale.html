@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizing Redis for Game Matchmaking at Scale - game-development</title>
+    <meta name="description" content="This article explores how game backend engineers optimize Redis memory caches to handle millions of short-lived matchmaking tickets simultaneously. Handling this workload requires minimizing the per-ticket memory footprint, preventing memory fragmentatio">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/optimizing-redis-for-game-matchmaking-at-scale">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Optimizing Redis for Game Matchmaking at Scale - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/optimizing-redis-for-game-matchmaking-at-scale" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article explores how game backend engineers optimize Redis memory caches to handle millions of short-lived matchmaking tickets simultaneously. Handling this workload requires minimizing the per-ticket memory footprint, preventing memory fragmentatio" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="optimizing-redis-for-game-matchmaking-at-scale">Optimizing Redis
+for Game Matchmaking at Scale</h1>
+<p>This article explores how game backend engineers optimize Redis
+memory caches to handle millions of short-lived matchmaking tickets
+simultaneously. Handling this workload requires minimizing the
+per-ticket memory footprint, preventing memory fragmentation, and
+ensuring low-latency retrieval. Key techniques include adopting compact
+serialization formats, using memory-dense data structures, shortening
+key namespaces, implementing precise Time-To-Live (TTL) strategies, and
+configuring Redis-level memory management.</p>
+<h3 id="efficient-data-structures-and-encoding">Efficient Data
+Structures and Encoding</h3>
+<p>Matchmaking systems often store metadata such as player MMR
+(Matchmaking Rating), latency profiles, team preferences, and ping
+metrics. How this data is structured within Redis directly affects
+memory consumption:</p>
+<ul>
+<li><strong>Hashes with Listpacks/Ziplists:</strong> Storing ticket
+attributes as Redis Hashes takes advantage of
+<code>hash-max-listpack-entries</code> (or
+<code>hash-max-ziplist-entries</code> in older versions). When a hash
+has few fields, Redis encodes it as a single contiguous memory block,
+eliminating much of the raw pointer overhead associated with standard
+hash tables.</li>
+<li><strong>Sorted Sets for Queues:</strong> When matchmaking involves
+searching across continuous parameters (such as MMR ranges), developers
+use Sorted Sets (<code>ZSET</code>). The player's MMR or queue entry
+timestamp serves as the score. This allows atomic range queries
+(<code>ZRANGEBYSCORE</code>) to pool compatible players while
+maintaining ordered ingestion.</li>
+<li><strong>Avoid Nested Schemas:</strong> Instead of maintaining
+multiple interrelated keys for a single ticket, flat schemas prevent
+redundant metadata allocations.</li>
+</ul>
+<h3 id="compact-binary-serialization">Compact Binary Serialization</h3>
+<p>JSON and XML introduce significant memory overhead due to repeated
+key strings, whitespace, and human-readable formatting. At a scale of
+millions of concurrent tickets, serialized text significantly bloats RAM
+usage.</p>
+<ul>
+<li><strong>MessagePack and Protocol Buffers:</strong> Replacing JSON
+with binary serialization formats like MessagePack, Protocol Buffers, or
+FlatBuffers reduces the payload size by 50% to 80%.</li>
+<li><strong>Bitfield Packing:</strong> Fixed-size attributes (e.g., role
+selections, region IDs, client versions) can be packed into raw
+bitfields or byte arrays, reducing fields that would otherwise require
+separate string or integer keys.</li>
+</ul>
+<h3 id="key-namespace-minimization">Key Namespace Minimization</h3>
+<p>Redis key names occupy valuable RAM. For millions of ephemeral
+tickets, long key names generate massive overhead relative to the actual
+payload:</p>
+<ul>
+<li><strong>Shortened Prefixes:</strong> Replace descriptive keys like
+<code>matchmaking:ticket:us-east:user:987654321</code> with compact
+prefixes like <code>m:t:987654321</code>.</li>
+<li><strong>Implied Context:</strong> Regional or game-mode contexts
+should be handled via database partitioning, Redis Cluster key hashing
+tags (e.g., <code>{na-east}:m:t:987654321</code>), or separate Redis
+instances rather than deeply nested key prefixes.</li>
+</ul>
+<h3 id="granular-expiration-and-eviction-policies">Granular Expiration
+and Eviction Policies</h3>
+<p>Matchmaking tickets are inherently short-lived, with life spans
+ranging from a few seconds to a few minutes. Without strict expiration
+controls, stale data degrades cluster capacity:</p>
+<ul>
+<li><strong>Aggressive TTL Assignment:</strong> Every ticket must be
+created with an explicit expiration using commands like
+<code>SET ... EX</code> or pipeline-bundled <code>EXPIRE</code>. TTLs
+are typically set to match or slightly exceed the client's matchmaking
+timeout.</li>
+<li><strong>Proactive Eviction Settings:</strong> Configure the Redis
+eviction policy to <code>volatile-ttl</code> or
+<code>volatile-lru</code>. If the cache approaches its memory limit
+(<code>maxmemory</code>), Redis removes keys with an explicit TTL first,
+prioritizing the eviction of tickets closest to natural expiration.</li>
+<li><strong>Active Defragmentation:</strong> Ephemeral workloads with
+high write-and-delete churn cause memory fragmentation over time.
+Enabling Redis's active defragmentation (<code>activedefrag yes</code>)
+prompts the memory allocator (typically Jemalloc) to reclaim sparse
+memory pages without requiring an instance restart.</li>
+</ul>
+<h3 id="pipeline-and-scripted-operations">Pipeline and Scripted
+Operations</h3>
+<p>Network round-trips can degrade throughput and leave half-processed
+tickets in memory during matchmaking spikes:</p>
+<ul>
+<li><strong>Lua Scripting and Functions:</strong> Logic for searching,
+matching, and removing tickets can be executed atomically inside Redis
+via Lua scripts. This eliminates race conditions where two matchmakers
+claim the same ticket, preventing orphaned memory artifacts.</li>
+<li><strong>Pipelining:</strong> Batching read and write operations for
+incoming tickets reduces network I/O and CPU context switching on the
+Redis host, leaving more system resources available for memory
+handling.</li>
+</ul>
+<h3 id="horizontal-scaling-with-sharding">Horizontal Scaling with
+Sharding</h3>
+<p>When ticket volumes exceed the memory or single-threaded limits of a
+standalone instance, developers partition workloads horizontally:</p>
+<ul>
+<li><strong>Redis Cluster and Hash Slots:</strong> Tickets can be
+distributed evenly across shards based on user IDs.</li>
+<li><strong>Functional Sharding:</strong> Separating matchmaking pools
+by game mode, platform, or geographic region into discrete Redis
+instances prevents a surge in one queue from starving memory resources
+across the entire game ecosystem.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

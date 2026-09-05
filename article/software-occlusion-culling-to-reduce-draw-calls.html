@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Occlusion Culling to Reduce Draw Calls - game-development</title>
+    <meta name="description" content="Software occlusion culling is a CPU-side rendering optimization that identifies and discards hidden geometry before issuing draw calls to the GPU. By rasterizing a simplified representation of the scene into a low-resolution CPU depth buffer, developers">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/software-occlusion-culling-to-reduce-draw-calls">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Software Occlusion Culling to Reduce Draw Calls - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/software-occlusion-culling-to-reduce-draw-calls" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Software occlusion culling is a CPU-side rendering optimization that identifies and discards hidden geometry before issuing draw calls to the GPU. By rasterizing a simplified representation of the scene into a low-resolution CPU depth buffer, developers" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="software-occlusion-culling-to-reduce-draw-calls">Software
+Occlusion Culling to Reduce Draw Calls</h1>
+<p>Software occlusion culling is a CPU-side rendering optimization that
+identifies and discards hidden geometry before issuing draw calls to the
+GPU. By rasterizing a simplified representation of the scene into a
+low-resolution CPU depth buffer, developers can test object bounding
+boxes against this buffer in real time. This article explores the
+architecture of software occlusion systems, detailing the generation of
+occluder meshes, SIMD-accelerated software rasterization, hierarchical
+depth tests, and how to integrate this pipeline to maximize rendering
+efficiency.</p>
+<h3 id="the-problem-with-hardware-occlusion-queries">The Problem with
+Hardware Occlusion Queries</h3>
+<p>Hardware occlusion queries rely on the GPU to render bounding boxes
+and report back how many pixels passed the depth test. While accurate,
+retrieving these results incurs significant CPU-GPU synchronization
+latency. If the CPU stalls waiting for results, frame rate drops. If the
+engine uses the results on the subsequent frame, visual artifacts
+(occlusion popping) can occur during rapid camera movements. Software
+occlusion solves this by performing the entire culling phase on the CPU,
+making visibility results available immediately within the same frame
+before draw calls are submitted.</p>
+<h3 id="1-selecting-and-preparing-occluders">1. Selecting and Preparing
+Occluders</h3>
+<p>Rasterizing complex high-poly geometry on the CPU is too expensive.
+Developers separate scene assets into two categories: occluders (objects
+that hide other things) and occludees (objects that might be
+hidden).</p>
+<ul>
+<li><strong>Occluder Geometry:</strong> Developers select large, opaque
+objects such as terrain, walls, and buildings. These meshes are
+simplified into low-polygon proxy representations, often consisting of
+tens to hundreds of triangles rather than thousands.</li>
+<li><strong>Occludee Geometry:</strong> Any potentially visible dynamic
+or static mesh is represented by its conservative bounding volume,
+typically an Axis-Aligned Bounding Box (AABB) or Oriented Bounding Box
+(OBB).</li>
+</ul>
+<h3 id="2-software-rasterization-of-the-depth-buffer">2. Software
+Rasterization of the Depth Buffer</h3>
+<p>The engine initializes a low-resolution software depth buffer on the
+CPU, commonly ranging from 256x144 to 480x270 pixels. The occluder proxy
+meshes are transformed into clip space using the current camera’s
+view-projection matrix and rasterized into this buffer.</p>
+<ul>
+<li><strong>Backface Culling and Clipping:</strong> Standard geometric
+clipping and backface culling discard non-visible polygons before pixel
+processing.</li>
+<li><strong>Depth Calculation:</strong> The software rasterizer computes
+the interpolated depth values (<span class="math inline">\(Z\)</span>)
+for each covered pixel. Unlike standard rendering, pixel colors,
+materials, and textures are ignored entirely; only the nearest depth
+value is written.</li>
+</ul>
+<h3 id="3-simd-and-multithreading-optimization">3. SIMD and
+Multithreading Optimization</h3>
+<p>Because CPU software rasterization can be computationally demanding,
+developers optimize the pipeline using data-oriented designs and modern
+processor vector instructions (such as SSE4.1, AVX2, or ARM Neon).</p>
+<ul>
+<li><strong>Vectorized Triangle Traversal:</strong> Engines test and
+rasterize groups of pixels simultaneously. Using AVX2, an algorithm can
+calculate edge functions and depth interpolation for 8 or 16 pixels per
+instruction.</li>
+<li><strong>Job System Distribution:</strong> The rasterization of
+occluders and the querying of occludees are divided into discrete jobs
+distributed across worker threads, executing in parallel with other
+engine tasks such as animation updates or physics simulation.</li>
+</ul>
+<h3 id="4-hierarchical-z-buffering-hi-z">4. Hierarchical Z-Buffering
+(Hi-Z)</h3>
+<p>To avoid sampling every pixel covered by an occludee’s bounding box,
+developers generate a Hierarchical Z-Buffer (a CPU depth
+mip-pyramid).</p>
+<ul>
+<li>Each subsequent mip level downsamples the depth buffer, storing the
+maximum (farthest) depth value of the corresponding <span
+class="math inline">\(2\times2\)</span> pixel footprint.</li>
+<li>When testing an object's bounding box, the system projects the box
+to screen space to calculate its 2D area.</li>
+<li>The system selects the mip level where the projected box covers
+roughly a <span class="math inline">\(2\times2\)</span> to <span
+class="math inline">\(4\times4\)</span> pixel region and compares the
+minimum depth of the bounding box against the maximum depth recorded in
+that mip level.</li>
+<li>If the nearest point of the bounding box is farther than the
+farthest recorded occluder depth in that cell, the entire object is
+guaranteed to be hidden and is culled instantly.</li>
+</ul>
+<h3 id="5-culling-integration-into-the-render-pipeline">5. Culling
+Integration into the Render Pipeline</h3>
+<p>The final step connects query results to the GPU command generation
+stage:</p>
+<ol type="1">
+<li><strong>Camera Setup:</strong> View-projection matrices are updated
+at the start of the frame.</li>
+<li><strong>Occluder Rasterization:</strong> Proxy meshes are rasterized
+into the CPU depth buffer.</li>
+<li><strong>Depth Pyramid Generation:</strong> The software Hi-Z buffer
+is generated.</li>
+<li><strong>Batch Bounding Box Queries:</strong> The engine iterates
+through the scene's spatial partition structures (such as BVH or
+Octrees). Hierarchical volumes that fail the occlusion test cull entire
+branches of the scene graph at once.</li>
+<li><strong>Command Generation:</strong> Only instances whose bounding
+boxes pass both the view-frustum test and the occlusion test are
+appended to the GPU draw list or indirect draw buffers.</li>
+</ol>
+<p>By leveraging low-resolution rasterization, conservative proxies, and
+SIMD-driven depth tests, software occlusion culling eliminates
+non-visible objects prior to the rendering stage, heavily reducing GPU
+vertex processing, fragment shading, and draw call overhead.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

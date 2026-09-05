@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesh Decimation Techniques for Game Backgrounds - game-development</title>
+    <meta name="description" content="Game developers frequently optimize highly detailed, high-polygon 3D models into lightweight background assets to maintain optimal game performance. This process, known as mesh decimation, reduces the polygon count of a 3D model while preserving its orig">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/mesh-decimation-techniques-for-game-backgrounds">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mesh Decimation Techniques for Game Backgrounds - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/mesh-decimation-techniques-for-game-backgrounds" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Game developers frequently optimize highly detailed, high-polygon 3D models into lightweight background assets to maintain optimal game performance. This process, known as mesh decimation, reduces the polygon count of a 3D model while preserving its orig" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="mesh-decimation-techniques-for-game-backgrounds">Mesh Decimation
+Techniques for Game Backgrounds</h1>
+<p>Game developers frequently optimize highly detailed, high-polygon 3D
+models into lightweight background assets to maintain optimal game
+performance. This process, known as mesh decimation, reduces the polygon
+count of a 3D model while preserving its original shape, silhouette, and
+visual appeal. This article explores the primary mesh decimation
+techniques used in the gaming industry, including quadric error metrics,
+edge collapse, vertex clustering, and automated retopology, explaining
+how each method helps streamline background asset optimization.</p>
+<h2 id="quadric-error-metrics-qem">Quadric Error Metrics (QEM)</h2>
+<p>Quadric Error Metrics is one of the most widely used algorithms for
+high-quality mesh simplification. This technique calculates the
+geometric distance (error) from any given point to the planes of the
+surrounding faces. By identifying areas where collapsing an edge will
+cause the least amount of visual distortion, the algorithm
+systematically removes polygons in flat or less-detailed areas while
+preserving critical geometric features like sharp edges and corners. QEM
+is the driving algorithm behind popular decimation tools in software
+like Blender, Maya, and Simplygon, making it ideal for background assets
+that still require a recognizable silhouette from a distance.</p>
+<h2 id="edge-collapse-and-half-edge-collapse">Edge Collapse (and
+Half-Edge Collapse)</h2>
+<p>Edge collapse is an iterative simplification technique where an edge
+connecting two vertices is collapsed into a single vertex, eliminating
+the edge and its two adjacent faces.</p>
+<ul>
+<li><strong>Full Edge Collapse:</strong> The two vertices are merged
+into a brand-new vertex positioned optimally between them.</li>
+<li><strong>Half-Edge Collapse:</strong> One vertex is pulled directly
+into the position of the other. This is highly beneficial for game
+engines because it preserves the original UV coordinate positions of the
+target vertex, minimizing texture stretching on the decimated background
+model.</li>
+</ul>
+<h2 id="vertex-clustering">Vertex Clustering</h2>
+<p>Vertex clustering is a highly efficient, grid-based decimation
+technique. The algorithm overlays a 3D grid (voxel grid) across the
+high-poly model. All vertices that fall within a single grid cell are
+clustered and merged into a single representative vertex, and the
+remaining topology is rebuilt. While vertex clustering can sometimes
+result in a loss of fine topological control, it is incredibly fast and
+robust. This makes it the go-to technique for generating extreme Level
+of Detail (LOD) models for objects positioned in the far background of a
+game scene where pixel-perfect precision is unnecessary.</p>
+<h2 id="automated-retopology-and-baking">Automated Retopology and
+Baking</h2>
+<p>For background assets that require clean, quad-dominant topology
+rather than randomized triangles, developers use automated retopology
+tools (such as ZBrush's ZRemesher or Autodesk's Reform). These tools
+analyze the flow of the high-poly mesh and generate a completely new,
+low-poly topology that follows the natural contours of the asset.</p>
+<p>Once the decimated low-poly mesh is generated using any of the above
+techniques, developers "bake" the high-poly surface details (like
+wrinkles, bevels, and textures) onto the low-poly model using normal
+maps. This combination of aggressive decimation and texture mapping
+allows background assets to look incredibly detailed while consuming
+minimal rendering budget.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

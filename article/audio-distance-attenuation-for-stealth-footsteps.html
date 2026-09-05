@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Distance Attenuation for Stealth Footsteps - game-development</title>
+    <meta name="description" content="In stealth games, maintaining clear auditory feedback for low-amplitude actions like crouching or sneaking is vital for player situational awareness. This article explains how game developers calculate and customize distance attenuation curves, establish">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/audio-distance-attenuation-for-stealth-footsteps">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Audio Distance Attenuation for Stealth Footsteps - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/audio-distance-attenuation-for-stealth-footsteps" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In stealth games, maintaining clear auditory feedback for low-amplitude actions like crouching or sneaking is vital for player situational awareness. This article explains how game developers calculate and customize distance attenuation curves, establish" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="audio-distance-attenuation-for-stealth-footsteps">Audio Distance
+Attenuation for Stealth Footsteps</h1>
+<p>In stealth games, maintaining clear auditory feedback for
+low-amplitude actions like crouching or sneaking is vital for player
+situational awareness. This article explains how game developers
+calculate and customize distance attenuation curves, establish reference
+radii, apply dynamic equalization, and leverage priority-based mixing to
+ensure quiet footsteps remain audible at close proximity without
+vanishing unnaturally or overwhelming the overall audio mix.</p>
+<h3 id="the-inverse-square-law-and-game-audio-limitations">The Inverse
+Square Law and Game Audio Limitations</h3>
+<p>In the physical world, sound intensity decreases according to the
+inverse-square law, dropping by approximately 6 decibels (dB) every time
+the distance between the listener and the source doubles:</p>
+<p><span class="math display">\[\text{Attenuation (dB)} = 20
+\log_{10}\left(\frac{d_0}{d}\right)\]</span></p>
+<p>While physically accurate, strictly applying a logarithmic
+inverse-square formula to game audio fails for stealth mechanics.
+Stealth footsteps are recorded or synthesized at a low baseline
+amplitude. If a pure logarithmic drop-off starts immediately from the
+source point (<span class="math inline">\(d_0\)</span>), the sound
+rapidly drops below the game’s perceptual noise floor within one or two
+virtual meters, rendering nearby enemy movements undetectable.</p>
+<h3 id="establishing-the-minimum-distance-inner-radius">Establishing the
+Minimum Distance (Inner Radius)</h3>
+<p>To counteract rapid volume loss, developers establish a minimum
+distance threshold (<span class="math inline">\(d_{\min}\)</span>),
+often called the inner radius or reference distance.</p>
+<p>Between the sound source and <span
+class="math inline">\(d_{\min}\)</span>, no distance attenuation is
+applied; the sound plays at 100% of its base stealth volume. By setting
+<span class="math inline">\(d_{\min}\)</span> to encompass the typical
+"tactical zone" (usually between 1 and 3 meters around an enemy or
+player), the subtle footstep sounds—such as fabric rustle, heel-strike,
+or surface shifting—retain their native loudness throughout the
+immediate vicinity.</p>
+<h3 id="custom-piecewise-and-s-curves">Custom Piecewise and
+S-Curves</h3>
+<p>Past the inner radius, game engines (such as Unreal Engine and Unity)
+and audio middleware (such as Audiokinetic Wwise and FMOD) allow
+developers to override pure logarithmic decay in favor of custom
+curves:</p>
+<ol type="1">
+<li><strong>Logarithmic with Offset:</strong> Keeps the sound relatively
+flat near the source, then initiates a controlled drop-off once outside
+the immediate danger zone.</li>
+<li><strong>S-Curves (Sigmoid Functions):</strong> An S-shaped
+attenuation curve creates a gentle roll-off just outside the inner
+radius, steepens in the mid-range (where the player no longer needs
+exact spatial precision), and flattens out smoothly before reaching zero
+volume (<span class="math inline">\(d_{\max}\)</span>).</li>
+<li><strong>Piecewise Linear Curves:</strong> Audio designers map
+specific volume nodes manually:
+<ul>
+<li><strong>0m to 2m:</strong> 0 dB attenuation (fully audible).</li>
+<li><strong>2m to 5m:</strong> -3 dB (gentle drop, retaining critical
+spatial clues).</li>
+<li><strong>5m to 12m:</strong> -12 dB to -24 dB (steep drop into the
+background).</li>
+<li><strong>12m+:</strong> Complete silence to free up audio
+voices.</li>
+</ul></li>
+</ol>
+<h3
+id="frequency-dependent-attenuation-and-air-absorption">Frequency-Dependent
+Attenuation and Air Absorption</h3>
+<p>Audibility is not merely a matter of decibel levels; human hearing
+relies on frequency cues to detect motion. Low-amplitude sounds are
+primarily recognized by their high-frequency transients, such as the
+scuff of leather or crunch of dirt.</p>
+<p>Developers use low-pass filters mapped to distance attenuation curves
+to simulate air absorption. At close proximity (0 to <span
+class="math inline">\(d_{\min}\)</span>), the low-pass filter remains
+fully open (20 kHz cutoff), preserving the transient sharpness that
+makes quiet footsteps cut through background ambience. As distance
+increases, the cutoff frequency drops sharply, quickly stripping out the
+transient detail and making distant sounds feel diffused.</p>
+<h3 id="dynamic-range-ducking-and-focus-mixes">Dynamic Range Ducking and
+Focus Mixes</h3>
+<p>Even with a tailored attenuation curve, low-decibel footsteps can be
+masked by ambient environmental sounds like wind, rain, or distant
+gunfire. To resolve this, developers link attenuation systems with
+real-time dynamic sidechaining:</p>
+<ul>
+<li><strong>Listener-State Ducking:</strong> When the player enters a
+crouched or stealth state, the audio engine automatically lowers
+non-critical ambient busses by 2 dB to 4 dB, lowering the game's overall
+noise floor.</li>
+<li><strong>Proximity Ducking:</strong> When a stealth sound triggers
+within the inner radius, high-priority footstep events subtly duck
+competing low-priority ambient beds directly in the listener's immediate
+spatial channel.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

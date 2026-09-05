@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destructive QA Testing for Game Physics Systems - game-development</title>
+    <meta name="description" content="This article outlines how Quality Assurance (QA) leads design and execute destructive exploratory testing sessions to expose vulnerabilities in newly introduced video game physics engines. From scoping charters and isolating high-risk integration vectors">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/destructive-qa-testing-for-game-physics-systems">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Destructive QA Testing for Game Physics Systems - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/destructive-qa-testing-for-game-physics-systems" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article outlines how Quality Assurance (QA) leads design and execute destructive exploratory testing sessions to expose vulnerabilities in newly introduced video game physics engines. From scoping charters and isolating high-risk integration vectors" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="destructive-qa-testing-for-game-physics-systems">Destructive QA
+Testing for Game Physics Systems</h1>
+<p>This article outlines how Quality Assurance (QA) leads design and
+execute destructive exploratory testing sessions to expose
+vulnerabilities in newly introduced video game physics engines. From
+scoping charters and isolating high-risk integration vectors—such as
+collision detection, mass extremes, and frame-rate discrepancies—to
+leveraging debug tools and structured swarming, this guide details
+practical strategies to identify, reproduce, and document severe physics
+anomalies before production code stabilizes.</p>
+<h3 id="establish-targeted-test-charters">Establish Targeted Test
+Charters</h3>
+<p>Unstructured exploratory testing often yields redundant or unhelpful
+feedback. QA leads prevent this by using Session-Based Test Management
+(SBTM) to define focused charters. Rather than issuing a generic mandate
+to "break physics," leads assign specific mechanical vectors to
+individual testers or pairs.</p>
+<p>Common targeted charters include:</p>
+<ul>
+<li><strong>Volumetric Bounds and Tunneling:</strong> Attempting to
+force high-velocity rigidbodies through thin static colliders
+(Continuous Collision Detection validation).</li>
+<li><strong>Mass and Scale Extremes:</strong> Testing how the solver
+handles interactions between objects with extreme mass ratios (e.g., a
+10,000 kg actor colliding with a 0.01 kg prop).</li>
+<li><strong>Constraint and Joint Stability:</strong> Straining hinges,
+springs, and ragdoll joints to identify explosive physics loops or
+detached geometry.</li>
+<li><strong>State Transitions:</strong> Moving rapidly between physics
+states, such as ragdoll-to-animation recovery, swimming-to-falling, or
+mounting vehicles.</li>
+</ul>
+<h3 id="implement-swarming-and-timeboxing">Implement Swarming and
+Timeboxing</h3>
+<p>Destructive sessions are most effective when executed as timeboxed
+"bug bashes" or swarms lasting between 60 to 90 minutes. Extending
+beyond this window leads to tester fatigue and diminished
+creativity.</p>
+<p>QA leads typically divide the team into pairs consisting of a driver
+(interacting with the game) and a navigator (logging logs, noting
+environmental variables, and checking system telemetry). Pairing
+increases the likelihood of identifying non-deterministic bugs, as the
+navigator observes systemic patterns that the driver might miss during
+active play.</p>
+<h3 id="attack-critical-physics-vulnerabilities">Attack Critical Physics
+Vulnerabilities</h3>
+<p>Physics engines rely on approximations and mathematical trade-offs to
+maintain real-time performance. Leads direct testers to exploit the
+typical weak points of these approximations:</p>
+<h4 id="1-frame-rate-decoupling-and-fluctuations">1. Frame Rate
+Decoupling and Fluctuations</h4>
+<p>Physics engines often run on fixed timesteps, while rendering
+operates on variable frame rates. Leads instruct testers to artificially
+alter performance metrics:</p>
+<ul>
+<li>Artificially cap the client at 10–15 FPS while spawning high
+quantities of dynamic objects to test accumulator behavior.</li>
+<li>Unlock frame rates to extreme highs (144+ FPS) to check for
+floating-point calculation acceleration or physics simulation
+drift.</li>
+<li>Introduce sudden lag spikes (via network throttling or memory
+injection) precisely as high-impact collisions occur.</li>
+</ul>
+<h4 id="2-geometry-cramming-and-overlapping-colliders">2. Geometry
+Cramming and Overlapping Colliders</h4>
+<p>Testers place dynamic props inside enclosed spaces, such as
+elevators, closing doors, or corners between static meshes. By wedging
+objects together, testers force collision solvers into impossible
+resolve loops, resulting in catastrophic velocity generation, commonly
+referred to as "object launching."</p>
+<h4 id="3-infinite-stacking-and-micro-vibrations">3. Infinite Stacking
+and Micro-Vibrations</h4>
+<p>Testers create vertical stacks of dynamic items to evaluate how
+resting contact is resolved. Stable systems quickly transition resting
+bodies into a "sleep" state to save compute cycles. Flawed
+implementations fail to sleep, producing micro-vibrations that propagate
+through the stack until the simulation explodes.</p>
+<h3 id="equip-testers-with-debug-and-telemetry-tooling">Equip Testers
+with Debug and Telemetry Tooling</h3>
+<p>Destructive testing relies on specialized internal tooling to
+manipulate the simulation environment. Leads ensure testers have access
+to:</p>
+<ul>
+<li><strong>Physics Visualization Overlays:</strong> Real-time rendering
+of bounding boxes (AABBs), collision meshes, contact points, and normal
+vectors to verify whether visual meshes align with underlying physics
+assets.</li>
+<li><strong>Object Spawners and Velocity Injectors:</strong> Developer
+commands to spawn predefined batches of physics actors at set velocities
+and trajectories.</li>
+<li><strong>Time-Dilation Controls:</strong> The ability to pause,
+advance tick-by-tick, or slow time to isolate the exact moment of solver
+failure.</li>
+<li><strong>State Snapshots:</strong> Quick-save mechanisms that capture
+object transforms, momentum vectors, and internal states right before an
+interaction occurs, allowing rapid reproduction of non-deterministic
+anomalies.</li>
+</ul>
+<h3
+id="standardize-documentation-for-non-deterministic-bugs">Standardize
+Documentation for Non-Deterministic Bugs</h3>
+<p>Physics defects are notoriously difficult to reproduce due to
+millisecond timing differences and floating-point variations. QA leads
+mandate strict logging protocols during destructive sessions:</p>
+<ul>
+<li><strong>Deterministic Capture:</strong> Testers must run continuous
+background video recording with debug overlays visible (showing
+coordinates, current frame rate, and input history).</li>
+<li><strong>Physics State Dumps:</strong> Bug reports must include raw
+positional data, angular velocity, linear velocity, and active
+constraints at the moment of failure.</li>
+<li><strong>Seed Logging:</strong> If the engine relies on pseudo-random
+seeds for procedural impacts or ragdoll twitching, the session seed must
+be automatically logged directly into the defect tracker.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

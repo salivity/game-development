@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Post-Mortems in Game Development: Best Practices - game-development</title>
+    <meta name="description" content="A well-structured technical post-mortem provides game studios with an objective framework to diagnose architectural failures, resolve persistent technical debt, and safeguard future projects from repeating costly engineering mistakes. Rather than simply">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/technical-post-mortems-in-game-development-best-practices">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Technical Post-Mortems in Game Development: Best Practices - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/technical-post-mortems-in-game-development-best-practices" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="A well-structured technical post-mortem provides game studios with an objective framework to diagnose architectural failures, resolve persistent technical debt, and safeguard future projects from repeating costly engineering mistakes. Rather than simply" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1
+id="technical-post-mortems-in-game-development-best-practices">Technical
+Post-Mortems in Game Development: Best Practices</h1>
+<p>A well-structured technical post-mortem provides game studios with an
+objective framework to diagnose architectural failures, resolve
+persistent technical debt, and safeguard future projects from repeating
+costly engineering mistakes. Rather than simply cataloging production
+pain points, an effective post-mortem isolates systemic flaws in
+software design, infrastructure, and pipeline architecture. This guide
+covers the essential practices for organizing and executing technical
+post-mortems, transforming subjective development frustrations into
+measurable, enforceable engineering standards for subsequent titles.</p>
+<h3 id="1-enforce-a-blameless-systems-first-culture">1. Enforce a
+Blameless, Systems-First Culture</h3>
+<p>Architectural breakdowns rarely stem from individual negligence; they
+are symptoms of misaligned incentives, shifting technical requirements,
+or insufficient tooling.</p>
+<ul>
+<li><strong>Separate People from Code:</strong> Focus inquiries on
+<em>how</em> a system allowed an anti-pattern to propagate rather than
+<em>who</em> wrote it.</li>
+<li><strong>Focus on Interfaces and Boundaries:</strong> Analyze whether
+a failure was caused by poorly defined contracts between engine
+subsystems (e.g., rendering and physics) or ambiguous data ownership
+between gameplay systems.</li>
+<li><strong>Normalize Vulnerability:</strong> Encourage leads and senior
+engineers to openly present miscalculations in memory budgets,
+networking models, or asset serialization to establish technical
+transparency across the studio.</li>
+</ul>
+<h3 id="2-reconstruct-an-objective-technical-timeline">2. Reconstruct an
+Objective Technical Timeline</h3>
+<p>A chronological audit connects high-level design pivots to their
+downstream architectural impacts, revealing when and why architectural
+debt accumulated.</p>
+<ul>
+<li><strong>Anchor to Production Milestones:</strong> Map major code
+changes against design shifts, publisher milestones, engine version
+upgrades, and platform-specific certification deadlines.</li>
+<li><strong>Correlate Commits with Technical Debt:</strong> Identify
+periods where quick hacks displaced sustainable technical designs (often
+during pre-vertical slice or pre-gold crunch periods).</li>
+<li><strong>Document Technical Assumptions vs. Reality:</strong> Record
+the original assumptions made during pre-production (e.g., entity
+counts, concurrent players, asset streaming budgets) alongside the
+actual production values that stressed the architecture.</li>
+</ul>
+<h3 id="3-conduct-rigorous-root-cause-analysis-rca">3. Conduct Rigorous
+Root Cause Analysis (RCA)</h3>
+<p>Superficial conclusions such as "the inventory system was poorly
+optimized" prevent real architectural learning. Use root-cause
+frameworks like the "5 Whys" tailored to software engineering.</p>
+<ul>
+<li><strong>Trace Performance Degradations to Foundation
+Choices:</strong> If frame rates plummeted during late production,
+investigate whether the core threading model supported asynchronous
+workloads or if cache-unfriendly data structures choked the CPU.</li>
+<li><strong>Identify Missing Verification Steps:</strong> Ask why the
+architectural flaw was not caught earlier. Was there a lack of automated
+stress testing, inadequate profiling tools, or missing automated
+performance telemetry in CI/CD pipelines?</li>
+<li><strong>Examine Engine and Middleware Friction:</strong> Distinguish
+between custom codebase flaws and third-party engine limitations that
+were poorly integrated or pushed beyond their intended use cases.</li>
+</ul>
+<h3 id="4-categorize-architectural-failures-explicitly">4. Categorize
+Architectural Failures Explicitly</h3>
+<p>Structure the findings into clear technical domains to make the
+post-mortem searchable and actionable for future teams:</p>
+<ul>
+<li><strong>Coupling and Modularity:</strong> Instances where gameplay
+mechanics were hardcoded into core engine loops, preventing isolated
+testing or system reuse.</li>
+<li><strong>Data Flow and State Management:</strong> Failures in
+replication, race conditions, or unmanaged shared states across
+multithreaded systems.</li>
+<li><strong>Asset Pipelines and Tooling:</strong> Inefficiencies where
+content creation workflows bypass validation steps, leading to runtime
+memory leaks or corrupt asset dependencies.</li>
+<li><strong>Scalability and Hardware Limits:</strong> Bottlenecks
+related to platform-specific constraints, such as console memory pools,
+thermal throttling on handhelds, or bandwidth saturation in multiplayer
+topologies.</li>
+</ul>
+<h3 id="5-convert-lessons-into-architectural-guardrails">5. Convert
+Lessons into Architectural Guardrails</h3>
+<p>A post-mortem fails if it ends as a static document stored in an
+internal wiki. Architectural insights must be codified into actionable
+development constraints:</p>
+<ul>
+<li><strong>Adopt Architecture Decision Records (ADRs):</strong>
+Document the baseline architectural requirements for new systems,
+including the alternatives considered and why previous implementations
+were deprecated.</li>
+<li><strong>Automate Verification in CI/CD:</strong> Translate failure
+modes into automated checks. If circular dependencies caused build
+instability, add dependency-graph linters to the build pipeline. If
+memory budgets were blown, introduce automated performance benchmarks
+that fail pull requests when memory thresholds are breached.</li>
+<li><strong>Update Engine Boilerplates and Project Templates:</strong>
+Strip out known problematic patterns from the studio’s starter
+repositories and replace them with robust, battle-tested
+abstractions.</li>
+</ul>
+<h3 id="6-distribute-and-institutionalize-the-knowledge">6. Distribute
+and Institutionalize the Knowledge</h3>
+<p>Institutional memory degrades rapidly between long development
+cycles. To maintain technical knowledge across the entire studio:</p>
+<ul>
+<li><strong>Mandate Cross-Team Technical Readouts:</strong> Have
+technical leads present post-mortem findings directly to other project
+teams, emphasizing the structural warning signs they encountered.</li>
+<li><strong>Integrate Findings into Onboarding:</strong> Incorporate key
+post-mortem takeaways into technical onboarding materials so incoming
+engineers understand the historical rationale behind current
+architectural guidelines.</li>
+<li><strong>Review Guardrails During Pre-Production:</strong> Make
+review of past technical post-mortems a mandatory phase of
+pre-production for greenlit titles to validate proposed system designs
+against historical failure modes.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

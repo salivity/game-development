@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A* Pathfinding in Game Development: Best Practices - game-development</title>
+    <meta name="description" content="Implementing A pathfinding is a cornerstone of game AI, enabling characters to navigate complex virtual environments efficiently. This article explores the best practices for implementing and optimizing the A algorithm in game development. We cover essen">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/a-pathfinding-in-game-development-best-practices">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="A* Pathfinding in Game Development: Best Practices - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/a-pathfinding-in-game-development-best-practices" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Implementing A pathfinding is a cornerstone of game AI, enabling characters to navigate complex virtual environments efficiently. This article explores the best practices for implementing and optimizing the A algorithm in game development. We cover essen" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="a-pathfinding-in-game-development-best-practices">A* Pathfinding
+in Game Development: Best Practices</h1>
+<p>Implementing A* pathfinding is a cornerstone of game AI, enabling
+characters to navigate complex virtual environments efficiently. This
+article explores the best practices for implementing and optimizing the
+A* algorithm in game development. We cover essential data structures,
+heuristic choices, search space representations, and performance
+optimization techniques like time-slicing and hierarchical pathfinding
+to help you minimize CPU overhead while maintaining smooth gameplay.</p>
+<h2 id="1-optimize-the-open-list-with-a-priority-queue">1. Optimize the
+Open List with a Priority Queue</h2>
+<p>The A* algorithm repeatedly retrieves the node with the lowest total
+estimated cost (<span class="math inline">\(f = g + h\)</span>) from the
+"Open List." Using a standard list or array requires scanning every
+element, resulting in an inefficient <span
+class="math inline">\(O(N)\)</span> operation.</p>
+<ul>
+<li><strong>Best Practice:</strong> Implement the Open List as a
+<strong>Binary Heap</strong> or a <strong>Priority Queue</strong>. This
+reduces the insertion and extraction time complexity to <span
+class="math inline">\(O(\log N)\)</span>, which drastically improves
+performance when navigating large maps with many nodes.</li>
+</ul>
+<h2 id="2-select-the-correct-heuristic-function">2. Select the Correct
+Heuristic Function</h2>
+<p>The heuristic function (<span class="math inline">\(h\)</span>)
+estimates the cost from the current node to the goal. Choosing the wrong
+heuristic can cause the algorithm to inspect too many nodes or produce
+unrealistic paths.</p>
+<ul>
+<li><strong>Manhattan Distance:</strong> Use this for grid-based
+movement limited to four directions (up, down, left, right).</li>
+<li><strong>Diagonal (Octile) Distance:</strong> Use this for 8-way grid
+movement (including diagonals).</li>
+<li><strong>Euclidean Distance:</strong> Use this for free 2D or 3D
+movement where agents can move in any direction. Note that calculating
+square roots is computationally expensive; use squared Euclidean
+distance if absolute accuracy can be compromised for speed, though be
+aware this can make the heuristic inadmissible (overestimating the
+cost).</li>
+</ul>
+<h2 id="3-simplify-the-search-space-with-navigation-meshes-navmeshes">3.
+Simplify the Search Space with Navigation Meshes (NavMeshes)</h2>
+<p>Representing a game world as a massive grid of small tiles leads to
+an unnecessarily high node count, slowing down pathfinding.</p>
+<ul>
+<li><strong>Best Practice:</strong> Use <strong>Navigation Meshes
+(NavMeshes)</strong> instead of grids for 3D and complex 2D
+environments. A NavMesh simplifies the walkable terrain into a network
+of convex polygons. A* pathfinding then runs on the polygon connections,
+reducing the graph size from thousands of grid cells to dozens of
+polygons, resulting in near-instantaneous path generation.</li>
+</ul>
+<h2 id="4-implement-hierarchical-pathfinding-hpa">4. Implement
+Hierarchical Pathfinding (HPA*)</h2>
+<p>For large-scale maps, finding a path from one side of the world to
+the other in a single query is CPU-intensive.</p>
+<ul>
+<li><strong>Best Practice:</strong> Divide your world into a hierarchy
+of regions. Use <em><em>Hierarchical Pathfinding (HPA</em>)</em>* to
+first plan a high-level route between abstract regions or zones. Once
+the high-level path is established, use standard A* to calculate
+detailed, local paths within the current and upcoming zones. This
+localized approach prevents the algorithm from scanning the entire
+map.</li>
+</ul>
+<h2 id="5-use-asynchronous-pathfinding-and-time-slicing">5. Use
+Asynchronous Pathfinding and Time-Slicing</h2>
+<p>Running complex pathfinding queries synchronously on the main game
+thread can cause noticeable frame drops or stuttering when multiple
+agents request paths simultaneously.</p>
+<ul>
+<li><strong>Best Practice:</strong> Offload pathfinding calculations to
+background worker threads. If multi-threading is not an option, use
+<strong>time-slicing</strong>, where the pathfinding algorithm is given
+a maximum budget (e.g., 1–2 milliseconds) per frame. If a path cannot be
+resolved within that time limit, the algorithm pauses, saves its state,
+and resumes on the next frame.</li>
+</ul>
+<h2 id="6-cache-and-share-paths">6. Cache and Share Paths</h2>
+<p>In many games, multiple units often move toward the same destination
+(e.g., real-time strategy games). Calculating individual paths for every
+single unit is redundant.</p>
+<ul>
+<li><strong>Best Practice:</strong> Cache recently calculated paths so
+other units moving to the same destination can reuse them. For crowd
+movement, consider using <strong>Flow Fields (Vector Fields)</strong>.
+Instead of running A* for 100 individual units, a single flow field
+calculation generates a grid of direction vectors toward the target,
+which all units can follow simultaneously with minimal CPU cost.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

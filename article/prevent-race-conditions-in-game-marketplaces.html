@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prevent Race Conditions in Game Marketplaces - game-development</title>
+    <meta name="description" content="High-frequency concurrent purchases in live game development marketplaces create severe concurrency challenges, often leading to duplicate transactions, inventory overselling, and financial discrepancies. This article details the primary engineering stra">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/prevent-race-conditions-in-game-marketplaces">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Prevent Race Conditions in Game Marketplaces - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/prevent-race-conditions-in-game-marketplaces" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="High-frequency concurrent purchases in live game development marketplaces create severe concurrency challenges, often leading to duplicate transactions, inventory overselling, and financial discrepancies. This article details the primary engineering stra" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="prevent-race-conditions-in-game-marketplaces">Prevent Race
+Conditions in Game Marketplaces</h1>
+<p>High-frequency concurrent purchases in live game development
+marketplaces create severe concurrency challenges, often leading to
+duplicate transactions, inventory overselling, and financial
+discrepancies. This article details the primary engineering strategies
+used to eliminate race conditions on high-throughput marketplace
+servers. By implementing atomic operations, robust locking mechanisms,
+message queuing architectures, and strict idempotency, developers can
+maintain absolute data integrity under intense concurrent player
+demand.</p>
+<h3 id="1-atomic-database-operations-and-conditional-updates">1. Atomic
+Database Operations and Conditional Updates</h3>
+<p>The standard "read-modify-write" cycle—checking available inventory
+and then decrementing it in a separate step—is the most common source of
+race conditions. Replacing this pattern with atomic, single-query
+conditional updates ensures the database handles validation and
+modification in an isolated step.</p>
+<p>Instead of selecting the quantity first, execute an update guarded by
+the current state:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> marketplace_items </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> stock <span class="op">=</span> stock <span class="op">-</span> <span class="dv">1</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> item_id <span class="op">=</span> <span class="dv">12345</span> <span class="kw">AND</span> stock <span class="op">&gt;</span> <span class="dv">0</span>;</span></code></pre></div>
+<p>If the rows affected count returns <code>0</code>, the purchase fails
+immediately at the database level because stock was depleted before the
+operation executed. This eliminates the window of opportunity between
+the read and write states without requiring complex application-level
+state tracking.</p>
+<h3 id="2-optimistic-concurrency-control-occ">2. Optimistic Concurrency
+Control (OCC)</h3>
+<p>Optimistic Concurrency Control assumes conflicts are infrequent,
+making it ideal for scalable systems with distributed read replicas. In
+an OCC model, inventory records include a <code>version</code> integer
+or timestamp.</p>
+<p>When an order arrives, the application reads the record and its
+version:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> stock, version <span class="kw">FROM</span> marketplace_items <span class="kw">WHERE</span> item_id <span class="op">=</span> <span class="dv">12345</span>;</span></code></pre></div>
+<p>When writing back:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> marketplace_items </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> stock <span class="op">=</span> stock <span class="op">-</span> <span class="dv">1</span>, version <span class="op">=</span> version <span class="op">+</span> <span class="dv">1</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> item_id <span class="op">=</span> <span class="dv">12345</span> <span class="kw">AND</span> version <span class="op">=</span> <span class="ch">:current_version</span>;</span></code></pre></div>
+<p>If another worker modified the version in the interim, the update
+affects zero rows. The application can catch this failure and either
+abort the purchase or transparently retry the transaction against the
+updated state.</p>
+<h3 id="3-pessimistic-locking">3. Pessimistic Locking</h3>
+<p>For exceptionally scarce assets—such as unique non-fungible items,
+one-of-one skins, or limited auctions—pessimistic locking prevents any
+other process from interacting with the row until the transaction
+commits.</p>
+<p>In transactional SQL databases, this is managed via
+<code>SELECT ... FOR UPDATE</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span> <span class="kw">TRANSACTION</span>;</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> stock <span class="kw">FROM</span> marketplace_items <span class="kw">WHERE</span> item_id <span class="op">=</span> <span class="dv">12345</span> <span class="cf">FOR</span> <span class="kw">UPDATE</span>;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- Validate stock, insert audit log, bill user account</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">UPDATE</span> marketplace_items <span class="kw">SET</span> stock <span class="op">=</span> stock <span class="op">-</span> <span class="dv">1</span> <span class="kw">WHERE</span> item_id <span class="op">=</span> <span class="dv">12345</span>;</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">COMMIT</span>;</span></code></pre></div>
+<p>While pessimistic locking guarantees safety, it blocks concurrent
+reads and writes, increasing database latency and risking deadlocks if
+transactions touch multiple resources in inconsistent orders. It should
+be reserved strictly for high-value, strictly limited inventory.</p>
+<h3 id="4-distributed-in-memory-locks-redis--redlock">4. Distributed
+In-Memory Locks (Redis / Redlock)</h3>
+<p>Relational database locks create high connection overhead under
+massive spikes, such as limited-time flash sales. Offloading concurrency
+locks to an in-memory datastore like Redis reduces relational database
+strain.</p>
+<p>Using Redis, services acquire an explicit, short-lived lock per asset
+using the <code>SET resource_name my_random_value NX PX 30000</code>
+pattern:</p>
+<ul>
+<li><strong><code>NX</code></strong>: Sets the key only if it does not
+already exist.</li>
+<li><strong><code>PX</code></strong>: Sets an automatic expiration
+timeout to prevent permanent deadlocks if a server node crashes
+mid-transaction.</li>
+</ul>
+<p>Alternatively, Redis can manage inventory decrementing directly via
+atomic commands (<code>DECRBY</code>) or embedded Lua scripts. Because
+Redis processes commands sequentially on a single thread, atomic scripts
+check and decrement stock in memory before passing the verified purchase
+to the permanent database layer.</p>
+<h3 id="5-asynchronous-request-serialization-via-queues">5. Asynchronous
+Request Serialization via Queues</h3>
+<p>To fully insulate the marketplace from traffic surges, implement an
+event-driven queue using Apache Kafka, RabbitMQ, or AWS SQS. Rather than
+processing payments and stock adjustments synchronously over HTTP,
+purchase requests enter a partitioned FIFO (First-In, First-Out) message
+queue.</p>
+<ul>
+<li>Requests are partitioned using the unique <code>item_id</code> as
+the message key.</li>
+<li>All requests for a specific item route to the same partition.</li>
+<li>A single consumer process handles that partition, guaranteeing that
+concurrent checkout attempts for a given item are serialized into strict
+sequential order.</li>
+</ul>
+<p>This approach absorbs sudden traffic spikes, prevents write
+contention, and transforms database interactions from spiky concurrent
+writes into an orderly, linear stream.</p>
+<h3 id="6-idempotency-keys-to-prevent-duplicate-executions">6.
+Idempotency Keys to Prevent Duplicate Executions</h3>
+<p>Network timeouts and client-side retries often cause players to
+submit the same purchase request multiple times in milliseconds. Without
+idempotency, multiple distinct purchase requests can be accepted and
+processed concurrently.</p>
+<p>Every purchase request must include a client-generated UUID
+(idempotency key). When the server receives the request:</p>
+<ol type="1">
+<li>It records the key in a fast cache (e.g., Redis) with an
+<code>IN_PROGRESS</code> status.</li>
+<li>If a second request arrives with the same key, it is immediately
+rejected or held until the initial request finishes.</li>
+<li>Once settled, the transaction result is stored alongside the key,
+allowing any subsequent duplicate requests to return the existing
+receipt without running the transaction pipeline again.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

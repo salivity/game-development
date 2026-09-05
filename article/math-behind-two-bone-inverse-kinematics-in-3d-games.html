@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Behind Two-Bone Inverse Kinematics in 3D Games - game-development</title>
+    <meta name="description" content="Two-bone inverse kinematics (IK) is a foundational technique in 3D character animation used to realistically position limbs, such as arms and legs, toward a specific target. This article explores the mathematical principles governing this system, coverin">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/math-behind-two-bone-inverse-kinematics-in-3d-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Math Behind Two-Bone Inverse Kinematics in 3D Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/math-behind-two-bone-inverse-kinematics-in-3d-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Two-bone inverse kinematics (IK) is a foundational technique in 3D character animation used to realistically position limbs, such as arms and legs, toward a specific target. This article explores the mathematical principles governing this system, coverin" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="math-behind-two-bone-inverse-kinematics-in-3d-games">Math Behind
+Two-Bone Inverse Kinematics in 3D Games</h1>
+<p>Two-bone inverse kinematics (IK) is a foundational technique in 3D
+character animation used to realistically position limbs, such as arms
+and legs, toward a specific target. This article explores the
+mathematical principles governing this system, covering distance
+constraints, the Law of Cosines for interior joint angles, vector
+projection for base rotation, and pole vectors for controlling the
+limb's bending plane.</p>
+<h3 id="the-geometric-setup">The Geometric Setup</h3>
+<p>A two-bone IK chain consists of three joints and two rigid
+segments:</p>
+<ul>
+<li><strong>Root joint (<span
+class="math inline">\(J_1\)</span>):</strong> The shoulder or hip,
+located at position <span class="math inline">\(\vec{P}_1\)</span>.</li>
+<li><strong>Mid joint (<span
+class="math inline">\(J_2\)</span>):</strong> The elbow or knee, located
+at position <span class="math inline">\(\vec{P}_2\)</span>.</li>
+<li><strong>End effector (<span
+class="math inline">\(J_3\)</span>):</strong> The wrist or ankle, which
+aims to reach the target position <span
+class="math inline">\(\vec{T}\)</span>.</li>
+</ul>
+<p>The lengths of the two bones are fixed scalars: <span
+class="math inline">\(L_1\)</span> (length between <span
+class="math inline">\(J_1\)</span> and <span
+class="math inline">\(J_2\)</span>) and <span
+class="math inline">\(L_2\)</span> (length between <span
+class="math inline">\(J_2\)</span> and <span
+class="math inline">\(J_3\)</span>).</p>
+<h3 id="1-reachability-and-clamping">1. Reachability and Clamping</h3>
+<p>The vector from the root to the target is defined as: <span
+class="math display">\[\vec{D} = \vec{T} - \vec{P}_1\]</span> The
+distance between the root and target is the magnitude <span
+class="math inline">\(d = \|\vec{D}\|\)</span>.</p>
+<p>Before solving the joint angles, the system must evaluate whether the
+target is physically reachable. According to the triangle inequality, a
+valid triangle can only be formed if: <span class="math display">\[|L_1
+- L_2| \le d \le L_1 + L_2\]</span></p>
+<ul>
+<li><strong>Target beyond maximum reach (<span class="math inline">\(d
+\ge L_1 + L_2\)</span>):</strong> The limb is fully extended. The
+distance <span class="math inline">\(d\)</span> is clamped to slightly
+less than <span class="math inline">\(L_1 + L_2\)</span> to avoid
+computational singularities, and the bones align straight toward <span
+class="math inline">\(\vec{T}\)</span>.</li>
+<li><strong>Target closer than minimum reach (<span
+class="math inline">\(d \le |L_1 - L_2|\)</span>):</strong> The limb
+fully folds. The distance <span class="math inline">\(d\)</span> is
+clamped to <span class="math inline">\(|L_1 - L_2|\)</span>.</li>
+</ul>
+<h3 id="2-solving-interior-angles-via-the-law-of-cosines">2. Solving
+Interior Angles via the Law of Cosines</h3>
+<p>When <span class="math inline">\(d\)</span> is within valid bounds,
+the three joints form a triangle with side lengths <span
+class="math inline">\(L_1\)</span>, <span
+class="math inline">\(L_2\)</span>, and <span
+class="math inline">\(d\)</span>. The interior angles are determined
+using the Law of Cosines: <span class="math display">\[c^2 = a^2 + b^2 -
+2ab \cos(C)\]</span></p>
+<h4 id="mid-joint-angle-alpha_2">Mid Joint Angle (<span
+class="math inline">\(\alpha_2\)</span>)</h4>
+<p>To find the interior angle at the knee or elbow (<span
+class="math inline">\(\theta_{mid}\)</span>), solve for the angle
+opposite to side <span class="math inline">\(d\)</span>: <span
+class="math display">\[\cos(\theta_{mid}) = \frac{L_1^2 + L_2^2 - d^2}{2
+L_1 L_2}\]</span> <span class="math display">\[\theta_{mid} =
+\arccos\left(\text{clamp}\left(\frac{L_1^2 + L_2^2 - d^2}{2 L_1 L_2},
+-1, 1\right)\right)\]</span></p>
+<p>In skeletal animation, the mid joint's relative flexion angle (<span
+class="math inline">\(\alpha_2\)</span>) is typically measured as the
+deviation from a straight line (<span
+class="math inline">\(180^\circ\)</span> or <span
+class="math inline">\(\pi\)</span> radians): <span
+class="math display">\[\alpha_2 = \pi - \theta_{mid}\]</span></p>
+<h4 id="root-joint-offset-angle-alpha_1">Root Joint Offset Angle (<span
+class="math inline">\(\alpha_1\)</span>)</h4>
+<p>To determine how much the upper bone deviates from the line
+connecting <span class="math inline">\(J_1\)</span> to <span
+class="math inline">\(\vec{T}\)</span>, solve for the angle opposite to
+side <span class="math inline">\(L_2\)</span>: <span
+class="math display">\[\cos(\alpha_1) = \frac{L_1^2 + d^2 - L_2^2}{2 L_1
+d}\]</span> <span class="math display">\[\alpha_1 =
+\arccos\left(\text{clamp}\left(\frac{L_1^2 + d^2 - L_2^2}{2 L_1 d}, -1,
+1\right)\right)\]</span></p>
+<h3 id="3-defining-the-bending-plane-with-a-pole-vector">3. Defining the
+Bending Plane with a Pole Vector</h3>
+<p>A triangle in 3D space requires a plane of orientation. Without a
+constraint, the mid joint can rotate infinitely around the axis <span
+class="math inline">\(\vec{D}\)</span>.</p>
+<p>A <strong>Pole Vector</strong> (<span
+class="math inline">\(\vec{P}_{pole}\)</span>) is introduced as an
+external point in space that defines the direction the joint should bend
+(e.g., forward for a knee, outward or backward for an elbow).</p>
+<ol type="1">
+<li>Construct the target direction unit vector: <span
+class="math display">\[\hat{u}_D =
+\frac{\vec{D}}{\|\vec{D}\|}\]</span></li>
+<li>Vector from the root to the pole target: <span
+class="math display">\[\vec{V}_{pole} = \vec{P}_{pole} -
+\vec{P}_1\]</span></li>
+<li>Project <span class="math inline">\(\vec{V}_{pole}\)</span> onto the
+plane perpendicular to <span class="math inline">\(\hat{u}_D\)</span>
+using Gram-Schmidt orthogonalization to define the upward bending
+direction: <span class="math display">\[\vec{Y} = \vec{V}_{pole} -
+(\vec{V}_{pole} \cdot \hat{u}_D)\hat{u}_D\]</span> <span
+class="math display">\[\hat{u}_Y =
+\frac{\vec{Y}}{\|\vec{Y}\|}\]</span></li>
+<li>Compute the normal vector of the triangle plane: <span
+class="math display">\[\hat{u}_N = \hat{u}_D \times
+\hat{u}_Y\]</span></li>
+</ol>
+<h3 id="4-constructing-the-final-joint-rotations">4. Constructing the
+Final Joint Rotations</h3>
+<p>With the plane and interior angles established:</p>
+<ol type="1">
+<li><p><strong>Root Bone Direction:</strong> The upper bone begins
+pointing along <span class="math inline">\(\hat{u}_D\)</span> and is
+rotated by angle <span class="math inline">\(\alpha_1\)</span> around
+the normal axis <span class="math inline">\(\hat{u}_N\)</span> toward
+<span class="math inline">\(\hat{u}_Y\)</span>. This sets the global
+direction vector of the first bone (<span
+class="math inline">\(\vec{B}_1\)</span>): <span
+class="math display">\[\vec{B}_1 = \cos(\alpha_1)\hat{u}_D +
+\sin(\alpha_1)\hat{u}_Y\]</span> The position of the mid joint is then:
+<span class="math display">\[\vec{P}_2 = \vec{P}_1 + L_1
+\vec{B}_1\]</span></p></li>
+<li><p><strong>Mid Bone Direction:</strong> The lower bone vector points
+from <span class="math inline">\(\vec{P}_2\)</span> to the final target:
+<span class="math display">\[\vec{B}_2 = \frac{\vec{T} -
+\vec{P}_2}{L_2}\]</span></p></li>
+</ol>
+<p>These directional vectors (<span
+class="math inline">\(\vec{B}_1\)</span> and <span
+class="math inline">\(\vec{B}_2\)</span>), combined with the surface
+normal <span class="math inline">\(\hat{u}_N\)</span>, are converted
+into rotation matrices or quaternions. These transforms are applied to
+the character's local joint hierarchy to yield the final, stable limb
+pose.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

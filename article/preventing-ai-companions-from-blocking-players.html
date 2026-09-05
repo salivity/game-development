@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventing AI Companions from Blocking Players - game-development</title>
+    <meta name="description" content="In narrative game development, preventing AI companions from trapping players in corridors is critical for maintaining immersion and preventing player frustration. Designers use a combination of dynamic collision systems, spatial tagging, predictive yiel">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/preventing-ai-companions-from-blocking-players">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Preventing AI Companions from Blocking Players - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/preventing-ai-companions-from-blocking-players" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In narrative game development, preventing AI companions from trapping players in corridors is critical for maintaining immersion and preventing player frustration. Designers use a combination of dynamic collision systems, spatial tagging, predictive yiel" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="preventing-ai-companions-from-blocking-players">Preventing AI
+Companions from Blocking Players</h1>
+<p>In narrative game development, preventing AI companions from trapping
+players in corridors is critical for maintaining immersion and
+preventing player frustration. Designers use a combination of dynamic
+collision systems, spatial tagging, predictive yielding behaviors, and
+tethering mechanics to ensure companions support rather than hinder
+traversal. This article explores the primary technical and design
+solutions used in modern game development to keep narrow pathways
+clear.</p>
+<h3 id="dynamic-collision-and-soft-capsules">Dynamic Collision and Soft
+Capsules</h3>
+<p>Rather than using rigid, immovable collision meshes, developers often
+implement dynamic collision boundaries for companions. When a companion
+is idle or wandering, their collision capsule is active. However, when
+the player moves directly toward the companion, the engine softens or
+shrinks the AI's collision capsule. In some implementations, collision
+is disabled entirely between the player and the companion, allowing the
+player to pass through the AI while an evasive animation plays to
+visually justify the movement.</p>
+<h3 id="predictive-yielding-and-intent-detection">Predictive Yielding
+and Intent Detection</h3>
+<p>Advanced companion AI continuously monitors the player's velocity,
+facing direction, and input vectors. If the system detects that the
+player is walking toward a space the companion currently occupies, the
+AI triggers an evasive or yielding routine. Instead of waiting for
+physical contact, the companion calculates an escape vector
+perpendicular to the player's path and moves out of the way
+preemptively, stepping aside to let the player pass.</p>
+<h3 id="corridor-tagging-and-navmesh-markup">Corridor Tagging and
+NavMesh Markup</h3>
+<p>Game environments frequently feature dedicated markup within
+navigation meshes (NavMeshes). In narrow hallways, doorways, and choke
+points, level designers apply specific volume tags that alter companion
+behavior:</p>
+<ul>
+<li><strong>No-Stop Zones:</strong> Companions are forbidden from idling
+or entering conversational idle states inside these marked volumes.</li>
+<li><strong>Single-File Rules:</strong> In tight spaces, the AI
+pathfinding restricts the companion from walking parallel to the player,
+forcing them to adopt a strict single-file formation.</li>
+<li><strong>Through-Pass Priority:</strong> If both the player and the
+companion are in a narrow corridor, the companion automatically yields
+navigation priority, retreating or sprinting forward to reach a wider
+opening.</li>
+</ul>
+<h3 id="adaptive-tethering-and-trailing-offsets">Adaptive Tethering and
+Trailing Offsets</h3>
+<p>Companion positioning is typically governed by dynamic tethering
+systems that place the AI relative to the player’s camera and motion
+vector. In open spaces, companions might walk alongside the player to
+facilitate dialogue. When entering tighter indoor environments, the
+tethering system shifts the companion’s target anchor point to a
+trailing offset directly behind the player or outside the primary camera
+frustum. This prevents the companion from entering a doorway before the
+player does.</p>
+<h3 id="player-driven-displacement">Player-Driven Displacement</h3>
+<p>If avoidance routines fail and physical contact occurs, games often
+employ soft physics displacement. By giving the player character a
+higher physics mass or priority override, simply walking forward gently
+shoves the companion out of the path without stopping player momentum.
+The companion plays an interrupted stumble or step-aside animation to
+maintain physical believability.</p>
+<h3 id="off-screen-relocation">Off-Screen Relocation</h3>
+<p>When an AI companion becomes completely wedged or stuck in geometry
+within a tight space, the system can use camera-frustum checks to
+resolve the issue invisibly. As soon as the companion leaves the
+player's field of view, the game can silently teleport the companion to
+an open navigation node behind or ahead of the player, instantly
+clearing the corridor without visual pop-in.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garbage Collection Performance in C# Game Development - game-development</title>
+    <meta name="description" content="Garbage collection (GC) in C# simplifies memory management by automatically reclaiming unused memory, but it introduces significant performance challenges for real-time game development, primarily in the form of frame rate stutters and latency. This arti">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/garbage-collection-performance-in-c-game-development">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Garbage Collection Performance in C# Game Development - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/garbage-collection-performance-in-c-game-development" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Garbage collection (GC) in C# simplifies memory management by automatically reclaiming unused memory, but it introduces significant performance challenges for real-time game development, primarily in the form of frame rate stutters and latency. This arti" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="garbage-collection-performance-in-c-game-development">Garbage
+Collection Performance in C# Game Development</h1>
+<p>Garbage collection (GC) in C# simplifies memory management by
+automatically reclaiming unused memory, but it introduces significant
+performance challenges for real-time game development, primarily in the
+form of frame rate stutters and latency. This article explores how
+garbage collection impacts game performance, identifies common sources
+of unnecessary memory allocations, and outlines practical strategies
+developers can use to minimize GC overhead and maintain a consistent
+frame rate.</p>
+<h3 id="the-impact-of-garbage-collection-on-frame-rates">The Impact of
+Garbage Collection on Frame Rates</h3>
+<p>In game development, maintaining a stable frame rate is critical for
+a smooth player experience. Games targeting 60 frames per second (FPS)
+have a strict frame budget of 16.6 milliseconds, while 120 FPS games
+have only 8.3 milliseconds per frame.</p>
+<p>When the C# garbage collector runs, it searches the managed heap for
+objects that are no longer referenced by the application and frees their
+memory. In many runtimes, particularly older or non-incremental
+collectors, this process requires a "stop-the-world" phase. During this
+phase, the entire game engine pauses while the GC runs. Even a brief
+pause of 5 to 10 milliseconds can cause a visible stutter, known as
+micro-stuttering or "hitch," which degrades the player experience.</p>
+<h3 id="common-culprits-of-memory-allocation-in-c-games">Common Culprits
+of Memory Allocation in C# Games</h3>
+<p>To prevent GC pauses, developers must minimize heap allocations
+during gameplay. Several common C# programming patterns inadvertently
+allocate memory on the heap:</p>
+<ul>
+<li><strong>Object Instantiation and Destruction:</strong> Frequently
+creating and destroying game objects, such as projectiles or particle
+effects, causes rapid heap fragmentation and triggers frequent GC
+cycles.</li>
+<li><strong>String Manipulation:</strong> Strings in C# are immutable.
+Concatenating strings or modifying text in an update loop (such as
+displaying a player's health or score) creates new string objects on the
+heap every frame.</li>
+<li><strong>Boxing and Unboxing:</strong> Converting a value type (like
+an <code>int</code> or a <code>struct</code>) to a reference type (like
+<code>object</code>) allocates memory. This often occurs when passing
+value types to APIs that accept generic objects or during
+formatting.</li>
+<li><strong>LINQ Queries and Closures:</strong> While Language
+Integrated Query (LINQ) makes code readable, it allocates temporary
+objects behind the scenes. Similarly, lambda expressions that capture
+local variables (closures) allocate memory on the heap.</li>
+<li><strong>Foreach Loops on Collections:</strong> In some older C#
+compilers and runtimes, using a <code>foreach</code> loop on certain
+collection types generates an enumerator object on the heap.</li>
+</ul>
+<h3 id="strategies-to-minimize-garbage-collection-overhead">Strategies
+to Minimize Garbage Collection Overhead</h3>
+<p>Achieving a "zero-allocation" game loop is the gold standard in C#
+game development. Developers can use several optimization techniques to
+keep memory usage flat:</p>
+<h4 id="1-object-pooling">1. Object Pooling</h4>
+<p>Instead of instantiating and destroying objects dynamically, games
+should use object pools. A pool pre-allocates a set number of objects
+(such as bullets or enemies) at the start of a level. When an object is
+needed, it is retrieved from the pool; when it is no longer needed, it
+is deactivated and returned to the pool, completely bypassing the
+garbage collector.</p>
+<h4 id="2-using-structs-instead-of-classes">2. Using Structs Instead of
+Classes</h4>
+<p>Structs are value types and are typically allocated on the stack
+rather than the heap. For small, short-lived data structures like 3D
+vectors, colors, or coordinate points, using <code>struct</code> instead
+of <code>class</code> prevents heap allocation. However, devs must be
+careful not to pass large structs by value, as this can cause
+performance issues due to data copying.</p>
+<h4 id="3-string-optimization">3. String Optimization</h4>
+<p>To avoid string allocation in the main update loop, developers should
+pre-allocate static text, use custom string builders, or use UI systems
+that support text caching. If a value changes frequently, update the UI
+only when the value actually changes, rather than every frame.</p>
+<h4 id="4-avoiding-allocations-in-update-loops">4. Avoiding Allocations
+in Update Loops</h4>
+<p>Any method called every frame (such as <code>Update</code> in Unity
+or custom tick loops) must be kept entirely free of allocations. Avoid
+using LINQ, lambda expressions, or array allocations within these hot
+paths. Instead, use pre-allocated arrays and write manual
+<code>for</code> loops.</p>
+<h4 id="5-non-allocating-apis">5. Non-Allocating APIs</h4>
+<p>Many modern game engines provide alternative APIs designed to prevent
+allocation. For example, in Unity, developers should use non-allocating
+physics queries like <code>Physics.OverlapSphereNonAlloc</code> instead
+of <code>Physics.OverlapSphere</code>, which returns a newly allocated
+array of colliders on every call.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

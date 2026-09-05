@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soft Body Deformation and Elastic Rebound in Games - game-development</title>
+    <meta name="description" content="Simulating elastic rebound and deformation in squishy, soft-body game characters requires a balance between physical accuracy and real-time computational performance. Developers rely on several techniques ranging from full volumetric physics engines to l">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/soft-body-deformation-and-elastic-rebound-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Soft Body Deformation and Elastic Rebound in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/soft-body-deformation-and-elastic-rebound-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Simulating elastic rebound and deformation in squishy, soft-body game characters requires a balance between physical accuracy and real-time computational performance. Developers rely on several techniques ranging from full volumetric physics engines to l" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="soft-body-deformation-and-elastic-rebound-in-games">Soft Body
+Deformation and Elastic Rebound in Games</h1>
+<p>Simulating elastic rebound and deformation in squishy, soft-body game
+characters requires a balance between physical accuracy and real-time
+computational performance. Developers rely on several techniques ranging
+from full volumetric physics engines to lightweight skeletal and shader
+approximations. This article explores the primary methods used in modern
+game development to achieve realistic squash, stretch, and jiggle
+effects, including Position-Based Dynamics, Mass-Spring systems, Finite
+Element Methods, skeletal physics rigs, and vertex shaders.</p>
+<h3 id="mass-spring-damper-systems">Mass-Spring-Damper Systems</h3>
+<p>The mass-spring model is one of the classic approaches to soft-body
+simulation. A character's 3D mesh is represented as a network of point
+masses interconnected by virtual springs and dampers. When an external
+force, such as an impact or acceleration, moves a mass, adjacent springs
+stretch or compress and apply restoring forces to return the mesh to its
+rest state. The dampers absorb energy over time to simulate internal
+material friction and prevent endless bouncing. While relatively simple
+to implement, basic mass-spring systems can suffer from numerical
+instability if the springs are too stiff or the frame rate
+fluctuates.</p>
+<h3
+id="position-based-dynamics-pbd-and-extended-pbd-xpbd">Position-Based
+Dynamics (PBD) and Extended PBD (XPBD)</h3>
+<p>Position-Based Dynamics has largely superseded traditional
+force-based mass-spring systems in modern real-time game engines.
+Instead of calculating forces and accelerations, PBD directly modifies
+vertex positions to satisfy specific geometric constraints, such as
+distance between vertices, bending limits, and volume conservation.</p>
+<p>Extended Position-Based Dynamics (XPBD) refines this by decoupling
+constraint stiffness from the simulation time step, allowing for
+predictable and stable elastic behavior regardless of frame rate. XPBD
+is widely used for squishy characters because it prevents the mesh from
+exploding or collapsing, easily handles collisions, and naturally
+supports volume preservation constraints that make soft bodies look full
+rather than hollow.</p>
+<h3 id="finite-element-method-fem">Finite Element Method (FEM)</h3>
+<p>For applications requiring high physical realism—such as medical
+simulations or cinematic character interactions—the Finite Element
+Method is the gold standard. FEM divides the character’s internal volume
+into a 3D mesh of volumetric elements, usually tetrahedra. Continuum
+mechanics equations are applied to calculate stress and strain
+throughout the entire volume.</p>
+<p>Because FEM calculates energy distribution through true volumetric
+deformation, it produces highly realistic organic tissue behavior and
+non-linear elasticity. However, it is computationally intensive,
+typically requiring precomputation, simplified collision proxies, or GPU
+acceleration to run in real-time games.</p>
+<h3 id="skeletal-jiggle-bones-and-spring-constraints">Skeletal Jiggle
+Bones and Spring Constraints</h3>
+<p>When full-mesh simulation is too resource-heavy, developers use
+physics-driven skeletal hierarchies. Often referred to as "spring bones"
+or "jiggle bones," this technique attaches dynamic physics constraints
+to secondary bones within a character's animation rig.</p>
+<p>When the primary character moves or stops, these secondary bones
+react via spring math, oscillating and dragging behind before settling.
+The underlying skin weights blend the movement smoothly across the mesh.
+This method is exceptionally cheap computationally, scales well across
+various hardware platforms, and allows animators to manually limit or
+tune deformation directly within standard authoring tools.</p>
+<h3 id="blend-shapes-driven-by-physics">Blend Shapes Driven by
+Physics</h3>
+<p>Another hybrid method combines artistic control with dynamic movement
+by using pre-sculpted morph targets (blend shapes) for squashing and
+stretching. The game engine monitors character variables—such as
+vertical velocity, acceleration, or impact forces from raycasts—and
+dynamically drives the weight of these blend shapes. When a character
+lands on the ground, an impact-detection script increases the weight of
+a "squash" morph target and rapidly transitions to a "rebound" stretch
+target using a damped harmonic oscillator curve. This guarantees
+visually pleasing silhouettes without relying on freeform mesh
+deformation.</p>
+<h3 id="vertex-shader-displacements">Vertex Shader Displacements</h3>
+<p>For stylized or lightweight squishy effects, deformation can be
+offloaded entirely to the GPU via vertex shaders or World Position
+Offset (WPO). The shader uses mathematical functions, such as sine
+waves, or reads dynamic data (like collision points and impact vectors
+passed from gameplay scripts) to offset vertices in real time. Because
+this occurs directly on the graphics card without updating CPU-side
+collision hulls, it introduces virtually no physics overhead, making it
+ideal for rendering dozens of squishy background characters or simple
+slime-like entities simultaneously.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

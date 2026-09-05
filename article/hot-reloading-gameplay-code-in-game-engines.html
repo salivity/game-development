@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot-Reloading Gameplay Code in Game Engines - game-development</title>
+    <meta name="description" content="Hot-reloading gameplay code enables game developers to modify game logic during runtime and observe changes immediately without recompiling the entire engine or restarting the application. This architectural capability significantly reduces iteration loo">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/hot-reloading-gameplay-code-in-game-engines">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Hot-Reloading Gameplay Code in Game Engines - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/hot-reloading-gameplay-code-in-game-engines" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Hot-reloading gameplay code enables game developers to modify game logic during runtime and observe changes immediately without recompiling the entire engine or restarting the application. This architectural capability significantly reduces iteration loo" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="hot-reloading-gameplay-code-in-game-engines">Hot-Reloading
+Gameplay Code in Game Engines</h1>
+<p>Hot-reloading gameplay code enables game developers to modify game
+logic during runtime and observe changes immediately without recompiling
+the entire engine or restarting the application. This architectural
+capability significantly reduces iteration loops during production.
+Building a robust hot-reloading system requires decoupling state from
+execution logic, modularizing gameplay code into dynamically loaded
+libraries, managing memory boundaries strictly, and implementing
+reliable serialization and pointer-patching pipelines.</p>
+<h3 id="dynamic-library-decoupling">Dynamic Library Decoupling</h3>
+<p>The foundation of a native hot-reloading architecture is the physical
+separation of the engine runtime from the gameplay code. Developers
+compile the core engine (rendering, audio, input handling, low-level
+platform APIs) as an executable host application, while gameplay logic
+is compiled into a dynamic-link library (such as a <code>.dll</code> on
+Windows or <code>.so</code> on Linux).</p>
+<p>The host application does not link against the gameplay library at
+link time. Instead, it relies on platform-level dynamic loading
+functions (<code>LoadLibraryA</code>/<code>GetProcAddress</code> on
+Windows, or <code>dlopen</code>/<code>dlsym</code> on POSIX systems).
+The host engine communicates with the gameplay library through a strict,
+C-compatible Application Binary Interface (ABI), typically exposed
+through an interface struct filled with function pointers for standard
+lifecycle events such as <code>game_init</code>,
+<code>game_update</code>, and <code>game_shutdown</code>.</p>
+<h3 id="state-separation-and-storage">State Separation and Storage</h3>
+<p>When code changes at runtime, the active module must be unloaded and
+replaced with the newly compiled binary. If the gameplay module stores
+state internally within static or global variables, that state is
+obliterated upon library unloading. To persist game state across
+reloads, developers separate behavior from data.</p>
+<p>Developers generally use one of two primary data patterns:</p>
+<ol type="1">
+<li><strong>Host-Managed Flat State Block:</strong> The host engine
+allocates a contiguous block of memory for game state at startup and
+passes a raw pointer to this block into the gameplay update function.
+The gameplay library casts this pointer to an internal
+<code>GameState</code> struct. When the library is swapped, the host
+simply hands the exact same memory block to the newly loaded
+library.</li>
+<li><strong>Entity Component Systems (ECS):</strong> In ECS
+architectures, components are plain old data (POD) structs stored in
+centralized pools managed by the persistent engine runtime. Gameplay
+modules contain only systems—pure functions that operate over those
+component arrays. Because the dynamic library contains zero persistent
+data, swapping out system functions has no inherent impact on the active
+world state.</li>
+</ol>
+<h3 id="memory-ownership-and-allocator-boundaries">Memory Ownership and
+Allocator Boundaries</h3>
+<p>A common pitfall in native hot-reloading is cross-module memory
+allocation. If dynamic library version A allocates memory using its
+local runtime heap and dynamic library version B frees that memory, heap
+corruption or crashes can occur, especially if compiler flags or
+allocator implementations shift between builds.</p>
+<p>To prevent this:</p>
+<ul>
+<li>The host engine provides an explicit memory API (custom allocators,
+scratchpads, or page allocators) passed into the gameplay module through
+its initialization table.</li>
+<li>The gameplay module is prohibited from using default dynamic
+allocations (<code>malloc</code>, <code>free</code>, global
+<code>new</code>, <code>delete</code>) that invoke the module’s local
+runtime library.</li>
+<li>All allocations are routed through the engine’s persistent memory
+subsystems.</li>
+</ul>
+<h3 id="the-reload-pipeline">The Reload Pipeline</h3>
+<p>A complete hot-reloading loop consists of coordinated steps triggered
+manually or via filesystem watchers:</p>
+<ol type="1">
+<li><strong>Detection:</strong> A file watcher thread detects changes to
+gameplay source files and triggers a background build process using a
+decoupled build tool.</li>
+<li><strong>Compilation and Unique Naming:</strong> Operating systems
+lock loaded dynamic libraries, preventing in-place overwrites. The build
+system must output a uniquely named artifact (e.g.,
+<code>gameplay_v12.dll</code>) or the engine must copy the newly
+compiled file to a temporary location before loading.</li>
+<li><strong>Quiescence and Pre-Reload Hooks:</strong> The engine
+finishes the current frame. Before unloading, it calls an optional
+pre-reload hook on the old library to allow cleanup of temporary
+platform handles, threads, or operating-system-level resources.</li>
+<li><strong>State Serialization (Optional/Structural):</strong> If
+struct definitions have changed (such as adding a field to an existing
+type), pure memory preservation will misalign data. In advanced engines,
+a reflection system serializes modified structures to a schema-agnostic
+intermediary format (such as JSON or flat binary buffers) before
+unload.</li>
+<li><strong>Library Swap:</strong> The host calls
+<code>FreeLibrary</code> or <code>dlclose</code> on the current module
+and invokes <code>LoadLibrary</code> or <code>dlopen</code> on the new
+artifact. It retrieves exported entry points via symbol lookup.</li>
+<li><strong>State Deserialization and Vtable Reconstruction:</strong>
+The host calls the post-reload hook, passing back the state pointer. If
+data schemas changed, the reflection pipeline rehydrates the serialized
+data into the new layout, mapping fields by name and applying defaults
+to new properties.</li>
+</ol>
+<h3 id="virtual-function-and-indirection-traps">Virtual Function and
+Indirection Traps</h3>
+<p>Direct use of C++ classes with virtual methods across hot-reloaded
+boundaries poses risks. Virtual method tables (vtables) store hardcoded
+pointers into the code segment of the loaded dynamic library. When the
+library is unloaded, existing objects with vtables contain pointers
+pointing to unmapped memory.</p>
+<p>Architectures mitigate vtable invalidation by:</p>
+<ul>
+<li>Avoiding virtual inheritance entirely in favor of data-oriented
+designs and C-style structs.</li>
+<li>Employing centralized dispatch tables where function pointers are
+updated explicitly during the reload phase.</li>
+<li>Implementing a global vtable patching routine that iterates through
+registered object types and updates their internal <code>vptr</code>
+addresses to match the address space of the newly loaded module.</li>
+</ul>
+<h3 id="scripting-environments-vs-native-code">Scripting Environments
+vs. Native Code</h3>
+<p>While native C/C++ hot-reloading requires meticulous management of
+memory layouts and ABI safety, engines utilizing embedded runtimes (such
+as Lua, WebAssembly, or C#) leverage virtual machine sandboxing for
+hot-reloading.</p>
+<p>In virtualized architectures, the runtime VM remains resident inside
+the engine. On reload, the VM recompiles and swaps script bytecode or
+assemblies. While this eliminates low-level memory corruption and
+symbol-linking complexities, developers still must ensure that
+script-side state is properly synchronized or serialized so that
+in-flight gameplay actions do not desynchronize during the update.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

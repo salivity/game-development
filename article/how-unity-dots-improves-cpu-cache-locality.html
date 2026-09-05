@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Unity DOTS Improves CPU Cache Locality - game-development</title>
+    <meta name="description" content="Unity’s Data-Oriented Technology Stack (DOTS) transforms game performance by shifting the underlying architecture from an object-oriented model to a data-oriented design. While traditional MonoBehaviours scatter data across memory and degrade hardware">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-unity-dots-improves-cpu-cache-locality">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Unity DOTS Improves CPU Cache Locality - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-unity-dots-improves-cpu-cache-locality" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Unity’s Data-Oriented Technology Stack (DOTS) transforms game performance by shifting the underlying architecture from an object-oriented model to a data-oriented design. While traditional MonoBehaviours scatter data across memory and degrade hardware" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-unity-dots-improves-cpu-cache-locality">How Unity DOTS
+Improves CPU Cache Locality</h1>
+<p>Unity’s Data-Oriented Technology Stack (DOTS) transforms game
+performance by shifting the underlying architecture from an
+object-oriented model to a data-oriented design. While traditional
+MonoBehaviours scatter data across memory and degrade hardware
+efficiency through constant cache misses, DOTS organizes component data
+contiguously in memory. This fundamental architectural shift maximizes
+CPU cache utilization, minimizes latency, and allows modern processors
+to operate at peak efficiency when simulating large numbers of game
+elements.</p>
+<h3 id="the-cache-bottleneck-in-monobehaviours">The Cache Bottleneck in
+MonoBehaviours</h3>
+<p>Traditional Unity development relies on MonoBehaviours, which are
+standard C# classes inheriting from managed objects. Because classes are
+reference types, their data is allocated dynamically on the managed
+heap. Over time, as objects are spawned, moved, and destroyed, these
+allocations become fragmented across disparate memory locations.</p>
+<p>When a system iterates through a list of MonoBehaviours to update
+them, the CPU must follow memory pointers to fetch each individual
+object. This process, known as "pointer chasing," severely degrades CPU
+cache locality. Furthermore, MonoBehaviours follow an
+Array-of-Structures (AoS) approach, bundling logic, transforms, physics
+data, and custom fields into a single monolithic object.</p>
+<p>Modern CPUs load data into fast L1, L2, and L3 caches in 64-byte
+blocks called cache lines. When an update loop touches a MonoBehaviour,
+the CPU loads the entire 64-byte chunk into the cache. If the system
+only needs to read a 12-byte <code>Vector3</code> position, the
+remaining 52 bytes of the cache line are filled with irrelevant
+metadata, virtual method tables, and unused fields. This results in
+frequent cache evictions and cache misses, forcing the CPU to stall
+while waiting for high-latency system RAM to deliver data.</p>
+<h3 id="how-dots-maximizes-cache-locality">How DOTS Maximizes Cache
+Locality</h3>
+<p>DOTS eliminates these inefficiencies by decoupling data from behavior
+through the Entity Component System (ECS). In ECS, entities are
+lightweight IDs, components are pure data structs containing no logic,
+and systems contain execution logic without storing state.</p>
+<h4 id="1-contiguous-memory-and-archetypes">1. Contiguous Memory and
+Archetypes</h4>
+<p>DOTS groups entities sharing the exact same component types into
+specific memory blocks called Archetype Chunks (typically 16 KB in
+size). Within each chunk, components are stored using a
+Structure-of-Arrays (SoA) layout rather than an Array-of-Structures
+layout. All instances of a specific component type are packed tightly
+alongside one another in contiguous memory arrays.</p>
+<h4 id="2-efficient-cache-line-saturation">2. Efficient Cache Line
+Saturation</h4>
+<p>Because components are packed contiguously, iterating over a specific
+component ensures that nearly 100% of each 64-byte cache line contains
+data relevant to the current operation. If a system updates positions,
+the CPU loads a cache line filled exclusively with position data. There
+are no object headers, no pointers, and no extraneous fields hogging
+cache capacity.</p>
+<h4 id="3-predictable-hardware-prefetching">3. Predictable Hardware
+Prefetching</h4>
+<p>Modern CPUs feature hardware prefetchers that detect linear memory
+access patterns and automatically pull subsequent data from RAM into the
+cache before the instruction even requests it. Because DOTS processes
+linear, contiguous arrays inside chunks, the CPU prefetcher can
+accurately predict incoming memory needs, virtually eliminating CPU idle
+time caused by memory latency.</p>
+<h4 id="4-hardware-optimization-via-burst-and-jobs">4. Hardware
+Optimization via Burst and Jobs</h4>
+<p>This optimized memory layout enables the C# Job System and the Burst
+Compiler to achieve maximum throughput. With data guaranteed to be
+contiguous and free of pointer aliasing, the compiler can auto-vectorize
+code using Single Instruction, Multiple Data (SIMD) instructions. This
+allows a CPU core to process multiple components in a single clock
+cycle, a feat that is impossible when dealing with the fragmented memory
+patterns of traditional MonoBehaviours.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

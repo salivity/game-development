@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decouple Gameplay from Graphics for Headless Servers - game-development</title>
+    <meta name="description" content="Isolating core gameplay logic from graphics rendering pipelines is essential for building efficient headless dedicated game servers that run without a graphical processing unit (GPU). By separating simulation state from visual representation, architects">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/decouple-gameplay-from-graphics-for-headless-servers">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Decouple Gameplay from Graphics for Headless Servers - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/decouple-gameplay-from-graphics-for-headless-servers" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Isolating core gameplay logic from graphics rendering pipelines is essential for building efficient headless dedicated game servers that run without a graphical processing unit (GPU). By separating simulation state from visual representation, architects" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="decouple-gameplay-from-graphics-for-headless-servers">Decouple
+Gameplay from Graphics for Headless Servers</h1>
+<p>Isolating core gameplay logic from graphics rendering pipelines is
+essential for building efficient headless dedicated game servers that
+run without a graphical processing unit (GPU). By separating simulation
+state from visual representation, architects can compile stripped-down
+server binaries that minimize memory usage, reduce CPU overhead, and
+operate cost-effectively in cloud environments. This guide explains the
+primary architectural patterns, build configurations, and design
+principles software engineers use to detach the simulation layer from
+the rendering pipeline.</p>
+<h3 id="model-view-separation-and-event-driven-architectures">Model-View
+Separation and Event-Driven Architectures</h3>
+<p>The foundation of gameplay and rendering isolation is the strict
+enforcement of a Model-View separation. In game architecture, the core
+gameplay logic acts as the Model (the authority on world state, physics,
+and rules), while the rendering pipeline acts as the View (an observer
+that visually represents that state).</p>
+<p>To maintain this boundary:</p>
+<ul>
+<li><strong>One-Way Dependency:</strong> The rendering layer may read
+from the gameplay layer, but the gameplay layer must never directly
+reference visual classes, materials, shaders, or rendering
+contexts.</li>
+<li><strong>Event Dispatching:</strong> Gameplay systems communicate
+state changes through an event broker or message queue. For example,
+when a projectile hits a target, the simulation layer updates health
+values and raises an <code>OnEntityDamaged</code> event. The client-side
+visual layer subscribes to this event to spawn blood splatters, screen
+shake, and floating text, whereas the server simply ignores the visual
+events or executes internal game state listeners.</li>
+</ul>
+<h3 id="entity-component-system-ecs-partitioning">Entity Component
+System (ECS) Partitioning</h3>
+<p>Data-driven architectures like the Entity Component System (ECS)
+provide an intuitive separation boundary by isolating raw data from
+execution logic.</p>
+<ul>
+<li><strong>Pure Simulation Components:</strong> Contain only data
+relevant to the game's state and math (e.g., <code>Position</code>,
+<code>Velocity</code>, <code>Health</code>,
+<code>Inventory</code>).</li>
+<li><strong>Visual Components:</strong> Contain data tied directly to
+graphics (e.g., <code>MeshFilter</code>, <code>MaterialInstance</code>,
+<code>ParticleEmitter</code>, <code>AnimationController</code>).</li>
+<li><strong>System Segmentation:</strong> Logic systems (such as
+<code>MovementSystem</code> or <code>CombatSystem</code>) run on both
+client and server, mutating simulation components. Dedicated rendering
+systems execute exclusively on the client, querying the current
+simulation components to update visual components and submit draw calls.
+In a headless build, rendering systems and visual components are omitted
+entirely.</li>
+</ul>
+<h3 id="abstract-hardware-and-physics-interfaces">Abstract Hardware and
+Physics Interfaces</h3>
+<p>To prevent native graphics and windowing libraries (such as DirectX,
+Vulkan, or Metal) from being linked into a headless build,
+platform-specific services must be abstracted behind interfaces.</p>
+<ul>
+<li><strong>Null Rendering Backends:</strong> Architects implement a
+null or dummy rendering device. When the game engine initializes, the
+presence of a headless flag (such as <code>-batchmode -nographics</code>
+or an explicit server build target) directs the engine to instantiate a
+null graphics device that stubs out display initialization, swap-chain
+creation, and frame buffer operations.</li>
+<li><strong>Simplified Collision Geometry:</strong> Physics simulations
+on headless servers do not require full-resolution visual meshes.
+Architects use simplified primitive colliders (spheres, capsules, and
+oriented bounding boxes) or low-poly convex hulls. This ensures that the
+server can calculate raycasts and collision resolution without loading
+texture data, vertex buffers, or graphics drivers.</li>
+</ul>
+<h3 id="conditional-compilation-and-modular-build-targets">Conditional
+Compilation and Modular Build Targets</h3>
+<p>Code-level isolation must be backed by compile-time boundaries to
+prevent graphical dependencies from swelling the binary size of the
+server.</p>
+<ul>
+<li><strong>Pre-processor Directives:</strong> Sections of code that
+deal strictly with visuals are wrapped in pre-processor macros (e.g.,
+<code>#if !UE_SERVER</code> in Unreal Engine or
+<code>#if !UNITY_SERVER</code> in Unity). This prevents
+graphics-specific functions from being compiled into the server
+executable.</li>
+<li><strong>Modular Assembly Definitions:</strong> Well-architected
+codebases split the project into distinct libraries or assemblies (e.g.,
+<code>Game.Core</code>, <code>Game.Client</code>,
+<code>Game.Server</code>). <code>Game.Core</code> contains shared rules
+and network protocols with zero references to rendering libraries.
+<code>Game.Server</code> references only <code>Game.Core</code> and
+server networking routines, completely cutting out dependencies on the
+graphics-heavy <code>Game.Client</code> module.</li>
+</ul>
+<h3 id="decoupling-tick-rates-from-frame-rates">Decoupling Tick Rates
+from Frame Rates</h3>
+<p>Rendering pipelines rely on variable frame rates, whereas
+deterministic game simulations require fixed-rate time-stepping.
+Isolating these two loops is mandatory for headless servers:</p>
+<ul>
+<li><strong>Fixed Simulation Loops:</strong> The headless server
+operates purely on a fixed tick rate (e.g., 30Hz or 60Hz), processing
+inputs, physics steps, and game rules at regular intervals using
+standard CPU timers.</li>
+<li><strong>Interpolation Decoupling:</strong> On client builds,
+rendering pipelines run at whatever frame rate the display allows,
+interpolating between the discrete simulation states provided by the
+logic loop. Because the interpolation and rendering logic exist
+downstream of the tick, the server can run the exact same core
+simulation loop without stalling or relying on a display refresh rate
+(VSync).</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

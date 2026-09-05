@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functional QA vs Compliance QA in Multi-Platform Games - game-development</title>
+    <meta name="description" content="In multi-platform game development, quality assurance is split into distinct pipelines to ensure a game is both enjoyable to play and legally and technically cleared for release. Functional Quality Assurance (FQA) focuses on the internal gameplay experie">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/functional-qa-vs-compliance-qa-in-multi-platform-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Functional QA vs Compliance QA in Multi-Platform Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/functional-qa-vs-compliance-qa-in-multi-platform-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In multi-platform game development, quality assurance is split into distinct pipelines to ensure a game is both enjoyable to play and legally and technically cleared for release. Functional Quality Assurance (FQA) focuses on the internal gameplay experie" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1
+id="functional-qa-vs-compliance-qa-in-multi-platform-games">Functional
+QA vs Compliance QA in Multi-Platform Games</h1>
+<p>In multi-platform game development, quality assurance is split into
+distinct pipelines to ensure a game is both enjoyable to play and
+legally and technically cleared for release. Functional Quality
+Assurance (FQA) focuses on the internal gameplay experience, verifying
+that mechanics, audio, progression, and assets perform as intended
+across all platforms. Conversely, Compliance Quality Assurance
+(CQA)—often called certification testing—ensures the title meets the
+strict, non-negotiable technical requirements set by first-party
+platform holders such as Sony, Microsoft, Nintendo, Valve, and mobile
+storefronts. Understanding the division, workflows, and objectives of
+these two pipelines is critical for shipping a multi-platform title on
+time and without costly submission rejections.</p>
+<h3 id="core-objectives-and-scope">Core Objectives and Scope</h3>
+<p>The primary objective of Functional QA is player-centric. FQA testers
+identify software bugs, visual glitches, physics anomalies, quest
+blockers, balancing issues, and performance drops. The scope covers the
+entirety of the game’s custom logic, user interfaces, and cross-platform
+feature parity.</p>
+<p>Compliance QA is platform-centric. CQA testers evaluate the game
+against standard technical requirements, such as Sony's Technical
+Requirements (TRCs), Microsoft's Xbox Requirements (XRBs), and
+Nintendo's Guideline Checklists. The scope does not concern whether the
+game is fun or balanced; instead, it checks platform-specific features,
+including proper terminology usage (e.g., "Press A" vs. "Press X"),
+account switching behaviors, network disconnection recovery, save data
+corruption handling, achievement/trophy triggers, and parental control
+implementations.</p>
+<h3 id="pipeline-timing-and-integration">Pipeline Timing and
+Integration</h3>
+<p>Functional QA operates continuously throughout the entire development
+lifecycle. It begins in pre-production or early alpha, integrating with
+daily build systems and Continuous Integration/Continuous Deployment
+(CI/CD) pipelines. FQA scales alongside feature implementation, with
+testers running regression suites and exploratory tests on an ongoing
+basis.</p>
+<p>Compliance QA typically enters the pipeline during the late alpha or
+beta phase and ramps up aggressively as the project approaches code
+freeze. While pre-compliance sanity checks can occur earlier, full
+compliance passes require feature-complete builds because
+platform-specific services (like real-time matchmaking, platform
+overlays, and store integrations) must be fully functional. CQA serves
+as the final barrier before a build is submitted to first-party holders
+for official certification.</p>
+<h3 id="test-execution-and-methodologies">Test Execution and
+Methodologies</h3>
+<p>The methodologies used in each pipeline differ significantly:</p>
+<ul>
+<li><strong>Functional QA:</strong> Relies on a mix of structured test
+suites, boundary testing, edge-case analysis, and unstructured
+exploratory testing. FQA teams actively try to break custom mechanics by
+performing unusual sequences of player actions, navigating
+out-of-bounds, or overloading inventory systems.</li>
+<li><strong>Compliance QA:</strong> Relies strictly on platform-provided
+verification checklists and pass/fail criteria. Tests follow rigid,
+documented steps. For example, a tester will intentionally pull an
+Ethernet cable during a cloud save operation to confirm that the game
+displays the exact platform-mandated error message without
+crashing.</li>
+</ul>
+<h3 id="multi-platform-management-and-tooling">Multi-Platform Management
+and Tooling</h3>
+<p>In a multi-platform pipeline, Functional QA focuses heavily on
+cross-platform parity and hardware scalability. Testers compare PC
+hardware variations, console performance modes (fidelity vs.
+performance), and mobile device fragmentation to ensure consistent
+gameplay experiences.</p>
+<p>Compliance QA, however, runs in parallel, platform-siloed tracks.
+Because each platform holder has proprietary debug tools, submission
+portals, and requirement sets, CQA requires testers with
+platform-specific specialization. A build may pass Microsoft XRBs
+completely while failing Sony TRCs due to differences in terminology or
+system overlay behavior.</p>
+<h3 id="impact-of-failure">Impact of Failure</h3>
+<p>The consequences of pipeline failures illustrate their distinct roles
+in production:</p>
+<ul>
+<li><strong>Functional QA Failure:</strong> If functional bugs slip
+through, the game launches with balance problems, visual artifacts, or
+progression blocks. This harms user reviews, player retention, and
+post-launch stability, but the game is still permitted to launch.</li>
+<li><strong>Compliance QA Failure:</strong> If compliance issues slip
+through to the first-party submission stage, platform holders will
+reject the build. A certification failure ("cert fail") delays release
+dates, incurs additional submission fees, disrupts marketing campaigns,
+and requires emergency patching cycles to resolve.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

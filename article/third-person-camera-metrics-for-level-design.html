@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Third-Person Camera Metrics for Level Design - game-development</title>
+    <meta name="description" content="Designing environments for third-person games requires scaling architecture beyond real-world dimensions to prevent camera collision, abrupt zooming, and visual clipping. Because third-person cameras rely on an offset boom (or spring arm) trailing the ch">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/third-person-camera-metrics-for-level-design">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Third-Person Camera Metrics for Level Design - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/third-person-camera-metrics-for-level-design" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Designing environments for third-person games requires scaling architecture beyond real-world dimensions to prevent camera collision, abrupt zooming, and visual clipping. Because third-person cameras rely on an offset boom (or spring arm) trailing the ch" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="third-person-camera-metrics-for-level-design">Third-Person
+Camera Metrics for Level Design</h1>
+<p>Designing environments for third-person games requires scaling
+architecture beyond real-world dimensions to prevent camera collision,
+abrupt zooming, and visual clipping. Because third-person cameras rely
+on an offset boom (or spring arm) trailing the character, spatial bounds
+must accommodate both the avatar's collision capsule and the camera’s
+orbit radius. This guide outlines the essential spatial metrics for
+doorways, stairs, and ceilings to ensure smooth camera clearance and
+player comfort.</p>
+<h2 id="the-foundation-the-camera-rig-envelope">The Foundation: The
+Camera Rig Envelope</h2>
+<p>Before setting architectural metrics, you must define your game's
+camera envelope. A standard third-person rig consists of:</p>
+<ul>
+<li><strong>Player Capsule:</strong> Typically 1.8 meters high by 0.6 to
+0.8 meters wide.</li>
+<li><strong>Camera Arm (Boom):</strong> Usually extends 2.5 to 4 meters
+behind the player, offset vertically by 1.2 to 1.8 meters.</li>
+<li><strong>Collision Probe (Spring Arm Sphere):</strong> A collision
+radius (typically 0.15 to 0.3 meters) around the camera that detects
+geometry and pushes the camera forward to prevent clipping through
+walls.</li>
+<li><strong>Field of View (FOV):</strong> Usually between 70 and 90
+degrees.</li>
+</ul>
+<p>Environmental dimensions are governed not by the player's physical
+size, but by the outer bounds of this camera envelope.</p>
+<h2 id="doorway-dimensions">Doorway Dimensions</h2>
+<p>Real-world doors are approximately 0.8 to 0.9 meters wide and 2.0 to
+2.1 meters high. In a third-person game, these dimensions cause the
+spring arm to collide with the lintel or frame, rapidly snapping the
+camera into the back of the player’s head.</p>
+<ul>
+<li><strong>Minimum Width:</strong> <strong>1.5 to 2.0 meters.</strong>
+This allows the player to enter at an angle without the camera striking
+the doorframe and stuttering forward.</li>
+<li><strong>Combat/Action Width:</strong> <strong>2.5 to 3.5
+meters.</strong> High-speed movement, strafing, or flanking during
+combat requires wide entryways so the camera maintains its offset during
+directional shifts.</li>
+<li><strong>Minimum Height:</strong> <strong>2.8 to 3.2 meters.</strong>
+A doorway needs sufficient clearance above the character’s head so that
+an elevated camera pitching downward does not strike the door
+frame.</li>
+<li><strong>Transitional Thickness:</strong> Limit the depth of the
+doorway or threshold to under 0.5 meters. Deep, narrow archways trap the
+camera in an extended zoom-in state.</li>
+</ul>
+<h2 id="ceiling-and-overhead-clearance">Ceiling and Overhead
+Clearance</h2>
+<p>Low ceilings are the primary cause of disorienting camera snaps. When
+a camera's collision sphere hits an overhead surface, the spring arm
+collapses downward and forward.</p>
+<ul>
+<li><strong>Standard Interior Clearance:</strong> <strong>3.5 to 4.5
+meters.</strong> This accommodates a character height of 1.8 meters, an
+elevated camera angle (15–20 degrees downward pitch), and a 3-meter boom
+without geometric contact.</li>
+<li><strong>Tight/Claustrophobic Spaces:</strong> <strong>3.0
+meters.</strong> This is the functional minimum for a standard
+over-the-shoulder perspective. Anything lower forces the camera directly
+onto the character's shoulder or into a forced first-person
+perspective.</li>
+<li><strong>Combat and Dynamic Camera Interiors:</strong> <strong>5.0 to
+6.0+ meters.</strong> Games featuring jumping, vertical combat, or
+dynamic boss encounters require taller volumes to prevent the camera
+from clipping ceiling geometry when pitching up to frame targets.</li>
+</ul>
+<h2 id="staircases-and-vertical-transitions">Staircases and Vertical
+Transitions</h2>
+<p>Stairs compound clearance issues because the ground behind the
+character rises as they descend, or the ceiling lowers relative to the
+camera as they ascend.</p>
+<ul>
+<li><strong>Headroom Clearance:</strong> <strong>3.5 to 4.0
+meters</strong>, measured vertically from the nose of each tread to the
+ceiling directly above it. Insufficient headroom causes the camera to
+ride the ceiling when moving up the stairs.</li>
+<li><strong>Staircase Width:</strong> <strong>2.0 to 3.0
+meters.</strong> Enclosed stairwells narrower than 2 meters push the
+camera into the wall during turns, especially on spiral or switchback
+stairs.</li>
+<li><strong>Incline Angle:</strong> Keep the slope between <strong>25
+and 33 degrees</strong> (an approximate 2:1 run-to-rise ratio, such as
+30 cm tread to 15 cm riser). Steeper angles force the ground behind the
+player upward too quickly, instantly colliding with a trailing camera
+during ascents.</li>
+<li><strong>Landing Depths:</strong> Landings should be at least
+<strong>2.5 to 3.0 meters deep</strong>. This gives the spring arm
+enough time to smoothly interpolate its vertical position before the
+player changes elevation or turns 90 to 180 degrees.</li>
+</ul>
+<h2 id="camera-collision-geometry-optimization">Camera Collision
+Geometry Optimization</h2>
+<p>Metrics alone do not solve all camera issues; collision design is
+equally critical:</p>
+<ul>
+<li><strong>Invisible Camera Ramps:</strong> Place smooth, invisible
+collision volumes over stairs. The player's physics capsule walks the
+steps, but the camera collision traces against a smooth 30-degree
+incline, eliminating jitter.</li>
+<li><strong>Beveled Corners:</strong> Use angled collision volumes on
+sharp interior corners and doorway frames. This prevents the camera
+sphere from catching on 90-degree edges.</li>
+<li><strong>Camera-Only Collision Channels:</strong> Separate player
+collision from camera collision. Thin decorative props, light fixtures,
+and low arches should block the player or be visually present, but set
+to ignore camera traces to prevent unnecessary view snapping.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

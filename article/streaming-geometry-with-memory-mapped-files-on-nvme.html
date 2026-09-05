@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Geometry with Memory-Mapped Files on NVMe - game-development</title>
+    <meta name="description" content="Memory-mapped files allow game engines to treat persistent storage directly as virtual memory, enabling lightning-fast streaming of static geometry from modern NVMe drives. By eliminating user-space buffer copies, leveraging kernel-level paging, and alig">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/streaming-geometry-with-memory-mapped-files-on-nvme">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Streaming Geometry with Memory-Mapped Files on NVMe - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/streaming-geometry-with-memory-mapped-files-on-nvme" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Memory-mapped files allow game engines to treat persistent storage directly as virtual memory, enabling lightning-fast streaming of static geometry from modern NVMe drives. By eliminating user-space buffer copies, leveraging kernel-level paging, and alig" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="streaming-geometry-with-memory-mapped-files-on-nvme">Streaming
+Geometry with Memory-Mapped Files on NVMe</h1>
+<p>Memory-mapped files allow game engines to treat persistent storage
+directly as virtual memory, enabling lightning-fast streaming of static
+geometry from modern NVMe drives. By eliminating user-space buffer
+copies, leveraging kernel-level paging, and aligning data for
+direct-to-GPU uploads, developers can eliminate loading screens and
+stream high-density meshes smoothly. This article details the specific
+techniques that combine memory-mapping (<code>mmap</code> on POSIX or
+<code>CreateFileMapping</code>/<code>MapViewOfFile</code> on Windows)
+with NVMe capabilities to achieve instant static geometry streaming.</p>
+<h3 id="zero-copy-binary-layouts-and-page-alignment">Zero-Copy Binary
+Layouts and Page Alignment</h3>
+<p>Traditional asset loading reads data into an intermediary CPU buffer,
+parses it, and copies it to a vertex buffer. Memory-mapped streaming
+eliminates this intermediary phase through structured binary
+compilation:</p>
+<ul>
+<li><strong>Pre-baked GPU-Ready Formats:</strong> Geometry is stored on
+disk in the exact binary format expected by the GPU (interleaved or
+non-interleaved vertex attributes, 16-bit/32-bit index buffers) with no
+runtime serialization, endian conversion, or pointer patching.</li>
+<li><strong>4KB/2MB Boundary Alignment:</strong> Assets are aligned to 4
+KB operating system page boundaries or 2 MB huge page boundaries.
+Because NVMe drives read in hardware block sizes (typically 4 KB
+sectors), aligning vertex and index data ensures that accessing an asset
+triggers optimal block reads without partial-page wastage.</li>
+</ul>
+<h3
+id="virtual-address-space-reservation-with-sparse-commitments">Virtual
+Address Space Reservation with Sparse Commitments</h3>
+<p>64-bit systems provide a 128 TB virtual address space, allowing game
+engines to reserve vast contiguous regions of virtual memory without
+consuming physical RAM:</p>
+<ul>
+<li><strong>Pointer Stability:</strong> The engine maps an entire
+multi-gigabyte geometry package into a single contiguous virtual address
+space reservation (<code>MEM_RESERVE</code> on Windows or
+<code>mmap</code> with <code>PROT_NONE</code> on Linux).</li>
+<li><strong>Sparse Mapping:</strong> As chunks of geometry enter the
+visibility range, the engine maps specific subregions to the physical
+file view. Meshes can use absolute offsets and deterministic indexing
+relative to the base pointer, completely bypassing pointer swizzling or
+internal hash-map lookups.</li>
+</ul>
+<h3 id="proactive-kernel-hinting-and-asynchronous-prefetching">Proactive
+Kernel Hinting and Asynchronous Prefetching</h3>
+<p>Relying on standard on-demand page faults can cause micro-stutters if
+the rendering thread touches unpaged memory. Engines prevent this using
+low-overhead OS paging hints:</p>
+<ul>
+<li><strong>POSIX <code>madvise</code> and Windows
+<code>PrefetchVirtualMemory</code>:</strong> When camera frustum checks
+or spatial acceleration structures (such as BVH nodes) detect
+approaching geometry, the engine issues <code>MADV_WILLNEED</code> or
+invokes <code>PrefetchVirtualMemory</code>.</li>
+<li><strong>NVMe Parallel Queue Saturation:</strong> Modern NVMe drives
+operate best under high queue depths across multiple hardware queues.
+Asynchronous prefetch hints allow the OS kernel to saturate these
+queues, pulling several mesh blocks into page cache simultaneously
+without blocking the main engine loop.</li>
+</ul>
+<h3 id="amortizing-page-faults-via-background-worker-probing">Amortizing
+Page Faults via Background Worker Probing</h3>
+<p>Because a hard page fault on unmapped memory suspends the calling
+thread until the NVMe controller delivers the data, synchronous touches
+on the main or render threads cause frame drops:</p>
+<ul>
+<li><strong>Touch-Paging Threads:</strong> High-priority worker threads
+"touch" mapped memory addresses (reading a single byte per 4 KB page)
+several frames before an asset enters the camera frustum.</li>
+<li><strong>Fault Absorption:</strong> The inevitable NVMe read latency
+and page fault handling are absorbed entirely by background worker
+threads. Once the read completes and the page table updates, the main
+thread can access the mesh with guaranteed zero-latency execution.</li>
+</ul>
+<h3 id="direct-gpu-uploads-from-mapped-system-pages">Direct GPU Uploads
+from Mapped System Pages</h3>
+<p>Once geometry data resides in the OS page cache via memory mapping,
+it must travel efficiently to GPU VRAM:</p>
+<ul>
+<li><strong>Direct DMA via Staging Buffers:</strong> Engines copy mapped
+pointers directly to write-combined CPU-visible GPU staging buffers
+(<code>D3D12_HEAP_TYPE_UPLOAD</code> or
+<code>VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT</code>) using vectorized
+AVX-512 or SIMD copy instructions. This minimizes the pipeline to a
+single copy operation directly from cache to PCIe bus.</li>
+<li><strong>Bypassing CPU Page Cache via DirectStorage:</strong> When
+higher throughput is needed, techniques shift from standard kernel
+<code>mmap</code> to low-level APIs like Microsoft DirectStorage or
+Vulkan direct memory extensions. These utilize NVMe bypass paths,
+scheduling Direct Memory Access (DMA) transactions that pull data
+straight from the physical NVMe storage into GPU memory, eliminating CPU
+intervention and cache pollution entirely.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

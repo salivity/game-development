@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curved Glass Lens Refraction Models in Games - game-development</title>
+    <meta name="description" content="Simulating light refraction through curved glass lenses in real-time game development requires mathematical models that balance optical realism with strict computational budgets. This article outlines the fundamental equations and approximations used by">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/curved-glass-lens-refraction-models-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Curved Glass Lens Refraction Models in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/curved-glass-lens-refraction-models-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Simulating light refraction through curved glass lenses in real-time game development requires mathematical models that balance optical realism with strict computational budgets. This article outlines the fundamental equations and approximations used by" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="curved-glass-lens-refraction-models-in-games">Curved Glass Lens
+Refraction Models in Games</h1>
+<p>Simulating light refraction through curved glass lenses in real-time
+game development requires mathematical models that balance optical
+realism with strict computational budgets. This article outlines the
+fundamental equations and approximations used by graphics programmers,
+ranging from foundational vector physics like Snell’s Law and Fresnel
+equations to screen-space distortion functions, the Lensmaker's
+equation, and chromatic dispersion models.</p>
+<h3 id="snells-law-in-vector-form">Snell’s Law in Vector Form</h3>
+<p>The physical foundation of any refraction simulation is Snell’s Law
+(<span class="math inline">\(n_1 \sin\theta_1 = n_2
+\sin\theta_2\)</span>), which governs how light bends across the
+interface of two media with different refractive indices (<span
+class="math inline">\(n_1\)</span> and <span
+class="math inline">\(n_2\)</span>). In modern real-time shaders
+(HLSL/GLSL), this is computed using the vector form to avoid expensive
+trigonometric functions:</p>
+<p><span class="math display">\[\mathbf{T} = \eta \mathbf{I} + \left(
+\eta \cos\theta_1 - \sqrt{1 - \eta^2 (1 - \cos^2\theta_1)} \right)
+\mathbf{N}\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\mathbf{I}\)</span> is the normalized
+incident light vector.</li>
+<li><span class="math inline">\(\mathbf{N}\)</span> is the normalized
+surface normal of the curved glass.</li>
+<li><span class="math inline">\(\eta = \frac{n_1}{n_2}\)</span> is the
+ratio of the refractive indices.</li>
+<li><span class="math inline">\(\cos\theta_1 = -\mathbf{N} \cdot
+\mathbf{I}\)</span>.</li>
+<li><span class="math inline">\(\mathbf{T}\)</span> is the resulting
+transmitted (refracted) direction vector.</li>
+</ul>
+<p>If the term under the square root becomes negative, total internal
+reflection occurs, and the light reflects rather than transmits. This
+equation forms the basis of the standard <code>refract()</code>
+intrinsic function in graphics pipelines.</p>
+<h3 id="the-lensmakers-equation-and-paraxial-optics">The Lensmaker's
+Equation and Paraxial Optics</h3>
+<p>For optical elements such as sniper scopes, camera lenses, or
+spectacles, calculating refraction at both the front and back surfaces
+of a 3D mesh is computationally expensive. Developers often utilize the
+Lensmaker’s Equation to approximate the net behavior of a curved
+lens:</p>
+<p><span class="math display">\[\frac{1}{f} = (n - 1) \left[
+\frac{1}{R_1} - \frac{1}{R_2} + \frac{(n - 1)d}{n R_1 R_2}
+\right]\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(f\)</span> is the focal length.</li>
+<li><span class="math inline">\(n\)</span> is the refractive index of
+the glass.</li>
+<li><span class="math inline">\(R_1\)</span> and <span
+class="math inline">\(R_2\)</span> are the radii of curvature of the two
+lens surfaces.</li>
+<li><span class="math inline">\(d\)</span> is the thickness of the
+lens.</li>
+</ul>
+<p>When simplified to the thin-lens approximation (<span
+class="math inline">\(d \approx 0\)</span>), this allows shaders to
+compute magnification and virtual image displacement algebraically on a
+flat billboard or simple geometry rather than tracing internal
+volumetric paths.</p>
+<h3 id="brown-conrady-polynomial-distortion-model">Brown-Conrady
+Polynomial Distortion Model</h3>
+<p>To simulate the physical magnification, barrel, or pincushion
+distortion produced by curved glass without ray-tracing, games commonly
+deform screen-space UV coordinates using the Brown-Conrady radial
+distortion model:</p>
+<p><span class="math display">\[x_{\text{distorted}} = x_c + (x - x_c)(1
++ K_1 r^2 + K_2 r^4 + K_3 r^6)\]</span> <span
+class="math display">\[y_{\text{distorted}} = y_c + (y - y_c)(1 + K_1
+r^2 + K_2 r^4 + K_3 r^6)\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\((x_c, y_c)\)</span> is the optical
+center of the lens.</li>
+<li><span class="math inline">\(r = \sqrt{(x - x_c)^2 + (y -
+y_c)^2}\)</span> is the radial distance from the center.</li>
+<li><span class="math inline">\(K_1, K_2, K_3\)</span> are radial
+distortion coefficients (positive values produce pincushion distortion;
+negative values produce barrel distortion typical of thick convex
+lenses).</li>
+</ul>
+<h3 id="cauchys-equation-for-chromatic-aberration">Cauchy’s Equation for
+Chromatic Aberration</h3>
+<p>Real curved glass disperses white light into its constituent spectral
+colors because the refractive index varies with wavelength (<span
+class="math inline">\(\lambda\)</span>). To simulate this dispersion,
+shaders use Cauchy's empirical equation:</p>
+<p><span class="math display">\[n(\lambda) = A +
+\frac{B}{\lambda^2}\]</span></p>
+<p>In real-time implementations, this is simplified by evaluating
+Snell’s Law or the UV distortion function three separate times for
+discrete red, green, and blue wavelengths (<span
+class="math inline">\(n_{\text{red}} &lt; n_{\text{green}} &lt;
+n_{\text{blue}}\)</span>). Sampling the background texture with these
+offset coordinates creates realistic color fringing along high-contrast
+curved edges.</p>
+<h3 id="schlicks-approximation-of-fresnel-equations">Schlick's
+Approximation of Fresnel Equations</h3>
+<p>Refraction never occurs in isolation; the ratio of transmitted to
+reflected light changes based on the viewing angle relative to the
+surface curvature. The full Fresnel equations are replaced in games by
+Schlick's approximation:</p>
+<p><span class="math display">\[R(\theta) = R_0 + (1 - R_0)(1 -
+\cos\theta)^5\]</span></p>
+<p>Where <span class="math inline">\(R_0 = \left( \frac{n_1 - n_2}{n_1 +
+n_2} \right)^2\)</span> is the reflectance at normal incidence (<span
+class="math inline">\(\theta = 0\)</span>). The computed transmission
+coefficient <span class="math inline">\(T = 1 - R(\theta)\)</span>
+determines the blend ratio between the refracted background image and
+the specular reflection on the curved glass.</p>
+<h3 id="real-time-pipeline-integration">Real-Time Pipeline
+Integration</h3>
+<p>In modern game engines (such as Unreal Engine and Unity), these
+mathematical models are applied within two primary architectures:</p>
+<ol type="1">
+<li><strong>Screen-Space Refraction (SSR):</strong> The curved normal
+vectors of the lens distort UV lookups into a pre-rendered background
+scene color buffer, scaled by thickness maps and the Snell-based
+offset.</li>
+<li><strong>Ray Marching via Signed Distance Fields (SDF):</strong> For
+thick glass geometries where double-refraction (entering and exiting the
+lens) is required, rays are marched through the front interface,
+deflected by the entry normal, marched through the interior medium, and
+deflected again at the exit interface.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

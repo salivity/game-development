@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Design Metrics: Calculating Movement and Jump Grids - game-development</title>
+    <meta name="description" content="Establishing player movement metrics and jump clearances is a foundational step in level design that bridges character mechanics with environment art. This article outlines the systematic process level designers use to extract kinematic data from charact">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/level-design-metrics-calculating-movement-and-jump-grids">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Level Design Metrics: Calculating Movement and Jump Grids - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/level-design-metrics-calculating-movement-and-jump-grids" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Establishing player movement metrics and jump clearances is a foundational step in level design that bridges character mechanics with environment art. This article outlines the systematic process level designers use to extract kinematic data from charact" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="level-design-metrics-calculating-movement-and-jump-grids">Level
+Design Metrics: Calculating Movement and Jump Grids</h1>
+<p>Establishing player movement metrics and jump clearances is a
+foundational step in level design that bridges character mechanics with
+environment art. This article outlines the systematic process level
+designers use to extract kinematic data from character controllers, test
+mechanical limits in dedicated metric gyms, calculate vertical and
+horizontal jump arcs, and convert those measurements into a unified
+architectural grid that ensures intuitive gameplay and modular
+environment production.</p>
+<h3 id="extracting-core-character-controller-variables">Extracting Core
+Character Controller Variables</h3>
+<p>Before constructing an environment, designers must identify the exact
+variables governing the character controller. In modern engines like
+Unreal Engine or Unity, these variables dictate character physics:</p>
+<ul>
+<li><strong>Walk and Run Speed:</strong> Units per second (often
+centimeters per second in Unreal, or meters per second in Unity).</li>
+<li><strong>Initial Jump Velocity (<span
+class="math inline">\(V_0\)</span>):</strong> The instantaneous upward
+impulse applied when pressing the jump button.</li>
+<li><strong>Gravity Scale (<span
+class="math inline">\(g\)</span>):</strong> The downward acceleration
+pulling the character back to earth.</li>
+<li><strong>Air Control / Friction:</strong> The degree to which a
+player can modify their trajectory mid-flight.</li>
+<li><strong>Bounding Box Dimensions:</strong> The collision cylinder or
+capsule radius and height.</li>
+</ul>
+<h3 id="calculating-jump-clearances">Calculating Jump Clearances</h3>
+<p>Jump clearance involves both vertical height (apex) and horizontal
+reach (distance traveled before landing). While physics engines handle
+real-time simulation, designers calculate theoretical maximums using
+standard kinematic formulas to determine baseline boundaries.</p>
+<h4 id="1-vertical-clearance-maximum-jump-height">1. Vertical Clearance
+(Maximum Jump Height)</h4>
+<p>The peak of a standard jump occurs when vertical velocity reaches
+zero:</p>
+<p><span class="math display">\[\text{Apex Height} =
+\frac{V_0^2}{2g}\]</span></p>
+<p>If a character has an initial vertical velocity (<span
+class="math inline">\(V_0\)</span>) of 600 cm/s and gravity (<span
+class="math inline">\(g\)</span>) is 980 cm/s², the theoretical peak
+is:</p>
+<p><span class="math display">\[\frac{600^2}{2 \times 980} \approx 183.6
+\text{ cm}\]</span></p>
+<p>Designers will typically round this to a practical limit (e.g., a
+maximum obstacle clearance of 175 cm to provide a margin for error).</p>
+<h4 id="2-hang-time-and-horizontal-distance">2. Hang Time and Horizontal
+Distance</h4>
+<p>Hang time is the total duration the character spends in the air
+during a flat jump:</p>
+<p><span class="math display">\[\text{Time to Apex } (t) =
+\frac{V_0}{g}\]</span> <span class="math display">\[\text{Total Hang
+Time} = 2t\]</span></p>
+<p>Horizontal jump clearance is calculated by multiplying total hang
+time by forward movement speed (<span
+class="math inline">\(V_x\)</span>):</p>
+<p><span class="math display">\[\text{Max Distance} = V_x \times
+(2t)\]</span></p>
+<p>If the player runs at 500 cm/s and hang time is 1.22 seconds, maximum
+horizontal clearance is approximately 610 cm.</p>
+<h3 id="empirical-testing-the-metric-gym">Empirical Testing: The Metric
+Gym</h3>
+<p>Calculations provide theoretical maximums, but input latency, frame
+rates, and variable jump systems (holding the button for higher jumps)
+alter outcomes. Designers build a specialized level known as a
+<strong>metric gym</strong> or <strong>graybox test range</strong> to
+record practical gameplay tolerances.</p>
+<p>In this gym, designers place standardized geometry at stepped
+intervals:</p>
+<ul>
+<li><strong>Vertical Ramps and Steps:</strong> Blocks placed in precise
+increments (e.g., 50 cm, 100 cm, 150 cm, 200 cm) to observe step-up
+limits, crouch heights, and vault trigger points.</li>
+<li><strong>Horizontal Gap Tests:</strong> Pits separated by increasing
+distances (e.g., 200 cm to 800 cm in 50 cm increments) to find minimum,
+comfortable, and maximum jump distances.</li>
+<li><strong>Headroom Clearances:</strong> Ceilings set at varying
+heights above jumps to prevent camera clipping and unintended trajectory
+cutoffs.</li>
+</ul>
+<p>From these tests, designers establish three key values for every
+action:</p>
+<ol type="1">
+<li><strong>Comfortable:</strong> Requires minimal precision; ideal for
+critical path progression.</li>
+<li><strong>Challenging:</strong> Requires precise timing or sprint
+momentum; used for optional rewards or platforming challenges.</li>
+<li><strong>Impossible:</strong> Absolute physical ceiling; used to
+construct soft boundaries and prevent sequence breaking.</li>
+</ol>
+<h3 id="establishing-the-modular-architectural-grid">Establishing the
+Modular Architectural Grid</h3>
+<p>Once physical limits are finalized, they are translated into a
+standardized grid for grayboxing and 3D asset creation. This prevents
+visual dissonance where architectural assets (such as doors or stairs)
+look unnatural relative to character scale.</p>
+<ul>
+<li><strong>Snapping Units:</strong> Engines typically use base-2 grids
+(8, 16, 32, 64, 128 units) or decimal metric systems (0.25m, 0.5m, 1m).
+The chosen system must neatly divide the character’s comfortable jump
+and step heights.</li>
+<li><strong>Step Height:</strong> Maximum height the character can
+traverse without jumping (typically 25–30 cm).</li>
+<li><strong>Doorway and Corridor Dimensions:</strong> Character capsule
+dimensions dictate minimum path widths. A capsule width of 80 cm
+typically requires a minimum doorway width of 120–150 cm to account for
+third-person camera clearance and combat spacing.</li>
+<li><strong>Cover Heights:</strong> Half-cover is aligned to the
+player's crouch height; full cover is aligned to the player's standing
+height plus a buffer to obscure the player model completely.</li>
+<li><strong>Ledge Grab/Mantle Windows:</strong> If the game supports
+mantling, the mantle reach distance is added to the jump apex to
+establish the total vertical traversal metric.</li>
+</ul>
+<p>By aligning controller physics with an architectural grid early in
+production, level designers ensure that geometry can be assembled
+rapidly with modular kits while maintaining consistent movement
+readability across the entire game.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computing Vehicle Mass and Inertia Tensors in Games - game-development</title>
+    <meta name="description" content="Accurately simulating vehicle dynamics in video games requires calculating realistic mass distributions and moment-of-inertia tensors for compound assemblies. Developers achieve this by decomposing a vehicle into discrete sub-components, computing their">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/computing-vehicle-mass-and-inertia-tensors-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Computing Vehicle Mass and Inertia Tensors in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/computing-vehicle-mass-and-inertia-tensors-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Accurately simulating vehicle dynamics in video games requires calculating realistic mass distributions and moment-of-inertia tensors for compound assemblies. Developers achieve this by decomposing a vehicle into discrete sub-components, computing their" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="computing-vehicle-mass-and-inertia-tensors-in-games">Computing
+Vehicle Mass and Inertia Tensors in Games</h1>
+<p>Accurately simulating vehicle dynamics in video games requires
+calculating realistic mass distributions and moment-of-inertia tensors
+for compound assemblies. Developers achieve this by decomposing a
+vehicle into discrete sub-components, computing their individual mass
+properties and center of mass, shifting their local inertia tensors to a
+common reference frame using the parallel axis theorem, and aggregating
+the results into a single rigid-body tensor. This workflow guarantees
+that behaviors like body roll, pitch under braking, and mid-air tumbling
+react convincingly to physical forces while remaining computationally
+efficient for real-time physics engines.</p>
+<h3 id="1-component-decomposition-and-local-inertia">1. Component
+Decomposition and Local Inertia</h3>
+<p>A vehicle is rarely treated as a single uniform solid. Instead,
+developers break the assembly into distinct logical components such as
+the chassis frame, engine block, transmission, fuel tank, battery, and
+passengers. Each component is assigned an estimated or real-world mass
+and approximated using geometric primitives (boxes, cylinders, spheres)
+or simplified convex collision hulls.</p>
+<p>For standard primitives, closed-form analytic formulas directly yield
+the local moment-of-inertia tensor (<span
+class="math inline">\(I_{local}\)</span>) relative to the component's
+own center of mass. For complex arbitrary meshes, developers often use
+numerical integration, such as Brian Mirtich’s divergence theorem
+algorithm, to compute exact volume and inertia properties based on the
+assumption of uniform density across the mesh.</p>
+<h3 id="2-computing-the-compound-center-of-mass">2. Computing the
+Compound Center of Mass</h3>
+<p>Before combining rotational properties, the unified Center of Mass
+(CoM) of the entire vehicle must be established. The compound CoM is
+calculated as the mass-weighted average position of all individual
+sub-components:</p>
+<p><span class="math display">\[\mathbf{R}_{\text{CoM}} = \frac{\sum m_i
+\mathbf{r}_i}{\sum m_i}\]</span></p>
+<p>Where <span class="math inline">\(m_i\)</span> is the mass of
+component <span class="math inline">\(i\)</span> and <span
+class="math inline">\(\mathbf{r}_i\)</span> is the position of its local
+center of mass in vehicle-space coordinates. Determining this point is
+crucial, as any offset directly shifts the vehicle’s pitch, roll, and
+yaw pivots.</p>
+<h3 id="3-applying-the-parallel-axis-theorem">3. Applying the Parallel
+Axis Theorem</h3>
+<p>Individual inertia tensors are defined around their own local centers
+of mass. To sum them, each tensor must be shifted to the newly
+calculated vehicle CoM. Developers accomplish this using the
+multi-dimensional Parallel Axis Theorem (also known as Steiner’s
+Theorem).</p>
+<p>For a component with mass <span class="math inline">\(m\)</span> and
+an offset vector <span class="math inline">\(\mathbf{d} = (d_x, d_y,
+d_z)\)</span> from its local center of mass to the vehicle's compound
+CoM, the parallel axis translation adds an offset matrix:</p>
+<p><span class="math display">\[I_{\text{offset}} = m \begin{bmatrix}
+d_y^2 + d_z^2 &amp; -d_x d_y &amp; -d_x d_z \\ -d_x d_y &amp; d_x^2 +
+d_z^2 &amp; -d_y d_z \\ -d_x d_z &amp; -d_y d_z &amp; d_x^2 + d_y^2
+\end{bmatrix}\]</span></p>
+<p>If the sub-component is rotated relative to the vehicle's coordinate
+frame, its local tensor <span
+class="math inline">\(I_{\text{local}}\)</span> is first rotated using
+its orientation matrix <span class="math inline">\(R\)</span> (<span
+class="math inline">\(R I_{\text{local}} R^T\)</span>) before adding the
+offset matrix.</p>
+<h3 id="4-tensor-aggregation-and-diagonalization">4. Tensor Aggregation
+and Diagonalization</h3>
+<p>The complete vehicle inertia tensor is the direct matrix sum of the
+transformed inertia tensors of all individual components:</p>
+<p><span class="math display">\[I_{\text{total}} = \sum \left( R_i
+I_{\text{local}, i} R_i^T + I_{\text{offset}, i} \right)\]</span></p>
+<p>This yields a symmetric <span class="math inline">\(3 \times
+3\)</span> matrix representing the combined resistance to rotational
+acceleration. Most standard physics engines (such as PhysX, Havok, or
+Jolt) require this tensor to be diagonalized to find the vehicle's
+principal axes of inertia. Eigenvalue decomposition is performed on
+<span class="math inline">\(I_{\text{total}}\)</span>:</p>
+<ul>
+<li>The <strong>eigenvalues</strong> yield the principal moments of
+inertia (stored as a vector: <span
+class="math inline">\(I_{xx}\)</span>, <span
+class="math inline">\(I_{yy}\)</span>, <span
+class="math inline">\(I_{zz}\)</span>).</li>
+<li>The <strong>eigenvectors</strong> define the principal rotation
+frame relative to the vehicle body.</li>
+</ul>
+<h3 id="5-practical-tuning-and-gameplay-adjustments">5. Practical Tuning
+and Gameplay Adjustments</h3>
+<p>While raw mathematical calculation provides physical accuracy, it
+does not always yield enjoyable gameplay. Developers frequently modify
+the calculated values:</p>
+<ul>
+<li><strong>Lowering the Center of Mass:</strong> The vertical position
+of the CoM is often artificially lowered below the physical axles to
+prevent excessive rolling or flipping during sharp turns.</li>
+<li><strong>Manipulating Yaw Inertia:</strong> Increasing the principal
+moment along the vertical axis (<span
+class="math inline">\(I_{zz}\)</span>) makes the vehicle feel heavier
+and less prone to erratic, hyper-sensitive spinning.</li>
+<li><strong>Separating Sprung vs. Unsprung Mass:</strong> Suspension
+assemblies, wheels, and brakes are often decoupled from the main
+compound body and simulated as dynamic constraints to ensure that wheel
+impacts do not unrealistically jerk the chassis.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

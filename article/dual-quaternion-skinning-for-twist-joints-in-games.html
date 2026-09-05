@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Quaternion Skinning for Twist Joints in Games - game-development</title>
+    <meta name="description" content="Dual Quaternion Skinning (DQS) is an advanced character deformation technique in game development designed to eliminate the severe volume loss and "candy-wrapper" collapsing artifacts caused by traditional Linear Blend Skinning (LBS). When skeletal joint">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/dual-quaternion-skinning-for-twist-joints-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dual Quaternion Skinning for Twist Joints in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/dual-quaternion-skinning-for-twist-joints-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Dual Quaternion Skinning (DQS) is an advanced character deformation technique in game development designed to eliminate the severe volume loss and "candy-wrapper" collapsing artifacts caused by traditional Linear Blend Skinning (LBS). When skeletal joint" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="dual-quaternion-skinning-for-twist-joints-in-games">Dual
+Quaternion Skinning for Twist Joints in Games</h1>
+<p>Dual Quaternion Skinning (DQS) is an advanced character deformation
+technique in game development designed to eliminate the severe volume
+loss and "candy-wrapper" collapsing artifacts caused by traditional
+Linear Blend Skinning (LBS). When skeletal joints undergo extreme
+twisting—such as wrists or shoulders rotating up to 180
+degrees—traditional skinning methods mistakenly scale down geometry,
+pinching the mesh inward. By representing both rotation and translation
+within a unified mathematical framework of dual quaternions, game
+engines can interpolate transformations along the shortest curved path,
+preserving mesh volume and maintaining structural fidelity in real
+time.</p>
+<h3 id="the-failure-of-linear-blend-skinning-lbs">The Failure of Linear
+Blend Skinning (LBS)</h3>
+<p>In standard Linear Blend Skinning, vertex transformations are
+calculated by taking a weighted linear average of transformation
+matrices:</p>
+<p><span class="math display">\[v&#39; = \sum_{i=1}^{n} w_i M_i
+v\]</span></p>
+<p>While computationally cheap and easy to compute on the GPU, <span
+class="math inline">\(4 \times 4\)</span> transformation matrices do not
+form a linear space. When interpolating between two matrices that have
+opposite or opposing rotational orientations—such as a forearm bone
+twisting 180 degrees relative to the elbow—the linear blend of the
+matrices averages the values directly across the center.</p>
+<p>This causes the intermediate transformation matrix to experience
+non-uniform scaling toward zero. Geometrically, the vertices collapse
+inward toward the central axis of the bone, creating a pinched, twisted
+effect universally known as the "candy-wrapper" artifact.</p>
+<h3 id="how-dual-quaternions-work">How Dual Quaternions Work</h3>
+<p>A dual quaternion extends classical quaternions using Clifford
+algebra and dual numbers. A dual number has the form <span
+class="math inline">\(a + \epsilon b\)</span>, where <span
+class="math inline">\(\epsilon^2 = 0\)</span> (with <span
+class="math inline">\(\epsilon \neq 0\)</span>).</p>
+<p>A dual quaternion combines two standard quaternions into an
+eight-component mathematical object:</p>
+<p><span class="math display">\[\hat{q} = q_r + \epsilon
+q_d\]</span></p>
+<ul>
+<li><strong>Real part (<span
+class="math inline">\(q_r\)</span>):</strong> A unit quaternion
+representing the rotational component of the transform.</li>
+<li><strong>Dual part (<span
+class="math inline">\(q_d\)</span>):</strong> A quaternion representing
+the translation, calculated as <span class="math inline">\(q_d =
+\frac{1}{2} t q_r\)</span>, where <span class="math inline">\(t\)</span>
+is the translation vector expressed as a pure quaternion.</li>
+</ul>
+<p>Because a unit dual quaternion encodes a rigid transformation
+(rotation and translation) without permitting shearing or non-uniform
+scaling, it treats transformation space as a manifold rather than a
+Euclidean space.</p>
+<h3 id="preventing-mesh-collapse-during-severe-twists">Preventing Mesh
+Collapse During Severe Twists</h3>
+<p>Dual-quaternion skinning prevents mesh collapse by altering how the
+skinning weights are interpolated. Instead of interpolating matrices,
+the engine computes a Dual Quaternion Linear Blend (DLB):</p>
+<p><span class="math display">\[\hat{b} = \frac{\sum_{i=1}^{n} w_i
+\hat{q}_i}{\left\| \sum_{i=1}^{n} w_i \hat{q}_i \right\|}\]</span></p>
+<p>Before blending, the dot product of the real parts of the quaternions
+is checked to ensure they lie on the same hemisphere (<span
+class="math inline">\(q_{r,i} \cdot q_{r,0} \ge 0\)</span>), preventing
+antipodal blending issues. Once normalized, the resulting dual
+quaternion represents a pure rigid transformation.</p>
+<p>When a joint undergoes a severe twist:</p>
+<ol type="1">
+<li><strong>Curvilinear Interpolation:</strong> The rotation
+interpolates along a spherical arc rather than cutting through the
+center of the joint volume.</li>
+<li><strong>Volume Preservation:</strong> Because the transformation
+remains rigid during interpolation, the vertices maintain their radial
+distance from the joint's axis of rotation.</li>
+<li><strong>Pinch Elimination:</strong> Rather than collapsing inward
+toward the bone, the vertices rotate smoothly around the bone axis,
+effectively resolving the candy-wrapper artifact without manual
+corrective blend shapes.</li>
+</ol>
+<h3 id="practical-considerations-in-game-engines">Practical
+Considerations in Game Engines</h3>
+<p>While DQS resolves volume loss during severe joint twists, it
+introduces specific technical trade-offs that developers account for
+during implementation:</p>
+<ul>
+<li><strong>The "Joint Bulging" Effect:</strong> Because dual
+quaternions strictly preserve distance and volume, bending joints (such
+as knees or elbows) can sometimes exhibit an unnatural outward bulging
+artifact. Many modern game engines resolve this using <strong>Hybrid
+Skinning</strong>, which dynamically blends between LBS for bending
+joints and DQS for twisting joints based on vertex weights or bone
+type.</li>
+<li><strong>Lack of Scale Support:</strong> Standard unit dual
+quaternions only support rigid transformations (isometries).
+Scaling—especially non-uniform scaling—cannot be represented directly
+within a unit dual quaternion. Engines handling scalable rigs often
+separate scale into a secondary pass or apply it via a hybrid
+pipeline.</li>
+<li><strong>GPU Performance:</strong> Evaluating dual quaternions
+requires normalization on the GPU vertex shader. While slightly more
+instruction-heavy than a standard matrix-vector multiply, the
+8-component structure requires only two <code>float4</code> registers
+per bone instead of the three or four <code>float4</code> registers
+needed for transformation matrices, reducing memory bandwidth pressure
+when passing bone palettes to shaders.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

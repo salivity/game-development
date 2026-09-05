@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passing Sony TRC: PlayStation Technical Requirements - game-development</title>
+    <meta name="description" content="Passing Sony’s Technical Requirements Checklist (TRC) is a mandatory milestone for publishing any game on PlayStation 4 or PlayStation 5. This article details the essential technical criteria developers must satisfy to pass TRC certification, covering">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/passing-sony-trc-playstation-technical-requirements">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Passing Sony TRC: PlayStation Technical Requirements - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/passing-sony-trc-playstation-technical-requirements" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Passing Sony’s Technical Requirements Checklist (TRC) is a mandatory milestone for publishing any game on PlayStation 4 or PlayStation 5. This article details the essential technical criteria developers must satisfy to pass TRC certification, covering" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="passing-sony-trc-playstation-technical-requirements">Passing
+Sony TRC: PlayStation Technical Requirements</h1>
+<p>Passing Sony’s Technical Requirements Checklist (TRC) is a mandatory
+milestone for publishing any game on PlayStation 4 or PlayStation 5.
+This article details the essential technical criteria developers must
+satisfy to pass TRC certification, covering system software integration,
+crash prevention, save data integrity, account handling, and strict
+platform terminology standards.</p>
+<h3 id="error-handling-and-crash-prevention">Error Handling and Crash
+Prevention</h3>
+<p>Sony maintains a zero-tolerance policy for unhandled exceptions.
+Games must not crash to the PlayStation home screen, freeze
+indefinitely, or cause the operating system to become unresponsive.</p>
+<ul>
+<li><strong>Exception Trapping:</strong> All fatal exceptions must be
+caught and routed through appropriate system-level crash reporting
+APIs.</li>
+<li><strong>Infinite Loops and Deadlocks:</strong> The game must never
+leave the player in an unrecoverable state, such as an infinite loading
+screen or unresolvable black screen.</li>
+<li><strong>Network Drops:</strong> If an active network connection
+drops during gameplay or matchmaking, the title must display an
+explicit, non-blocking error prompt and return the user safely to an
+offline state or the main menu.</li>
+</ul>
+<h3 id="user-account-management-and-profiles">User Account Management
+and Profiles</h3>
+<p>PlayStation consoles support multiple simultaneous users, requiring
+strict session management.</p>
+<ul>
+<li><strong>Controller Disconnection:</strong> If an active controller
+loses connection or battery power, the game must immediately pause (if
+single-player) and present a system-compliant prompt asking the user to
+reconnect the controller.</li>
+<li><strong>User Switching:</strong> Titles must correctly handle
+scenarios where a user changes active profiles or reassigns controllers
+via the system software.</li>
+<li><strong>Parental Controls:</strong> The title must respect
+PlayStation Family Management restrictions, such as disabling online
+communications, blocking user-generated content, or restricting playtime
+limits based on the account settings.</li>
+</ul>
+<h3 id="save-data-and-storage-management">Save Data and Storage
+Management</h3>
+<p>Data integrity and storage constraints are heavily audited during the
+TRC submission process.</p>
+<ul>
+<li><strong>Storage Checks:</strong> Before writing save data,
+downloading updates, or installing add-on content, the game must query
+the available disk space. If space is insufficient, the game must prompt
+the user with the exact amount of space required to proceed.</li>
+<li><strong>Corruption Resilience:</strong> The game must verify save
+data checksums upon loading. If corrupted data is detected, the game
+must offer to delete or overwrite the file rather than crashing.</li>
+<li><strong>Autosave Icons:</strong> A clear visual indicator must be
+displayed during any save operation. Titles must inform the user not to
+power off the console or close the application while this icon is
+active.</li>
+<li><strong>Cloud Sync:</strong> Games must properly integrate with
+PlayStation Plus cloud storage, resolving conflict timestamps when cloud
+saves differ from local files.</li>
+</ul>
+<h3 id="playstation-network-psn-and-trophy-logic">PlayStation Network
+(PSN) and Trophy Logic</h3>
+<p>Features utilizing PSN infrastructure must adhere to strict
+operational logic.</p>
+<ul>
+<li><strong>Trophy Implementation:</strong> Every base game must include
+a valid Trophy set configured according to Sony's point-tier allocation
+rules. Trophies must unlock precisely when their criteria are met and
+must never be permanently locked out due to network failures.</li>
+<li><strong>Privilege Validation:</strong> Prior to initiating any
+multiplayer session, voice chat, or user-content sharing, the
+application must query the user's PSN account for PlayStation Plus
+subscription status and age-appropriate online communication
+permissions.</li>
+</ul>
+<h3 id="display-audio-and-performance-standards">Display, Audio, and
+Performance Standards</h3>
+<ul>
+<li><strong>Framerate Stability:</strong> The game must deliver a stable
+framerate that matches its declared target (e.g., locked 30 FPS, 60 FPS,
+or 120 FPS modes) without persistent stuttering or severe frame
+drops.</li>
+<li><strong>Resolution and HDR Support:</strong> The software must
+correctly output standard resolutions (1080p, 1440p, 4K) without
+stretching or non-standard aspect ratios. If High Dynamic Range (HDR) is
+supported, it must properly map to the system's global HDR calibration
+settings.</li>
+<li><strong>Audio Routing:</strong> The application must correctly route
+audio across default TV outputs, external AV receivers, USB headsets,
+and the DualSense controller speaker.</li>
+</ul>
+<h3 id="system-terminology-and-localization">System Terminology and
+Localization</h3>
+<p>Sony enforces exact trademark and nomenclature guidelines across all
+supported languages.</p>
+<ul>
+<li><strong>Button Names:</strong> Hardware inputs must use official
+naming conventions. The face buttons must be referred to as the Cross,
+Circle, Square, and Triangle buttons—never the "X button" or generic
+equivalents.</li>
+<li><strong>Hardware References:</strong> Titles must strictly refer to
+Sony accessories using their official branded names, such as the
+"DualSense wireless controller" rather than "gamepad" or "remote."</li>
+<li><strong>Platform Names:</strong> References to system software
+features (such as "PlayStation Network," "Rest Mode," and "Control
+Center") must use exact capitalization and official localizations
+provided in Sony’s platform documentation.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

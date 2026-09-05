@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye-Tracking Calibration for Spatial Computing Games - game-development</title>
+    <meta name="description" content="This article outlines how spatial computing developers implement eye-tracking calibration pipelines to power responsive gaze-directed user interfaces. It covers obtaining raw sensor data through modern XR APIs, executing multi-point calibration routines">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/eye-tracking-calibration-for-spatial-computing-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Eye-Tracking Calibration for Spatial Computing Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/eye-tracking-calibration-for-spatial-computing-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article outlines how spatial computing developers implement eye-tracking calibration pipelines to power responsive gaze-directed user interfaces. It covers obtaining raw sensor data through modern XR APIs, executing multi-point calibration routines" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1
+id="eye-tracking-calibration-for-spatial-computing-games">Eye-Tracking
+Calibration for Spatial Computing Games</h1>
+<p>This article outlines how spatial computing developers implement
+eye-tracking calibration pipelines to power responsive gaze-directed
+user interfaces. It covers obtaining raw sensor data through modern XR
+APIs, executing multi-point calibration routines to correct for
+anatomical differences, applying real-time data smoothing to eliminate
+jitter, and structuring spatial UI colliders to deliver precise,
+low-latency gaze selection.</p>
+<h3 id="1-accessing-hardware-via-xr-apis">1. Accessing Hardware via XR
+APIs</h3>
+<p>Implementing eye-tracking starts with interfacing with the headset’s
+eye-tracking hardware through platform-standard runtimes. Most spatial
+computing platforms rely on OpenXR standards, specifically the
+<code>XR_EXT_eye_gaze_interaction</code> extension. In engines like
+Unity or Unreal Engine, developers use platform-specific SDKs (such as
+visionOS, Meta XR Core SDK, or Vive OpenXR) to query the user's eye
+pose.</p>
+<p>The system returns a combined gaze pose or individual eye poses
+consisting of:</p>
+<ul>
+<li><strong>Origin:</strong> A 3D spatial coordinate indicating the
+center point between the eyes or the pupil centers.</li>
+<li><strong>Direction:</strong> A normalized 3D forward vector showing
+where the eyes are looking relative to the headset coordinate
+space.</li>
+</ul>
+<h3 id="2-the-multi-point-calibration-process">2. The Multi-Point
+Calibration Process</h3>
+<p>Anatomical differences—such as interpupillary distance (IPD) and the
+angle between the optical axis (pupil center) and the visual axis (fovea
+alignment, known as the kappa angle)—cause raw gaze data to drift.
+Developers implement calibration routines to correct this variance:</p>
+<ol type="1">
+<li><strong>Point Presentation:</strong> The user is prompted to look at
+a series of calibration targets (typically 5 or 9 points) distributed
+across the field of view in a 3D grid.</li>
+<li><strong>Fixation Verification:</strong> The system verifies stable
+fixation by checking that the user's head position remains relatively
+still and that gaze velocity drops below a set threshold for a
+designated duration (e.g., 200–400 ms).</li>
+<li><strong>Data Collection:</strong> Gaze samples are recorded and
+matched against the known spatial coordinates of the target
+markers.</li>
+<li><strong>Polynomial Regression / Mapping Matrix:</strong> Developers
+apply geometric or polynomial transformation algorithms to map the raw
+sensor vectors to true world coordinates, generating an offset matrix
+that is stored and applied to all subsequent real-time gaze
+vectors.</li>
+</ol>
+<h3 id="3-noise-filtering-and-gaze-smoothing">3. Noise Filtering and
+Gaze Smoothing</h3>
+<p>Human eyes constantly produce micro-saccades, nystagmus, and rapid
+drift, which makes raw gaze vectors unsuitable for driving steady UI
+focus. To make the interface feel responsive rather than jittery,
+developers run raw data through real-time filtering algorithms:</p>
+<ul>
+<li><strong>The 1€ (One Euro) Filter:</strong> A preferred choice for
+spatial interactions because it dynamically adjusts smoothing based on
+movement speed. It heavily smooths low-velocity fixations to keep UI
+highlights stable while minimizing lag during high-velocity saccades
+when the user switches targets.</li>
+<li><strong>Kalman Filtering:</strong> Predicts the next gaze point
+based on past trajectory, which reduces perceived latency at the cost of
+slight mathematical overhead.</li>
+<li><strong>Dwell Windows:</strong> Brief temporal buffers (e.g., 50–100
+ms) prevent UI elements from flickering when the user's gaze rapidly
+brushes across intermediate buttons.</li>
+</ul>
+<h3 id="4-gaze-target-raycasting-and-collider-architecture">4.
+Gaze-Target Raycasting and Collider Architecture</h3>
+<p>Once the calibrated and filtered gaze vector is generated, it must be
+matched to interface elements in the 3D scene. Traditional single-pixel
+raycasting makes UI selection frustrating because spatial UI requires
+excessive precision. Developers solve this using tailored collision
+techniques:</p>
+<ul>
+<li><strong>Cone Casting and Sphere Casting:</strong> Instead of casting
+an infinitesimally thin ray, developers cast a cone (typically 1.5° to
+3° wide, matching the human foveal field) or a swept sphere. The system
+selects the UI element closest to the center of the cone.</li>
+<li><strong>Expanded Hit Targets:</strong> Interactive UI components are
+built with invisible colliders that extend 20% to 30% beyond their
+visible visual boundaries, allowing users to trigger hover states
+without aiming precisely at visual edges.</li>
+<li><strong>Magnetic Target Snapping:</strong> When a gaze ray passes
+within proximity of an interactive element, the active focus point
+softly snaps to that element's center, preventing UI focus loss caused
+by natural eye tremors.</li>
+</ul>
+<h3 id="5-solving-the-midas-touch-with-multi-modal-input">5. Solving the
+Midas Touch with Multi-Modal Input</h3>
+<p>To prevent inadvertent clicks caused by simply looking at an element
+(the "Midas Touch" problem), gaze is rarely used as a standalone
+activation trigger. Instead, the calibrated gaze acts as the pointing
+mechanism, while selection is confirmed through a secondary action:</p>
+<ul>
+<li><strong>Indirect Pinch:</strong> The gaze highlights the UI element,
+and an micro-gesture (like touching the index finger to the thumb)
+triggers the event.</li>
+<li><strong>Dwell Triggers:</strong> For accessibility or
+controller-free contexts, keeping the gaze inside the target collider
+for a set duration (typically 400–800 ms) fills a radial progress bar to
+trigger the action.</li>
+<li><strong>Hardware Confirmation:</strong> Gamepad triggers, wrist
+gestures, or voice commands confirm the action on the currently focused
+element.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

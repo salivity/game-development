@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Calculate Mobile Game LTV vs CAC - game-development</title>
+    <meta name="description" content="This article provides a practical overview of how mobile game studios measure profitability by calculating player Lifetime Value (LTV) against Customer Acquisition Cost (CAC). It covers standard industry formulas, predictive modeling techniques, and payb">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/how-to-calculate-mobile-game-ltv-vs-cac">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Calculate Mobile Game LTV vs CAC - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/how-to-calculate-mobile-game-ltv-vs-cac" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a practical overview of how mobile game studios measure profitability by calculating player Lifetime Value (LTV) against Customer Acquisition Cost (CAC). It covers standard industry formulas, predictive modeling techniques, and payb" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-calculate-mobile-game-ltv-vs-cac">How to Calculate Mobile
+Game LTV vs CAC</h1>
+<p>This article provides a practical overview of how mobile game studios
+measure profitability by calculating player Lifetime Value (LTV) against
+Customer Acquisition Cost (CAC). It covers standard industry formulas,
+predictive modeling techniques, and payback period frameworks essential
+for scaling user acquisition campaigns sustainably.</p>
+<hr />
+<h2 id="defining-the-core-metrics">Defining the Core Metrics</h2>
+<p>Mobile game studios must understand the baseline metrics before
+evaluating marketing efficiency:</p>
+<ul>
+<li><strong>Customer Acquisition Cost (CAC):</strong> The direct cost of
+acquiring a single install.
+<ul>
+<li><em>Paid CAC:</em> Total marketing spend on a specific channel
+divided by direct paid installs attributed to that channel.</li>
+<li><em>Effective CAC (eCAC):</em> Total marketing spend divided by
+total installs (including organic users generated by viral growth or
+store featuring).</li>
+</ul></li>
+<li><strong>Lifetime Value (LTV):</strong> The net projected revenue a
+player generates through in-app purchases (IAP), in-app advertisements
+(IAA), and subscriptions from their first session until they permanently
+churn.</li>
+</ul>
+<h2 id="primary-methods-for-calculating-mobile-game-ltv">Primary Methods
+for Calculating Mobile Game LTV</h2>
+<h3 id="1-the-arpdau-and-retention-model">1. The ARPDAU and Retention
+Model</h3>
+<p>The most common structural method calculates LTV by combining Average
+Revenue Per Daily Active User (ARPDAU) with player retention curves over
+a specified horizon (<span class="math inline">\(t\)</span> days).</p>
+<p><span class="math display">\[\text{LTV}_t = \sum_{n=1}^{t}
+(\text{Retention}_n \times \text{ARPDAU}_n)\]</span></p>
+<ul>
+<li><strong>Retention (<span
+class="math inline">\(R_n\)</span>):</strong> The percentage of acquired
+users who return on day <span class="math inline">\(n\)</span> (Day 1,
+Day 7, Day 30, etc.).</li>
+<li><strong>ARPDAU:</strong> The total revenue earned on day <span
+class="math inline">\(n\)</span> (IAP + IAA) divided by active users on
+that day.</li>
+<li><strong>Application:</strong> Studios model retention decay using
+power-law or logarithmic curves to forecast retention beyond observed
+days (e.g., extending D30 data to D180 or D365).</li>
+</ul>
+<h3 id="2-the-cumulative-arpu-method">2. The Cumulative ARPU Method</h3>
+<p>This empirical approach aggregates the cumulative Average Revenue Per
+User (ARPU) over time for a specific cohort:</p>
+<p><span class="math display">\[\text{LTV}_t = \text{Cumulative Revenue
+up to Day } t / \text{Total Cohort Installs}\]</span></p>
+<p>Studios plot observed cumulative ARPU curves across historical
+cohorts and fit mathematical functions (such as logarithmic regression:
+<span class="math inline">\(y = a \cdot \ln(x) + b\)</span>) to project
+where the curve flattens out, representing terminal LTV.</p>
+<h3 id="3-predictive-machine-learning-models-pltv">3. Predictive Machine
+Learning Models (pLTV)</h3>
+<p>Modern privacy changes (such as Apple’s SKAdNetwork and Google’s
+Privacy Sandbox) limit long-term user tracking. As a result, studios
+increasingly rely on machine learning models:</p>
+<ul>
+<li><strong>Data Inputs:</strong> Early gameplay metrics collected
+within the first 24 to 72 hours (levels completed, session length, ad
+views, tutorial completion, early IAP).</li>
+<li><strong>Algorithms:</strong> Gradient boosting algorithms (XGBoost,
+LightGBM) or neural networks map early behavior against historical
+cohorts to predict Day 180 or Day 360 LTV.</li>
+</ul>
+<h2 id="calculating-cac">Calculating CAC</h2>
+<p>To accurately compare acquisition expenses to LTV, studios isolate
+acquisition costs by segmentation:</p>
+<p><span class="math display">\[\text{CAC} = \frac{\text{Total
+Acquisition Spend}}{\text{Total Attributed Installs}}\]</span></p>
+<p>When accounting for virality (the K-factor), studios calculate
+effective CAC (eCAC):</p>
+<p><span class="math display">\[\text{eCAC} = \frac{\text{Direct Paid
+Spend}}{\text{Paid Installs} + \text{Organic Installs}}\]</span></p>
+<h2 id="methods-to-evaluate-ltv-against-cac">Methods to Evaluate LTV
+Against CAC</h2>
+<h3 id="1-return-on-ad-spend-roas-by-day-cohort">1. Return on Ad Spend
+(ROAS) by Day Cohort</h3>
+<p>Rather than waiting for full lifetime value, studios track ROAS
+targets at fixed intervals to determine campaign viability:</p>
+<p><span class="math display">\[\text{ROAS}_d = \frac{\text{Cumulative
+Revenue at Day } d}{\text{Campaign Spend}} \times 100\]</span></p>
+<ul>
+<li><strong>Day 7 ROAS:</strong> Provides early indicators for ad-heavy
+hyper-casual or hybrid-casual games.</li>
+<li><strong>Day 30 to Day 90 ROAS:</strong> Common break-even targets
+for mid-core and core games with deep IAP economies.</li>
+</ul>
+<h3 id="2-payback-period-time-to-break-even">2. Payback Period (Time to
+Break-Even)</h3>
+<p>The payback period measures the exact number of days required for
+cumulative LTV to equal CAC (<span class="math inline">\(\text{LTV} =
+\text{CAC}\)</span>).</p>
+<ul>
+<li>A shorter payback period reduces working capital requirements and
+reinvestment risk.</li>
+<li>If a game achieves break-even at Day 60, all cohort revenue
+generated from Day 61 onward represents gross profit.</li>
+</ul>
+<h3 id="3-the-ltvcac-ratio">3. The LTV:CAC Ratio</h3>
+<p>For mature titles with stable long-term retention, studios evaluate
+the overall ratio:</p>
+<ul>
+<li><strong>LTV:CAC &lt; 1:1:</strong> The game loses money on user
+acquisition; spend must be halted or monetization improved.</li>
+<li><strong>LTV:CAC = 1:1 to 1.5:1:</strong> Marginal sustainability;
+vulnerable to platform fee increases or ad mediation volatility.</li>
+<li><strong>LTV:CAC <span class="math inline">\(\ge\)</span>
+3:1:</strong> Healthy margin; indicates the studio can aggressively
+scale ad spend to capture more market share.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

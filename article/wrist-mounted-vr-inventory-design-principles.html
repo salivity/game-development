@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrist-Mounted VR Inventory Design Principles - game-development</title>
+    <meta name="description" content="Diegetic wrist-mounted inventory interfaces anchor user interface elements directly onto an avatar's body, blending mechanical utility with immersive spatial presence. This article examines the core design principles governing these systems in virtual re">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/wrist-mounted-vr-inventory-design-principles">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Wrist-Mounted VR Inventory Design Principles - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/wrist-mounted-vr-inventory-design-principles" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Diegetic wrist-mounted inventory interfaces anchor user interface elements directly onto an avatar's body, blending mechanical utility with immersive spatial presence. This article examines the core design principles governing these systems in virtual re" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="wrist-mounted-vr-inventory-design-principles">Wrist-Mounted VR
+Inventory Design Principles</h1>
+<p>Diegetic wrist-mounted inventory interfaces anchor user interface
+elements directly onto an avatar's body, blending mechanical utility
+with immersive spatial presence. This article examines the core design
+principles governing these systems in virtual reality game development,
+focusing on physical ergonomics, intentional activation mechanisms,
+visual hierarchy within constrained spaces, tactile feedback
+substitution, and seamless object transitions.</p>
+<h3 id="ergonomic-proprioception-and-fatigue-reduction">Ergonomic
+Proprioception and Fatigue Reduction</h3>
+<p>A primary advantage of wrist-mounted interfaces is human
+proprioception—the natural awareness of where one's limbs are in
+physical space. Players can bring a wrist into their field of view
+without consciously searching for it. However, holding an arm raised
+causes rapid muscle fatigue, commonly known as "gorilla arm." To counter
+this, wrist interfaces must prioritize quick, transactional interactions
+rather than prolonged menu navigation. Key data or frequently used items
+should be accessible within seconds, allowing the player to return their
+arm to a resting position immediately.</p>
+<h3 id="intentional-gaze-and-orientation-thresholds">Intentional Gaze
+and Orientation Thresholds</h3>
+<p>Accidental activation breaks immersion and interferes with standard
+gameplay actions like climbing, aiming, or gesturing. Reliable wrist
+interfaces use multi-axis orientation checks combined with gaze
+direction algorithms. The interface should only activate when the back
+or underside of the forearm is rotated toward the player's head-mounted
+display (HMD) within a strict angular threshold (typically 30 to 45
+degrees) and held for a brief temporal threshold (such as 150
+milliseconds). This mimics the natural movement of checking a wristwatch
+while preventing accidental triggers during combat or locomotion.</p>
+<h3 id="spatial-real-estate-and-visual-hierarchy">Spatial Real Estate
+and Visual Hierarchy</h3>
+<p>The surface area of a virtual forearm is small, making visual clarity
+essential. Designers must avoid cluttering the interface with dense text
+or deep nested menus. Information architecture should rely on
+high-contrast iconography, color-coded status meters, and spatial depth
+layering. Critical parameters—such as health, ammunition, or primary
+tools—must remain legible at a glance from variable arm distances.
+Secondary information should be contextual, expanding only when the
+player brings the wrist closer to their eyes or points at it with the
+opposing hand.</p>
+<h3 id="tangible-interaction-and-multi-sensory-feedback">Tangible
+Interaction and Multi-Sensory Feedback</h3>
+<p>Because virtual reality lacks physical resistance, interacting with a
+wrist interface requires precise multi-sensory feedback to confirm
+input. When the opposing hand interacts with the wrist-mounted
+system—via virtual buttons, dials, or miniature slots—developers must
+synchronize localized controller haptics with distinct audio cues. Audio
+pitch variation and micro-vibrations communicate state changes
+instantly, assuring the player that an input was registered without
+requiring them to stare intently at the interface.</p>
+<h3 id="seamless-spatial-transition-of-stored-objects">Seamless Spatial
+Transition of Stored Objects</h3>
+<p>Diegetic inventories succeed by making digital abstraction feel
+physical. When a player pulls an item from a wrist interface, the asset
+should transition smoothly from a miniaturized or holographic
+representation into a full-scale, physics-enabled object in the hand.
+Conversely, storing an item should feature a clear docking state,
+magnetic snap volume, or dissolving effect to reinforce the spatial
+logic of the game world. Maintaining consistent physical behavior during
+extraction and insertion preserves the illusion that the interface
+exists as an authentic tool within the virtual environment.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

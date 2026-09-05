@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Space Contact Shadow Algorithms in Games - game-development</title>
+    <meta name="description" content="Screen-space contact shadows (SSCS) are a vital real-time rendering technique used in game development to ground dynamic objects and resolve the visual detachment—often called "Peter Panning"—caused by standard shadow map bias. By casting short-range">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/screen-space-contact-shadow-algorithms-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Screen Space Contact Shadow Algorithms in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/screen-space-contact-shadow-algorithms-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Screen-space contact shadows (SSCS) are a vital real-time rendering technique used in game development to ground dynamic objects and resolve the visual detachment—often called "Peter Panning"—caused by standard shadow map bias. By casting short-range" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="screen-space-contact-shadow-algorithms-in-games">Screen Space
+Contact Shadow Algorithms in Games</h1>
+<p>Screen-space contact shadows (SSCS) are a vital real-time rendering
+technique used in game development to ground dynamic objects and resolve
+the visual detachment—often called "Peter Panning"—caused by standard
+shadow map bias. By casting short-range rays directly across the
+camera’s screen-space depth buffer toward a light source, rendering
+engines can generate high-frequency micro-shadows at geometry contact
+points. This article breaks down the primary algorithms and optimization
+techniques employed to implement contact shadows from depth buffers in
+modern game engines.</p>
+<h3 id="uniform-screen-space-linear-ray-marching">Uniform Screen-Space
+Linear Ray Marching</h3>
+<p>The foundational algorithm for screen-space contact shadows is
+uniform linear ray marching. In this approach, each visible pixel's
+world-space position is determined by unprojecting the depth buffer
+value. The engine then projects a ray from the surface position toward
+the light source directly into screen space (UV and depth
+coordinates).</p>
+<p>The ray marches forward in fixed-size increments along the 2D screen
+vector while computing the expected linear depth at each step. At every
+increment, the algorithm samples the screen-space depth buffer and
+compares the stored depth against the ray’s current depth:</p>
+<ul>
+<li><strong>Intersection:</strong> If the ray's depth is greater than
+the sampled surface depth (meaning the ray is behind a rendered
+surface), an occlusion is registered, and the pixel is shadowed.</li>
+<li><strong>Miss:</strong> If the ray travels its maximum defined
+distance without intersecting the surface, the pixel remains
+unshadowed.</li>
+</ul>
+<p>Because linear ray marching performs an identical step count per
+pixel regardless of scene complexity, it is computationally predictable
+but can miss thin occluders if the step size is too coarse, or cause
+performance bottlenecks if the step size is too fine.</p>
+<h3 id="hierarchical-z-hi-z-ray-tracing">Hierarchical-Z (Hi-Z) Ray
+Tracing</h3>
+<p>To accelerate ray traversal and reduce depth texture bandwidth, many
+engines implement Hierarchical-Z (Hi-Z) ray tracing. This algorithm
+constructs a mipmap pyramid of the depth buffer, where each higher mip
+level stores the minimum (or maximum, depending on the depth convention)
+depth value of a 2x2 pixel footprint.</p>
+<p>Instead of stepping linearly across full-resolution depth, the Hi-Z
+algorithm navigates this spatial hierarchy:</p>
+<ol type="1">
+<li>The ray begins traversal at an intermediate or fine mip level.</li>
+<li>The algorithm checks whether the ray intersects the bounding box of
+the current cell.</li>
+<li>If the ray does not intersect the cell's conservative depth bounds,
+the algorithm advances the ray to the boundary of the cell and moves up
+to a coarser mip level to skip empty space.</li>
+<li>If an intersection is detected within the cell's bounds, the
+algorithm steps down to a finer mip level to locate the exact
+intersection surface.</li>
+</ol>
+<p>Hi-Z tracing drastically reduces the number of texture reads required
+to trace long rays, though the traversal overhead often makes it more
+suitable for screen-space reflections, while contact shadows frequently
+rely on optimized short-range linear variants.</p>
+<h3 id="dithered-ray-marching-with-temporal-filtering">Dithered Ray
+Marching with Temporal Filtering</h3>
+<p>To maintain high performance without sacrificing visual fidelity,
+game developers frequently utilize dithered ray marching combined with
+Temporal Anti-Aliasing (TAA). Instead of running dozens of samples per
+pixel, engines limit the ray steps to a small budget—often between 4 and
+16 steps per ray.</p>
+<p>To hide the resulting spatial banding artifacts, a pseudo-random or
+blue-noise offset is added to the starting position of each ray. This
+converts coherent banding into high-frequency noise. The noisy shadow
+mask is then resolved over multiple frames using temporal reprojection,
+which blends current and previous frames using motion vectors. This
+pipeline yields smooth, artifact-free contact shadows at a fraction of
+the computational cost of brute-force sampling.</p>
+<h3 id="thickness-heuristics-and-occlusion-falloff">Thickness Heuristics
+and Occlusion Falloff</h3>
+<p>Depth buffers represent only a 2.5D capture of the scene, containing
+only the frontmost surfaces visible to the camera with no information
+regarding back-face geometry or real-world thickness. A standard depth
+comparison assumes that any geometry extends infinitely into the screen,
+which can cause background objects to cast massive, incorrect
+shadows.</p>
+<p>Contact shadow algorithms resolve this by introducing a thickness
+threshold:</p>
+<p><span class="math display">\[\text{Occlusion} = (\text{RayDepth} &gt;
+\text{SampledDepth}) \land (\text{RayDepth} - \text{SampledDepth} &lt;
+\text{Threshold})\]</span></p>
+<p>If the ray penetrates beyond this thickness threshold, the algorithm
+assumes the ray has passed behind the object rather than through it,
+treating the sample as unoccluded. Engines also apply a distance-based
+attenuation function that smoothly fades out the contact shadow as the
+ray approaches its maximum screen distance, blending it seamlessly into
+standard cascaded shadow maps.</p>
+<h3 id="cross-bilateral-filtering">Cross-Bilateral Filtering</h3>
+<p>After ray marching, a spatial post-processing pass is often applied
+to clean up any remaining high-frequency dithering patterns. Standard
+Gaussian blurs cannot be used because they cause shadows to bleed across
+disconnected geometry edges.</p>
+<p>Instead, a cross-bilateral blur is employed. This filter weights
+neighboring shadow samples not only by screen distance, but also by
+linear depth and world-space normal differences. Samples that deviate
+significantly in depth or normal from the center pixel are discarded,
+preserving sharp, physically accurate shadow boundaries against geometry
+edges while smoothing flat surfaces.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

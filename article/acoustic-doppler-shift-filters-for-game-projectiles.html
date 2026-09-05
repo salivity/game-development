@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acoustic Doppler Shift Filters for Game Projectiles - game-development</title>
+    <meta name="description" content="Modeling the acoustic Doppler shift for rapidly passing projectiles requires digital signal processing (DSP) techniques capable of dynamic pitch shifting and frequency modulation in real time. Game audio engines primarily utilize fractional variable dela">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/acoustic-doppler-shift-filters-for-game-projectiles">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Acoustic Doppler Shift Filters for Game Projectiles - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/acoustic-doppler-shift-filters-for-game-projectiles" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Modeling the acoustic Doppler shift for rapidly passing projectiles requires digital signal processing (DSP) techniques capable of dynamic pitch shifting and frequency modulation in real time. Game audio engines primarily utilize fractional variable dela" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="acoustic-doppler-shift-filters-for-game-projectiles">Acoustic
+Doppler Shift Filters for Game Projectiles</h1>
+<p>Modeling the acoustic Doppler shift for rapidly passing projectiles
+requires digital signal processing (DSP) techniques capable of dynamic
+pitch shifting and frequency modulation in real time. Game audio engines
+primarily utilize fractional variable delay lines, polyphase
+interpolation filters, and dynamic biquad filters to reproduce the
+continuous compression and expansion of sound waves as a projectile
+approaches, passes, and recedes from the listener.</p>
+<h3 id="fractional-variable-delay-lines-vdls">Fractional Variable Delay
+Lines (VDLs)</h3>
+<p>The standard method for simulating the Doppler effect in real-time
+audio is the Variable Delay Line (VDL). By modulating the read position
+of an audio buffer relative to the write position based on the
+projectile's distance from the listener, the playback frequency is
+continuously altered. Because the calculated delay times rarely fall on
+integer sample boundaries, fractional delay filter algorithms are
+required to compute inter-sample values without causing discontinuities
+or "zipper" noise.</p>
+<ul>
+<li><strong>Linear and Polynomial Interpolators:</strong> First-order
+linear and higher-order Hermite or Lagrange polynomial filters are
+widely used for their low computational overhead. While linear
+interpolation causes high-frequency attenuation, cubic and Hermite
+interpolation provide a balance between CPU cost and audio
+fidelity.</li>
+<li><strong>Allpass Fractional Delay Filters:</strong> First-order
+Thiran allpass filters provide a flat magnitude response across the
+entire audible spectrum while shifting phase to create the necessary
+fractional delay. These are particularly useful when preserving the
+high-frequency "crack" of a bullet is essential.</li>
+</ul>
+<h3 id="polyphase-and-sinc-resampling-filters">Polyphase and Sinc
+Resampling Filters</h3>
+<p>For higher-fidelity simulation, game engines use dynamic sample-rate
+conversion (SRC) rather than simple delay lines. This approach models
+the Doppler shift by dynamically resampling the projectile's sound
+buffer to match the target frequency calculated by the Doppler
+equation:</p>
+<p><span class="math display">\[f = f_0 \left( \frac{c + v_r}{c + v_s}
+\right)\]</span></p>
+<ul>
+<li><strong>Windowed Sinc Filters:</strong> Sinc interpolation provides
+theoretically ideal bandlimited reconstruction. In practice, a
+truncated, windowed Sinc function (such as a Kaiser or Lanczos window)
+is implemented to alter the pitch of the source sound continuously.</li>
+<li><strong>Polyphase FIR Filter Banks:</strong> To make real-time Sinc
+resampling computationally feasible, engines use polyphase Finite
+Impulse Response (FIR) filter banks. These split the filter into
+sub-filters that allow rapid coefficient updates as projectile
+velocities change, preventing aliasing when the pitch shifts upward
+during approach.</li>
+</ul>
+<h3 id="time-varying-iir-biquad-filters">Time-Varying IIR Biquad
+Filters</h3>
+<p>Doppler shift is inherently paired with distance attenuation and
+directional air absorption. As a projectile approaches, high frequencies
+are sustained; as it recedes, high frequencies attenuate rapidly due to
+the medium's viscosity.</p>
+<ul>
+<li><strong>Dynamic Low-Pass Filters (LPF):</strong> Second-order
+Infinite Impulse Response (IIR) biquad filters—most commonly Butterworth
+or State-Variable Filters (SVF)—are linked directly to the Doppler
+parameter. The cutoff frequency of the filter dynamically sweeps
+downward the instant the projectile passes the listener. SVFs are
+preferred because their coefficients can be updated rapidly on a
+per-sample or per-block basis without internal instability or audio
+pops.</li>
+</ul>
+<h3 id="shockwave-cones-and-n-wave-filters">Shockwave Cones and N-Wave
+Filters</h3>
+<p>For supersonic projectiles, classical Doppler filtering is
+insufficient because the projectile travels faster than the acoustic
+wave front. In these scenarios, game engines transition from Doppler
+pitch modulation to transient shockwave synthesis. This is achieved
+using specialized FIR filters modeled on an N-wave impulse response. The
+filter models a near-instantaneous rise to positive overpressure, a
+linear decline to negative pressure, and a sharp return to ambient
+pressure, recreating the sharp "snap" heard before the subsonic engine
+or drag sound arrives.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

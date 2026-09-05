@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deterministic Floating-Point Emulation in Games - game-development</title>
+    <meta name="description" content="In lockstep multiplayer games and physics-driven simulations, maintaining cross-architecture determinism across varied hardware platforms like x86 and ARM is notoriously difficult due to microarchitectural differences in IEEE-754 floating-point implement">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/deterministic-floating-point-emulation-in-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deterministic Floating-Point Emulation in Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/deterministic-floating-point-emulation-in-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In lockstep multiplayer games and physics-driven simulations, maintaining cross-architecture determinism across varied hardware platforms like x86 and ARM is notoriously difficult due to microarchitectural differences in IEEE-754 floating-point implement" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="deterministic-floating-point-emulation-in-games">Deterministic
+Floating-Point Emulation in Games</h1>
+<p>In lockstep multiplayer games and physics-driven simulations,
+maintaining cross-architecture determinism across varied hardware
+platforms like x86 and ARM is notoriously difficult due to
+microarchitectural differences in IEEE-754 floating-point
+implementations. This article examines how game developers build
+deterministic floating-point emulation wrappers, detailing the
+mathematical pitfalls of hardware floats, the choice between software
+floating-point and fixed-point math, the implementation of
+cross-platform transcendental functions, and optimization techniques for
+keeping network simulations tightly synchronized.</p>
+<h3 id="the-problem-with-native-floating-point-hardware">The Problem
+with Native Floating-Point Hardware</h3>
+<p>While modern CPUs adhere to the IEEE-754 specification, the standard
+leaves several implementation details ambiguous or optional:</p>
+<ul>
+<li><strong>Fused Multiply-Add (FMA):</strong> Operations like
+<code>(a * b) + c</code> can execute as a single instruction with a
+single rounding step on modern architectures, or as two distinct
+instructions with intermediate rounding on older hardware, producing
+different low-order bits.</li>
+<li><strong>Transcendental Functions:</strong> Hardware-level
+trigonometric and logarithmic implementations (<code>sin</code>,
+<code>cos</code>, <code>sqrt</code>) rely on vendor-specific
+approximations, microcode, or polynomial expansions that vary widely
+between Intel, AMD, and ARM processors.</li>
+<li><strong>Denormals and NaN Payloads:</strong> Sign bits and payloads
+for <code>NaN</code> (Not a Number) values are not standardized.
+Hardware flags like Flush-to-Zero (FTZ) and Denormals-are-Zero (DAZ)
+behave differently or may not be supported uniformly across mobile and
+desktop silicon.</li>
+<li><strong>Compiler Reordering:</strong> Optimizations like
+<code>-ffast-math</code> or aggressive instruction scheduling can
+violate the associative law (<span class="math inline">\(a + (b + c)
+\neq (a + b) + c\)</span>), leading to diverging results across
+different compiler versions.</li>
+</ul>
+<h3 id="strategy-1-fixed-point-arithmetic-wrappers">Strategy 1:
+Fixed-Point Arithmetic Wrappers</h3>
+<p>The most common approach to deterministic simulation is replacing
+floating-point operations entirely with fixed-point math implemented
+over integer types.</p>
+<p>Developers construct custom types using integer scalars, commonly
+employing formats like <span class="math inline">\(Q16.16\)</span>
+(32-bit total: 16 bits integer, 16 bits fractional) or <span
+class="math inline">\(Q48.16\)</span> / <span
+class="math inline">\(Q32.32\)</span> (64-bit total):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Fixed64 <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int64_t</span> raw_value<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> <span class="kw">constexpr</span> <span class="dt">int</span> FRACTIONAL_BITS <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> <span class="kw">constexpr</span> <span class="dt">int64_t</span> ONE <span class="op">=</span> <span class="dv">1</span><span class="bu">LL</span> <span class="op">&lt;&lt;</span> FRACTIONAL_BITS<span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Fixed64<span class="op">()</span> <span class="op">:</span> raw_value<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">explicit</span> Fixed64<span class="op">(</span><span class="dt">int32_t</span> val<span class="op">)</span> <span class="op">:</span> raw_value<span class="op">(</span><span class="kw">static_cast</span><span class="op">&lt;</span><span class="dt">int64_t</span><span class="op">&gt;(</span>val<span class="op">)</span> <span class="op">&lt;&lt;</span> FRACTIONAL_BITS<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    Fixed64 <span class="kw">operator</span><span class="op">+(</span><span class="at">const</span> Fixed64<span class="op">&amp;</span> rhs<span class="op">)</span> <span class="at">const</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        Fixed64 result<span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>raw_value <span class="op">=</span> <span class="kw">this</span><span class="op">-&gt;</span>raw_value <span class="op">+</span> rhs<span class="op">.</span>raw_value<span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    Fixed64 <span class="kw">operator</span><span class="op">*(</span><span class="at">const</span> Fixed64<span class="op">&amp;</span> rhs<span class="op">)</span> <span class="at">const</span> <span class="op">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        Fixed64 result<span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 128-bit intermediate storage prevents overflow during multiplication</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="pp">#if defined(</span><span class="ot">__SIZEOF_INT128__</span><span class="pp">)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">__int128</span> temp <span class="op">=</span> <span class="kw">static_cast</span><span class="op">&lt;</span><span class="dt">__int128</span><span class="op">&gt;(</span><span class="kw">this</span><span class="op">-&gt;</span>raw_value<span class="op">)</span> <span class="op">*</span> <span class="kw">static_cast</span><span class="op">&lt;</span><span class="dt">__int128</span><span class="op">&gt;(</span>rhs<span class="op">.</span>raw_value<span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            result<span class="op">.</span>raw_value <span class="op">=</span> <span class="kw">static_cast</span><span class="op">&lt;</span><span class="dt">int64_t</span><span class="op">&gt;(</span>temp <span class="op">&gt;&gt;</span> FRACTIONAL_BITS<span class="op">);</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="pp">#else</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Fallback for platforms lacking 128-bit native types</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            result<span class="op">.</span>raw_value <span class="op">=</span> multiply_split<span class="op">(</span><span class="kw">this</span><span class="op">-&gt;</span>raw_value<span class="op">,</span> rhs<span class="op">.</span>raw_value<span class="op">);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="pp">#endif</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<p>Fixed-point math guarantees identical behavior across any
+architecture because integer addition, subtraction, bit-shifts, and
+multiplications are strictly specified in hardware logic.</p>
+<h3 id="strategy-2-pure-software-floating-point-soft-float">Strategy 2:
+Pure Software Floating-Point (Soft-Float)</h3>
+<p>When a wide dynamic range is strictly required (such as in celestial
+mechanics or high-velocity collisions) and fixed-point scales are too
+restrictive, developers emulate the IEEE-754 standard entirely in
+software.</p>
+<p>Instead of routing operations to the CPU's Floating-Point Unit (FPU),
+a soft-float wrapper unpacks the raw sign, exponent, and mantissa fields
+of a 32-bit or 64-bit integer, executes integer-based math, applies
+precise rounding rules (typically round-to-nearest, ties-to-even), and
+packs the fields back into an integer.</p>
+<p>Soft-float wrappers enforce uniform behavior by:</p>
+<ol type="1">
+<li>Hardcoding the handling of subnormal numbers without relying on CPU
+hardware flags.</li>
+<li>Canonicalizing all <code>NaN</code> results to a single predefined
+bit pattern (e.g., <code>0x7FC00000</code>).</li>
+<li>Preventing the generation of architecture-dependent FMA instructions
+by explicitly handling intermediate precision in integer registers.</li>
+</ol>
+<h3
+id="implementing-deterministic-transcendental-functions">Implementing
+Deterministic Transcendental Functions</h3>
+<p>Standard C Runtime libraries (<code>math.h</code>) cannot be used
+because their implementations vary by platform. Deterministic wrappers
+substitute them with explicit mathematical approximations:</p>
+<ul>
+<li><strong>Look-Up Tables (LUTs):</strong> For trigonometric functions,
+developers precompute high-resolution tables (e.g., 4096 entries for a
+quarter-sine wave) and use integer linear interpolation for intermediate
+values.</li>
+<li><strong>CORDIC Algorithms:</strong> Coordinate Rotation Digital
+Computer (CORDIC) algorithms compute trigonometric, hyperbolic, and
+square root operations using only addition, subtraction, table lookups,
+and bit-shifts.</li>
+<li><strong>Chebyshev Polynomials:</strong> Fixed-point or
+software-float implementations often evaluate mini-max polynomial
+approximations where the order of operations and rounding modes are
+completely locked.</li>
+</ul>
+<h3 id="isolating-simulation-from-presentation">Isolating Simulation
+from Presentation</h3>
+<p>Because software-emulated floating-point and fixed-point types incur
+a measurable performance penalty compared to native hardware vector
+units, developers isolate their execution:</p>
+<ol type="1">
+<li><strong>State Partitioning:</strong> The deterministic wrapper is
+used strictly inside the simulation core: gameplay state, rigid-body
+physics, collision queries, and character logic.</li>
+<li><strong>Decoupled Rendering:</strong> Graphics, animation blending,
+audio, and camera tracking consume the simulation state, convert the
+fixed/emulated values into native <code>float</code> or
+<code>double</code> representations, and run at native hardware speeds
+via standard SIMD (AVX, NEON) pipelines.</li>
+<li><strong>Data Marshalling:</strong> Explicit cast operators are
+restricted to output-only boundaries to prevent accidental pollution of
+the simulation loop with native floating-point types.</li>
+</ol>
+<h3 id="vectorization-and-simd-optimizations">Vectorization and SIMD
+Optimizations</h3>
+<p>To mitigate the overhead of software wrappers, developers implement
+custom SIMD wrappers that target integer vector instructions. Because
+integer vector registers (<code>__m128i</code> on x86,
+<code>int32x4_t</code> on ARM) execute identically across architectures,
+math routines can process four to eight simulated values simultaneously
+using integer shifts, masks, and parallel integer multiply operations.
+This maintains total bit-for-bit synchronization while recovering the
+performance necessary for high-tick-rate simulation engines.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

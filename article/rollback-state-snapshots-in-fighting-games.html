@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4Y4YXFHZS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag(){
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-R4Y4YXFHZS');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rollback State Snapshots in Fighting Games - game-development</title>
+    <meta name="description" content="Rollback netcode relies on the ability to continuously save, restore, and resimulate game states within single-frame windows to hide network latency. To execute these rollbacks without causing frame drops or exceeding strict platform memory limits, fight">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/rollback-state-snapshots-in-fighting-games">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Rollback State Snapshots in Fighting Games - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/rollback-state-snapshots-in-fighting-games" />
+    <meta property="og:image:url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Rollback netcode relies on the ability to continuously save, restore, and resimulate game states within single-frame windows to hide network latency. To execute these rollbacks without causing frame drops or exceeding strict platform memory limits, fight" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="rollback-state-snapshots-in-fighting-games">Rollback State
+Snapshots in Fighting Games</h1>
+<p>Rollback netcode relies on the ability to continuously save, restore,
+and resimulate game states within single-frame windows to hide network
+latency. To execute these rollbacks without causing frame drops or
+exceeding strict platform memory limits, fighting game developers
+decouple logic from presentation, pack game state into contiguous data
+structures, and use circular memory buffers. This article explains the
+architectural patterns, memory alignment techniques, and serialization
+strategies developers use to structure deterministic state snapshots to
+ensure high performance within constrained memory footprints.</p>
+<h3 id="decoupling-logic-from-presentation">Decoupling Logic from
+Presentation</h3>
+<p>The most critical step in reducing snapshot size is strictly
+isolating game simulation state from presentation assets. Rendering
+objects, 3D meshes, particle effects, audio triggers, and animation
+blend trees take up megabytes of memory and are non-deterministic or
+purely cosmetic.</p>
+<p>Developers split the game loop into two distinct systems:</p>
+<ul>
+<li><strong>The Simulation State:</strong> The minimal set of variables
+required to determine the exact outcome of the next frame. This includes
+player positions, velocities, hurtboxes, hitboxes, current animation
+frame indices, health values, input buffers, and internal timers.</li>
+<li><strong>The Presentation Layer:</strong> A visual interpolation
+layer that reads the simulation state and renders graphics or plays
+audio.</li>
+</ul>
+<p>Because the presentation layer can be completely recreated from the
+simulation state, rollback snapshots discard presentation data entirely.
+This reduces the raw data footprint of a single frame from hundreds of
+megabytes down to a few kilobytes or even bytes.</p>
+<h3 id="plain-old-data-pod-and-monolithic-structs">Plain Old Data (POD)
+and Monolithic Structs</h3>
+<p>In traditional object-oriented programming, game entities are
+scattered across heap allocations with pointers, vtables, and dynamic
+data collections. Traversing these structures causes cache misses and
+makes serialization slow.</p>
+<p>For rollback architectures, developers enforce Plain Old Data (POD)
+layouts. The entire mutable state of a match is stored inside a single,
+flat C/C++ <code>struct</code>.</p>
+<p>Key characteristics of this struct include:</p>
+<ul>
+<li><strong>No Pointers:</strong> Every field is a value type or an
+array of fixed maximum size. Pointers point to dynamic heap memory that
+can be invalidated during a state restore.</li>
+<li><strong>No Virtual Functions:</strong> Removing vtables eliminates
+hidden metadata pointers that bloat the struct size.</li>
+<li><strong>Fixed-Capacity Arrays:</strong> Dynamic lists (such as
+active projectiles) are replaced with fixed-capacity arrays sized to the
+theoretical maximum permitted by the game rules (e.g., a maximum of 4
+active projectiles per character).</li>
+</ul>
+<p>Because the state is a contiguous block of memory without pointers,
+saving and restoring the game state becomes a single, ultra-fast memory
+copy operation (<code>memcpy</code>) rather than a deep object
+traversal.</p>
+<h3 id="bit-packing-and-data-quantization">Bit-Packing and Data
+Quantization</h3>
+<p>To fit within strict target limits—often under 2 to 8 kilobytes per
+frame—developers aggressively compress data types inside the state
+struct:</p>
+<ul>
+<li><strong>Fixed-Point Math:</strong> Floating-point numbers introduce
+cross-platform determinism issues and waste precision. Developers use
+fixed-point integers (such as 32-bit or 16-bit integers) to represent
+world-space coordinates and velocities.</li>
+<li><strong>Bitfields for Boolean Flags:</strong> States such as
+grounded, airborne, blocking, invulnerable, and counter-hit states are
+packed into single-bit flags within bitfields or bitsets, turning dozens
+of standard booleans into a single 32-bit integer.</li>
+<li><strong>Enumeration Clamping:</strong> Enums indicating character
+actions or attack phases are typed explicitly as <code>uint8_t</code> or
+packed into custom bit-widths rather than the default compiler-dependent
+32-bit integer.</li>
+</ul>
+<h3 id="pre-allocated-circular-buffers">Pre-Allocated Circular
+Buffers</h3>
+<p>Rollback engines, such as GGPO or proprietary equivalents, only need
+to simulate backward by the maximum anticipated network ping—typically
+between 7 and 15 frames.</p>
+<p>Instead of allocating memory dynamically during gameplay, developers
+pre-allocate a fixed-size ring buffer (circular array) during match
+initialization. If the snapshot size is 4 KB and the rollback limit is
+10 frames, the entire rollback history requires a static allocation of
+only 40 KB. Each incoming tick writes into the circular buffer at
+<code>frame_number % buffer_size</code>, overwriting the oldest state
+without generating heap fragmentation or triggering garbage
+collection.</p>
+<h3 id="delta-compression-between-frames">Delta Compression Between
+Frames</h3>
+<p>For games with larger state requirements (such as tag-team fighters
+featuring multiple characters, assists, and complex physics), developers
+employ delta compression across the snapshot ring buffer.</p>
+<p>Rather than storing a complete (keyframe) snapshot every tick, the
+engine stores a baseline keyframe followed by the difference (delta) of
+changed bytes for subsequent ticks. Because the majority of variables
+(such as maximum health, stage bounds, and inactive character data)
+remain static across consecutive frames, XOR delta encoding or
+run-length encoding (RLE) dramatically compresses intermediate frames.
+When a rollback occurs, the engine reconstructs the desired frame by
+applying sequential deltas to the nearest historical keyframe.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
