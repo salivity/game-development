@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Prediction Techniques for Online Game Latency - game-development</title>
+    <meta name="description" content="In multiplayer online game development, network latency can severely degrade the player experience by causing noticeable delays between an input and its action on screen. To combat this, developers employ input prediction and latency-masking techniques to">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/input-prediction-techniques-for-online-game-latency">
+    <link rel="search" type="application/opensearchdescription+xml" title="game-development" href="/game-development/opensearch.xml">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Input Prediction Techniques for Online Game Latency - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/input-prediction-techniques-for-online-game-latency" />
+    <meta property="og:image" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="In multiplayer online game development, network latency can severely degrade the player experience by causing noticeable delays between an input and its action on screen. To combat this, developers employ input prediction and latency-masking techniques to" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="input-prediction-techniques-for-online-game-latency">Input
+Prediction Techniques for Online Game Latency</h1>
+<p>In multiplayer online game development, network latency can severely
+degrade the player experience by causing noticeable delays between an
+input and its action on screen. To combat this, developers employ input
+prediction and latency-masking techniques to make gameplay feel
+instantaneous and responsive. This article explores the core methods
+used to hide network lag, including client-side prediction, server
+reconciliation, entity interpolation, and lag compensation.</p>
+<h2 id="client-side-prediction">Client-Side Prediction</h2>
+<p>Client-side prediction is the foundational technique used to
+eliminate the feeling of input lag. Traditionally, a client would send
+an input to the server, wait for the server to process it, and then
+render the result. This creates a delay equal to the round-trip time
+(RTT) of the network.</p>
+<p>With client-side prediction, the local client immediately processes
+the player's input and updates the character's position on screen as if
+the action has already been confirmed by the server. This gives the
+player immediate visual feedback, making the game feel highly
+responsive.</p>
+<h2 id="server-reconciliation">Server Reconciliation</h2>
+<p>Because the server is the ultimate authority on the game state to
+prevent cheating, it periodically sends the "correct" player state back
+to the client. If the server’s state differs from the client’s predicted
+state (due to packet loss, collisions with other players, or
+environmental changes), a correction must occur.</p>
+<p>Server reconciliation resolves these discrepancies. When a correction
+is needed, the client does not simply snap the player to the server's
+position, as this would cause jarring visual stutters. Instead, the
+client rewinds its local state to the timestamp of the server’s last
+confirmed update, discards the incorrect prediction, and rapidly replays
+all inputs that occurred after that timestamp. This smoothly aligns the
+client with the authoritative server state.</p>
+<h2 id="entity-interpolation">Entity Interpolation</h2>
+<p>While client-side prediction works well for the local player, it
+cannot be used to predict the movements of other players, as their
+inputs are unknown. If the client relied solely on raw, periodic state
+updates from the server to render other players, their movement would
+appear choppy and disjointed.</p>
+<p>To solve this, developers use entity interpolation. Instead of
+rendering other players at their absolute latest received positions, the
+client renders them slightly in the past (usually by 100 to 200
+milliseconds). The client then smoothly interpolates (blends) the
+rendering of those players between two known, past server updates. This
+results in fluid, continuous movement at the cost of a tiny delay in
+visual accuracy.</p>
+<h2 id="lag-compensation-backward-reconciliation">Lag Compensation
+(Backward Reconciliation)</h2>
+<p>In fast-paced shooters, entity interpolation creates a problem: a
+player sees an enemy where they were 100 milliseconds ago, not where
+they are on the server. If the player aims directly at the enemy and
+shoots, the server would normally register a miss because, in the
+server's present time, the enemy has already moved.</p>
+<p>Lag compensation resolves this issue. When a client performs an
+action like firing a weapon, it sends the input along with a precise
+timestamp. When the server receives this packet, it temporarily
+"rewinds" the positions of all other players to match where they were at
+that specific timestamp. The server then performs the hit detection in
+that past state, ensuring that if the player's crosshair was on the
+target on their screen, the hit registers successfully.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

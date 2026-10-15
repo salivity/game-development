@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Asset Linting for 3D Polygon Budgets - game-development</title>
+    <meta name="description" content="Technical art leads maintain performance targets in game production by implementing automated asset linting pipelines that intercept and validate 3D models during version control operations. By integrating headless parsing scripts into version control hoo">
+    <link rel="canonical" href="https://salivity.github.io/game-development/article/automated-asset-linting-for-3-d-polygon-budgets">
+    <link rel="search" type="application/opensearchdescription+xml" title="game-development" href="/game-development/opensearch.xml">
+    <link rel="icon" href="/game-development/favicon.ico">
+    <link rel="stylesheet" href="/game-development/css/style.css">
+    <link media="print" rel="stylesheet" href="/game-development/css/print.css">
+    <script src="/game-development/js/fuse.min.js"></script>
+    <script src="/game-development/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Automated Asset Linting for 3D Polygon Budgets - game-development" />
+    <meta property="og:url" content="https://salivity.github.io/game-development/article/automated-asset-linting-for-3-d-polygon-budgets" />
+    <meta property="og:image" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/game-development/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Technical art leads maintain performance targets in game production by implementing automated asset linting pipelines that intercept and validate 3D models during version control operations. By integrating headless parsing scripts into version control hoo" />
+    <link rel="manifest" href="/game-development/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/game-development/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>game-development</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/game-development/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="automated-asset-linting-for-3d-polygon-budgets">Automated Asset
+Linting for 3D Polygon Budgets</h1>
+<p>Technical art leads maintain performance targets in game production
+by implementing automated asset linting pipelines that intercept and
+validate 3D models during version control operations. By integrating
+headless parsing scripts into version control hooks or continuous
+integration (CI) workflows, teams can programmatically inspect incoming
+meshes (such as FBX or USD files) against predefined polygon thresholds.
+When an artist attempts to commit an asset exceeding its allocated
+budget, the automated system rejects the commit and provides actionable
+error logs, ensuring unoptimized assets never reach the shared project
+repository.</p>
+<h3 id="1-define-budget-rules-and-metadata-schemas">1. Define Budget
+Rules and Metadata Schemas</h3>
+<p>Before writing validation scripts, define explicit polygon thresholds
+across asset classifications. Store these rules in a machine-readable
+configuration file (such as JSON or YAML) within the repository:</p>
+<ul>
+<li><strong>Asset Categories:</strong> Differentiate between characters,
+weapons, hero props, and background foliage.</li>
+<li><strong>LOD Tiers:</strong> Establish discrete triangle counts for
+LOD0, LOD1, and lower levels of detail.</li>
+<li><strong>Naming Conventions:</strong> Tie budget rules to specific
+naming conventions (e.g., <code>SM_Prop_Bench_LOD0.fbx</code>) or folder
+structures (e.g., <code>/Art/Characters/Hero/</code>) so the linter
+knows which rule to apply.</li>
+</ul>
+<h3 id="2-develop-headless-mesh-analyzers">2. Develop Headless Mesh
+Analyzers</h3>
+<p>Linter execution must be fast and headless, avoiding the overhead of
+launching full digital content creation (DCC) software interfaces. Use
+lightweight parsing libraries in Python:</p>
+<ul>
+<li><strong>Autodesk FBX SDK:</strong> Parse scene hierarchies, retrieve
+mesh nodes, and calculate total polygon and triangle counts
+natively.</li>
+<li><strong>OpenUSD Python API:</strong> If working with Universal Scene
+Description, query geometry primitives (<code>UsdGeomMesh</code>) and
+sum their face-vertex counts.</li>
+<li><strong>Headless DCC Execution:</strong> Run Blender or Maya in
+headless batch mode (<code>blender -b</code> or <code>mayapy</code>)
+using custom scripts to extract triangle metrics when dealing with
+proprietary formats.</li>
+</ul>
+<p>The script must return a non-zero exit code if an asset violates its
+budget to signal failure to the version control system.</p>
+<h3 id="3-implement-version-control-interceptors">3. Implement Version
+Control Interceptors</h3>
+<p>Validation can occur locally on the artist's workstation or centrally
+on the repository server.</p>
+<h4 id="server-side-hooks-recommended">Server-Side Hooks
+(Recommended)</h4>
+<p>Server-side hooks act as the definitive gatekeeper because local
+hooks can be bypassed or disabled.</p>
+<ul>
+<li><strong>Perforce:</strong> Write a custom <code>change-submit</code>
+trigger. When an artist submits a changelist, the trigger script parses
+newly added or modified 3D files in the depot workspace. If the polygon
+limits are exceeded, the submit transaction is aborted.</li>
+<li><strong>Git:</strong> Use a <code>pre-receive</code> or
+<code>update</code> hook on the central server (e.g., GitHub Enterprise,
+GitLab, or a self-hosted Git server). The hook rejects push attempts
+containing commits that break budget limits.</li>
+</ul>
+<h4 id="client-side-hooks">Client-Side Hooks</h4>
+<ul>
+<li><strong>Git Pre-Commit Hooks:</strong> Deploy local hooks using
+tools like Python's <code>pre-commit</code> framework to validate files
+staged via Git LFS before the commit is created, saving artists upload
+time.</li>
+</ul>
+<h3 id="4-continuous-integration-ci-and-shelve-verification">4.
+Continuous Integration (CI) and Shelve Verification</h3>
+<p>For teams using pull request (PR) workflows or Perforce swarms,
+enforce linting in CI/CD pipelines (such as GitHub Actions, GitLab CI,
+or Jenkins):</p>
+<ol type="1">
+<li><strong>Trigger on PR/Shelve:</strong> The pipeline clones the
+modified branch or syncs the shelved changelist.</li>
+<li><strong>Run Linter Suite:</strong> A runner executes the Python
+validation script across changed binary paths.</li>
+<li><strong>Automated Blocking:</strong> Merge capabilities are locked
+until the asset linter returns an exit code of <code>0</code>.</li>
+</ol>
+<h3 id="5-provide-actionable-artist-feedback">5. Provide Actionable
+Artist Feedback</h3>
+<p>To prevent developer friction, the tool must output clear, actionable
+diagnostic data directly to the terminal or code review tool. The log
+should state:</p>
+<ul>
+<li>The exact file path failing validation.</li>
+<li>The parsed triangle count versus the maximum permissible limit.</li>
+<li>The specific mesh node or LOD causing the failure.</li>
+<li>Recommended corrective actions (e.g., decimate LOD0, merge duplicate
+vertices, or apply for a budget override exception).</li>
+</ul></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/game-development'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/game-development/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/game-development/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
